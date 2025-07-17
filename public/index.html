@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrevista de Retiro - Siigo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --siigo-primary: #0066cc;
+            --siigo-secondary: #f8f9fa;
+            --siigo-accent: #28a745;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container-main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(45deg, var(--siigo-primary), #0052a3);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .card-header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 300;
+        }
+        
+        .card-header p {
+            margin-top: 10px;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .card-body {
+            padding: 40px;
+            background: white;
+        }
+        
+        .intro-text {
+            background: var(--siigo-secondary);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--siigo-primary);
+        }
+        
+        .question-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .question-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .required-asterisk {
+            color: #dc3545;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--siigo-primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+        }
+        
+        .form-check-input[type="radio"] {
+            width: 1.2em;
+            height: 1.2em;
+            margin-top: 0.25em;
+        }
+        
+        .form-check-label {
+            font-size: 1rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .scale-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .scale-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .scale-item input[type="radio"] {
+            width: 1.5em;
+            height: 1.5em;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .matrix-table th, .matrix-table td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .matrix-table th {
+            background-color: var(--siigo-secondary);
+            font-weight: 600;
+        }
+        
+        .matrix-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--siigo-primary), #0052a3);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.4);
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--siigo-primary), var(--siigo-accent));
+            transition: width 0.6s ease;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .container-main {
+                padding: 10px;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            .question-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <div class="card">
+            <div class="card-header">
+                <h1>Entrevista de Retiro</h1>
+                <p>¡Gracias por tu tiempo en Siigo!</p>
+            </div>
+            <div class="card-body">
+                <div class="intro-text">
+                    <p><strong>¡Gracias por tu tiempo en Siigo!</strong></p>
+                    <p>Antes de cerrar oficialmente tu ciclo con nosotros, queremos agradecerte por tu trabajo, dedicación y por haber hecho parte de esta etapa. Para nosotros es muy valioso conocer tu experiencia, aprender de lo que funcionó bien y también de lo que podemos mejorar.</p>
+                    <p>Este formulario es una herramienta confidencial que nos permite seguir creciendo como equipo y fortalecer nuestra cultura organizacional a nivel LATAM. Tus respuestas serán revisadas con respeto y servirán para construir un mejor lugar para quienes siguen y también, por qué no, dejar las puertas abiertas para un reencuentro en el futuro.</p>
+                    <p><strong>Completar esta entrevista te tomará menos de 10 minutos.</strong></p>
+                    <p>¡Gracias por tu sinceridad!</p>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <form id="exitInterviewForm">
+                    <div id="questionsContainer"></div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <span class="submit-text">Enviar Respuestas</span>
+                            <div class="loading">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Enviando...
+                            </div>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="successAlert" class="alert alert-success mt-3" style="display: none;">
+                    <h5 class="alert-heading">¡Gracias por completar la entrevista!</h5>
+                    <p>Tus respuestas han sido enviadas correctamente. Valoramos mucho tu tiempo y feedback.</p>
+                </div>
+
+                <div id="errorAlert" class="alert alert-danger mt-3" style="display: none;">
+                    <h5 class="alert-heading">Error al enviar</h5>
+                    <p id="errorMessage">Hubo un problema al enviar tus respuestas. Por favor, intenta nuevamente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let questions = [];
+        let currentResponses = {};
+
+        // Cargar preguntas al iniciar
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/questions');
+                questions = await response.json();
+                renderQuestions();
+            } catch (error) {
+                console.error('Error cargando preguntas:', error);
+                showError('Error cargando el formulario. Por favor, recarga la página.');
+            }
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const questionElement = createQuestionElement(question, index);
+                container.appendChild(questionElement);
+            });
+        }
+
+        function createQuestionElement(question, index) {
+            const div = document.createElement('div');
+            div.className = 'question-card fade-in';
+            div.style.animationDelay = `${index * 0.1}s`;
+
+            let inputHtml = '';
+            const questionId = `q${question.number}`;
+
+            switch (question.type) {
+                case 'text':
+                    inputHtml = `<input type="text" class="form-control" id="${questionId}" name="${questionId}" ${question.required ? 'required' : ''}>`;
+                    break;
+                
+                case 'textarea':
+                    inputHtml = `<textarea class="form-control" id="${questionId}" name="${questionId}" rows="4" ${question.required ? 'required' : ''}></textarea>`;
+                    break;
+                
+                case 'date':
+                    inputHtml = `<input type="date" class="form-control" id="${questionId}" name="${questionId}" ${question.required ? 'required' : ''}>`;
+                    break;
+                
+                case 'radio':
+                    inputHtml = question.options.map((option, i) => `
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="${questionId}" id="${questionId}_${i}" value="${option}" ${question.required ? 'required' : ''}>
+                            <label class="form-check-label" for="${questionId}_${i}">
+                                ${option}
+                            </label>
+                        </div>
+                    `).join('');
+                    break;
+                
+                case 'scale':
+                    const scaleItems = [];
+                    for (let i = question.min; i <= question.max; i++) {
+                        scaleItems.push(`
+                            <div class="scale-item">
+                                <input type="radio" name="${questionId}" id="${questionId}_${i}" value="${i}" ${question.required ? 'required' : ''}>
+                                <label for="${questionId}_${i}">${i}</label>
+                            </div>
+                        `);
+                    }
+                    inputHtml = `
+                        <div class="scale-container">
+                            ${scaleItems.join('')}
+                        </div>
+                        <div class="scale-labels">
+                            <span>${question.labels[0]}</span>
+                            <span>${question.labels[1]}</span>
+                        </div>
+                    `;
+                    break;
+                
+                case 'matrix':
+                    const matrixRows = question.items.map((item, i) => {
+                        const radioInputs = question.scale.map(value => `
+                            <td>
+                                <input type="radio" name="${questionId}_${i}" value="${value}" ${question.required ? 'required' : ''}>
+                            </td>
+                        `).join('');
+                        return `
+                            <tr>
+                                <td>${item}</td>
+                                ${radioInputs}
+                            </tr>
+                        `;
+                    }).join('');
+
+                    const headerCells = question.scale.map(value => `<th>${value}</th>`).join('');
+                    
+                    inputHtml = `
+                        <table class="matrix-table table">
+                            <thead>
+                                <tr>
+                                    <th>Aspecto</th>
+                                    ${headerCells}
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    ${question.scaleLabels.map(label => `<td style="font-size: 0.8rem; font-weight: normal;">${label}</td>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${matrixRows}
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+            }
+
+            div.innerHTML = `
+                <div class="question-title">
+                    ${question.number}. ${question.question}
+                    ${question.required ? '<span class="required-asterisk">*</span>' : ''}
+                </div>
+                ${inputHtml}
+            `;
+
+            return div;
+        }
+
+        // Actualizar progreso del formulario
+        function updateProgress() {
+            const totalQuestions = questions.length;
+            let answeredQuestions = 0;
+
+            questions.forEach(question => {
+                const questionId = `q${question.number}`;
+                if (question.type === 'matrix') {
+                    // Para preguntas de matriz, verificar que todas las sub-preguntas estén respondidas
+                    let allAnswered = true;
+                    for (let i = 0; i < question.items.length; i++) {
+                        const matrixInput = document.querySelector(`input[name="${questionId}_${i}"]:checked`);
+                        if (!matrixInput) {
+                            allAnswered = false;
+                            break;
+                        }
+                    }
+                    if (allAnswered) answeredQuestions++;
+                } else {
+                    const input = document.querySelector(`input[name="${questionId}"]:checked, input[name="${questionId}"][type="text"], input[name="${questionId}"][type="date"], textarea[name="${questionId}"]`);
+                    if (input && input.value) {
+                        answeredQuestions++;
+                    }
+                }
+            });
+
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.querySelector('.progress-bar').style.width = `${progress}%`;
+            document.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
+        }
+
+        // Escuchar cambios en los inputs para actualizar el progreso
+        document.addEventListener('input', updateProgress);
+        document.addEventListener('change', updateProgress);
+
+        // Manejar envío del formulario
+        document.getElementById('exitInterviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const submitText = submitBtn.querySelector('.submit-text');
+            const loading = submitBtn.querySelector('.loading');
+            
+            // Mostrar estado de carga
+            submitText.style.display = 'none';
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+
+            try {
+                // Recopilar todas las respuestas
+                const responses = {};
+                
+                questions.forEach(question => {
+                    const questionId = `q${question.number}`;
+                    
+                    if (question.type === 'matrix') {
+                        const matrixResponses = {};
+                        question.items.forEach((item, i) => {
+                            const input = document.querySelector(`input[name="${questionId}_${i}"]:checked`);
+                            if (input) {
+                                matrixResponses[item] = input.value;
+                            }
+                        });
+                        responses[questionId] = matrixResponses;
+                    } else if (question.type === 'radio') {
+                        const input = document.querySelector(`input[name="${questionId}"]:checked`);
+                        if (input) {
+                            responses[questionId] = input.value;
+                        }
+                    } else {
+                        const input = document.querySelector(`input[name="${questionId}"], textarea[name="${questionId}"]`);
+                        if (input && input.value) {
+                            responses[questionId] = input.value;
+                        }
+                    }
+                });
+
+                // Enviar respuestas al servidor
+                const response = await fetch('/api/responses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ responses })
+                });
+
+                if (response.ok) {
+                    document.getElementById('successAlert').style.display = 'block';
+                    document.getElementById('exitInterviewForm').style.display = 'none';
+                    
+                    // Scroll al mensaje de éxito
+                    document.getElementById('successAlert').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const errorData = await response.json();
+                    showError(errorData.error || 'Error desconocido al enviar las respuestas');
+                }
+            } catch (error) {
+                console.error('Error enviando respuestas:', error);
+                showError('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
+            } finally {
+                // Restaurar estado del botón
+                submitText.style.display = 'inline';
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            errorAlert.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Inicializar la aplicación
+        loadQuestions();
+    </script>
+</body>
+</html>
