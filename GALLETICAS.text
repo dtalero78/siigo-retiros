@@ -1,6 +1,3 @@
-git init
 git add .
 git commit -m "Initial commit - Siigo Exit Interview App"
-git branch -M main
-git remote add origin SIIGO-RETIROS
-git push -u origin main
+git push

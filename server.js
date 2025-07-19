@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const Database = require('./database/db');
 
 const app = express();
+app.set('trust proxy', true); // Agregar esta línea
 const PORT = process.env.PORT || 3000;
 
 // Middleware de seguridad
@@ -15,18 +16,31 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdn.tailwindcss.com"],
+      scriptSrcAttr: ["'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
 }));
 
 // Rate limiting
+// Rate limiting - configurado para entornos de desarrollo
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100 // límite de 100 requests por IP cada 15 minutos
+  max: 100, // límite de 100 requests por IP cada 15 minutos
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Configuración específica para Codespaces/desarrollo
+  ...(process.env.NODE_ENV === 'development' ? {
+    skip: () => false, // No saltar el rate limiting en desarrollo
+    keyGenerator: (req) => {
+      // Usar una clave más simple en desarrollo
+      return req.ip || req.connection.remoteAddress || 'unknown';
+    }
+  } : {
+    trustProxy: true
+  })
 });
-app.use(limiter);
 
 // Middleware
 app.use(cors());
