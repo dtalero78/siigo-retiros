@@ -228,20 +228,61 @@ app.get('/api/questions', (req, res) => {
   res.json(questions);
 });
 
+// ================================
+// NUEVA RUTA: Obtener usuario para formulario
+// ================================
+app.get('/api/user-form/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await usersDb.getUser(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Devolver solo los datos necesarios para el formulario
+    const userData = {
+      id: user.id,
+      full_name: `${user.first_name} ${user.last_name}`,
+      identification: user.identification,
+      exit_date: user.exit_date,
+      area: user.area,
+      country: user.country,
+      phone: user.phone
+    };
+
+    res.json(userData);
+  } catch (error) {
+    console.error('Error obteniendo usuario para formulario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 app.post('/api/responses', async (req, res) => {
   try {
-    const { responses } = req.body;
-    
+    const { responses, userId } = req.body;
+
     if (!responses || typeof responses !== 'object') {
       return res.status(400).json({ error: 'Respuestas inválidas' });
     }
 
+    // Si hay userId, verificar que el usuario existe
+    if (userId) {
+      const user = await usersDb.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      // Agregar el userId a las respuestas para relacionarlas
+      responses.userId = userId;
+    }
+
     const responseId = await db.saveResponse(responses);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Respuestas guardadas correctamente',
-      id: responseId 
+      id: responseId
     });
   } catch (error) {
     console.error('Error guardando respuestas:', error);
@@ -263,11 +304,11 @@ app.get('/api/responses/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const response = await db.getResponse(id);
-    
+
     if (!response) {
       return res.status(404).json({ error: 'Respuesta no encontrada' });
     }
-    
+
     res.json(response);
   } catch (error) {
     console.error('Error obteniendo respuesta:', error);
@@ -295,11 +336,11 @@ app.get('/api/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const user = await usersDb.getUser(id);
-    
+
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    
+
     res.json(user);
   } catch (error) {
     console.error('Error obteniendo usuario:', error);
@@ -311,7 +352,7 @@ app.get('/api/users/:id', async (req, res) => {
 app.post('/api/users', async (req, res) => {
   try {
     const userData = req.body;
-    
+
     // Validar campos requeridos
     const requiredFields = ['first_name', 'last_name', 'identification', 'exit_date', 'area', 'country'];
     for (const field of requiredFields) {
@@ -333,11 +374,11 @@ app.post('/api/users', async (req, res) => {
     }
 
     const userId = await usersDb.addUser(userData);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Usuario creado exitosamente',
-      id: userId 
+      id: userId
     });
   } catch (error) {
     console.error('Error creando usuario:', error);
@@ -354,7 +395,7 @@ app.put('/api/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const userData = req.body;
-    
+
     // Validar campos requeridos
     const requiredFields = ['first_name', 'last_name', 'identification', 'exit_date', 'area', 'country'];
     for (const field of requiredFields) {
@@ -364,13 +405,13 @@ app.put('/api/users/:id', async (req, res) => {
     }
 
     const changesCount = await usersDb.updateUser(id, userData);
-    
+
     if (changesCount === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Usuario actualizado exitosamente'
     });
   } catch (error) {
@@ -388,13 +429,13 @@ app.delete('/api/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const changesCount = await usersDb.deleteUser(id);
-    
+
     if (changesCount === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Usuario eliminado exitosamente'
     });
   } catch (error) {
@@ -412,7 +453,7 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
     const fs = require('fs');
     const csvContent = fs.readFileSync(req.file.path, 'utf8');
-    
+
     // Limpiar archivo temporal
     fs.unlinkSync(req.file.path);
 
@@ -428,13 +469,13 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
     // Procesar cada línea (omitir la primera si es header)
     const dataLines = lines[0].toLowerCase().includes('nombre') ? lines.slice(1) : lines;
-    
+
     for (let i = 0; i < dataLines.length; i++) {
       const line = dataLines[i].trim();
       if (!line) continue;
 
       const columns = line.split(',').map(col => col.trim().replace(/^["']|["']$/g, ''));
-      
+
       if (columns.length < 7) {
         continue; // Saltar líneas incompletas
       }
@@ -467,7 +508,7 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
     // Insertar en lote
     const result = await usersDb.bulkInsert(users);
-    
+
     res.json({
       success: true,
       message: 'Archivo CSV procesado exitosamente',
@@ -508,24 +549,24 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Limpiar número de teléfono (remover espacios, guiones, etc.)
+    // Limpiar número de teléfono
     const cleanPhone = phone.replace(/\D/g, '');
     
-    // Verificar que el número tenga al menos 10 dígitos
     if (cleanPhone.length < 10) {
       return res.status(400).json({ error: 'Número de teléfono inválido' });
     }
 
-    // Formatear número para WhatsApp (agregar código de país si no lo tiene)
+    // Formatear número para WhatsApp
     let whatsappNumber = cleanPhone;
     if (!whatsappNumber.startsWith('57') && cleanPhone.length === 10) {
       whatsappNumber = '57' + cleanPhone; // Código de Colombia
     }
 
-    // URL del formulario (ajustar según tu dominio)
-    const formUrl = process.env.FORM_URL || 'https://tu-dominio.com';
+    // URL del formulario con ID del usuario
+    const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
+    const formUrl = `${baseUrl}/?user=${userId}`;
     
-    // Mensaje personalizado
+    // Mensaje personalizado con la URL que incluye el ID
     const message = `Hola ${name.split(' ')[0]}. Antes de despedirnos queremos pedirte que realices la siguiente encuesta: ${formUrl}`;
 
     // Configuración de Whapi
@@ -551,12 +592,13 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
       const result = await whapiResponse.json();
       
       // Log del envío exitoso
-      console.log(`WhatsApp enviado a ${name} (${phone}): ${message}`);
+      console.log(`WhatsApp enviado a ${name} (${phone}): ${formUrl}`);
       
       res.json({ 
         success: true, 
         message: 'Mensaje de WhatsApp enviado exitosamente',
-        whatsappId: result.id
+        whatsappId: result.id,
+        formUrl: formUrl
       });
     } else {
       const error = await whapiResponse.text();

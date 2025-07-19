@@ -1,3 +1,3 @@
 git add .
-git commit -m "antes de hacer cambios fundamentales"
+git commit -m "cambios fundamentales"
 git push

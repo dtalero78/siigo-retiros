@@ -24,83 +24,16 @@
         }
     </script>
     <style>
-        /* === FUENTE PERSONALIZADA === */
-        @font-face {
-            font-family: 'MiFuentePersonalizada';
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url('/fonts/tu-fuente.woff2') format('woff2');
-            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-        }
-        
-        /* === BUTTON STYLES === */
-        .btn-outline-light {
-            border: 1px solid rgba(255,255,255,0.6) !important; /* Borde más intenso */
-            color: white !important; /* Color más blanco */
-            background: rgba(255,255,255,0.1) !important; /* Fondo ligeramente visible */
-            border-radius: 6px !important; /* Más redondeado como admin */
-        }
-        
-        .btn-outline-light:hover {
-            background-color: rgba(255,255,255,0.2) !important;
-            border-color: rgba(255,255,255,0.8) !important;
-            color: white !important;
-            transform: translateY(-1px); /* Efecto hover como admin */
-        }
-        
-        .btn-outline-light:hover {
-            background: rgba(255,255,255,0.1) !important;
-            border-color: rgba(255,255,255,0.5) !important;
-            color: white !important;
-            transform: translateY(-1px) !important;
-        }
-        
-        /* Navigation bar styles */
-        .nav-bar {
-            background: linear-gradient(45deg, var(--siigo), var(--siigo-dark));
-            margin-left: -16px;
-            margin-right: -16px;
-            padding: 16px;
-        }
-        
-        @media (min-width: 768px) {
-            .nav-bar {
-                margin-left: -32px;
-                margin-right: -32px;
-                padding: 20px 32px;
-            }
-        }
-        .logo {
-            height: 48px;
-            width: auto;
-            transition: transform 0.3s ease;
-        }
-        
-        .logo:hover {
-            transform: scale(1.05);
-        }
-        
-        /* Responsive logo */
-        @media (max-width: 768px) {
-            .logo {
-                height: 36px;
-            }
-        }
-        
-        /* === VARIABLES === */
         :root {
             --siigo: #08acfc;
             --siigo-dark: #0694d3;
             --siigo-light: #e6f7ff;
         }
         
-        /* === TRANSITIONS === */
         .step-transition {
             transition: all 0.3s ease-in-out;
         }
         
-        /* === FORM COMPONENTS === */
         .scale-container {
             display: flex;
             justify-content: space-between;
@@ -132,7 +65,6 @@
             color: #64748b;
         }
         
-        /* === MATRIX TABLE === */
         .matrix-table {
             width: 100%;
             margin-top: 15px;
@@ -164,12 +96,10 @@
             accent-color: #08acfc;
         }
         
-        /* === CUSTOM RADIO BUTTONS === */
         input[type="radio"]:checked {
             accent-color: #08acfc;
         }
         
-        /* === ANIMATIONS === */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -179,7 +109,7 @@
             animation: fadeIn 0.3s ease-out;
         }
         
-        /* === RESPONSIVE === */
+        /* RESPONSIVE STYLES */
         @media (max-width: 768px) {
             .scale-container {
                 flex-wrap: wrap;
@@ -198,41 +128,14 @@
                 padding: 8px 4px;
             }
             
-            /* MOBILE OPTIMIZATIONS */
-            .mobile-header {
-                padding: 20px 16px !important;
-            }
-            
-            .mobile-header h1 {
-                font-size: 1.5rem !important;
-                margin-bottom: 8px !important;
-            }
-            
-            .mobile-header p {
-                font-size: 0.875rem !important;
-                opacity: 0.8;
-            }
-            
-            .mobile-container {
-                margin: 0 !important;
-                border-radius: 0 !important;
-                min-height: 100vh;
-                box-shadow: none !important;
-            }
-            
-            .mobile-content {
-                padding: 24px !important; /* Aumentado de 16px a 24px */
-            }
-            
-            /* Form fields same width and height */
             .mobile-input, 
             input[type="date"],
             select {
                 width: 100% !important;
                 padding: 16px !important;
-                font-size: 16px !important; /* Prevents zoom on iOS */
-                min-height: 64px !important; /* Taller height */
-                height: 64px !important; /* Fixed height */
+                font-size: 16px !important;
+                min-height: 64px !important;
+                height: 64px !important;
                 box-sizing: border-box !important;
                 border: 2px solid #d1d5db !important;
                 border-radius: 12px !important;
@@ -242,100 +145,85 @@
                 -moz-appearance: none !important;
             }
             
-            /* Date picker specific fixes */
-            input[type="date"]::-webkit-calendar-picker-indicator {
-                padding: 8px;
-                cursor: pointer;
-            }
-            
-            /* Select dropdown arrow */
-            select {
-                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-                background-position: right 12px center;
-                background-repeat: no-repeat;
-                background-size: 16px;
-                padding-right: 40px !important;
-            }
-            
-            /* Compact navigation - fixed button sizing */
-            .mobile-nav {
-                padding: 24px 0 !important; /* Top and bottom padding only */
-                margin: 0 !important;
-            }
-            
-            .mobile-btn {
-                padding: 14px 28px !important; /* Better proportions */
-                font-size: 0.9rem !important;
-                min-width: 120px !important; /* Longer minimum width */
-                max-width: 200px !important; /* Allow wider buttons */
-                height: 48px !important; /* Keep this height */
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                border-radius: 12px !important; /* Same as input fields */
-            }
-            
-            /* Progress indicators smaller */
-            .mobile-indicator {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 0.875rem !important;
-            }
-            
-            .mobile-progress {
-                height: 6px !important;
-                margin-bottom: 20px !important;
-            }
-            
-            /* Radio buttons better spacing */
             .mobile-radio {
                 padding: 16px !important;
                 margin-bottom: 12px !important;
             }
         }
         
-        /* === DESKTOP OVERRIDES === */
-        @media (min-width: 769px) {
-            .mobile-btn {
-                padding: 12px 32px !important; /* Desktop padding */
-                min-width: 140px !important; /* Wider on desktop */
-                max-width: 180px !important; /* Not too wide */
-                height: 100px !important; /* Your test height */
-                border-radius: 12px !important;
-            }
+        .user-info-card {
+            background: linear-gradient(135deg, var(--siigo-light) 0%, #f0f9ff 100%);
+            border: 1px solid var(--siigo);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .user-info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .user-info-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .user-info-value {
+            font-size: 1rem;
+            color: #1f2937;
+            font-weight: 600;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body class="bg-gray-100 md:bg-gradient-to-br md:from-blue-50 md:to-indigo-100 min-h-screen font-muli">
     <div class="min-h-screen flex items-start md:items-center justify-center md:py-8 md:px-4">
-        <div class="w-full max-w-4xl bg-white shadow-none md:shadow-2xl rounded-none md:rounded-2xl overflow-hidden mobile-container">
+        <div class="w-full max-w-4xl bg-white shadow-none md:shadow-2xl rounded-none md:rounded-2xl overflow-hidden">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-siigo to-siigo-dark text-white p-8 mobile-header">
+            <div class="bg-gradient-to-r from-siigo to-siigo-dark text-white p-8">
                 <div class="flex items-center justify-between">
-                    <!-- Logo -->
                     <div class="flex items-center">
                         <img src="/images/siigo-logo.png" alt="Siigo Logo" class="h-8 md:h-12 w-auto mr-3 md:mr-4">
                     </div>
-                    
-                    <!-- Título centrado -->
                     <div class="flex-1 text-center">
                         <h1 class="text-xl md:text-3xl font-bold mb-1 md:mb-2">Entrevista de Retiro</h1>
                         <p class="text-blue-100 text-sm md:text-lg">¡Gracias por tu tiempo en Siigo!</p>
                     </div>
-                    
-                    <!-- Espacio para balance visual -->
                     <div class="w-8 md:w-16"></div>
                 </div>
             </div>
 
-            <div class="p-4 md:p-8 mobile-content">
+            <div class="p-4 md:p-8">
+                <!-- User Info Card (solo si hay usuario pre-registrado) -->
+                <div id="userInfoCard" class="user-info-card" style="display: none;">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                        <i class="bi bi-person-check me-2 text-siigo"></i>
+                        Información del Usuario
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-3">Hemos pre-llenado tu información básica. Solo necesitas completar la entrevista.</p>
+                    <div class="user-info-grid" id="userInfoGrid">
+                        <!-- Info será llenada dinámicamente -->
+                    </div>
+                </div>
+
                 <!-- Intro Text -->
                 <div class="bg-siigo-light rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-l-4 border-siigo">
                     <p class="text-gray-700 mb-2 md:mb-3 text-sm md:text-base"><strong>¡Gracias por tu tiempo en Siigo!</strong></p>
                     <p class="text-gray-600 text-xs md:text-sm leading-relaxed">
                         Para nosotros es muy valioso conocer tu experiencia y aprender de lo que funcionó bien. 
                         Este formulario es confidencial y nos ayudará a seguir creciendo como equipo. 
-                        <strong>Completarlo te tomará menos de 10 minutos.</strong>
+                        <strong>Completarlo te tomará menos de 5 minutos.</strong>
                     </p>
                 </div>
 
@@ -344,71 +232,30 @@
                     <div class="flex items-center gap-2 md:gap-4 w-full">
                         <!-- Step 1 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-1" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">1</div>
+                            <div id="indicator-1" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10 text-sm md:text-base">1</div>
                             <div id="line-1" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
                         </div>
                         <!-- Step 2 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-2" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">2</div>
+                            <div id="indicator-2" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">2</div>
                             <div id="line-2" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
                         </div>
                         <!-- Step 3 -->
-                        <div class="relative flex-1 flex items-center">
-                            <div id="indicator-3" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">3</div>
-                            <div id="line-3" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
-                        </div>
-                        <!-- Step 4 -->
-                        <div class="relative flex-1 flex items-center">
-                            <div id="indicator-4" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">4</div>
-                            <div id="line-4" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
-                        </div>
-                        <!-- Step 5 -->
                         <div>
-                            <div id="indicator-5" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">5</div>
+                            <div id="indicator-3" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">3</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Progress Bar -->
-                <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 mb-6 md:mb-8 mobile-progress">
-                    <div id="progress-bar" class="bg-gradient-to-r from-siigo to-siigo-dark h-2 md:h-3 rounded-full step-transition" style="width: 20%;"></div>
+                <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 mb-6 md:mb-8">
+                    <div id="progress-bar" class="bg-gradient-to-r from-siigo to-siigo-dark h-2 md:h-3 rounded-full step-transition" style="width: 33.33%;"></div>
                 </div>
 
                 <!-- Form Content -->
                 <form id="exitInterviewForm">
-                    <!-- Step 1: Información Personal -->
+                    <!-- Step 1: Información Laboral -->
                     <div id="step-1" class="step fade-in">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Información Personal</h2>
-                            <p class="text-gray-600">Comencemos con algunos datos básicos</p>
-                        </div>
-                        
-                        <div class="space-y-6 max-w-2xl mx-auto">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu nombre completo? *</label>
-                                <input type="text" id="q3" name="q3" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu número de Identificación? *</label>
-                                <input type="text" id="q4" name="q4" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Confirma tu fecha de retiro *</label>
-                                <input type="date" id="q5" name="q5" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Información Laboral -->
-                    <div id="step-2" class="step hidden">
                         <div class="text-center mb-8">
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">Información Laboral</h2>
                             <p class="text-gray-600">Cuéntanos sobre tu experiencia en Siigo</p>
@@ -446,39 +293,6 @@
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál área estabas? *</label>
-                                <select id="q7" name="q7" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors appearance-none bg-white"
-                                        style="min-height: 64px; height: 64px; padding: 16px 40px 16px 16px; font-size: 16px;">
-                                    <option value="">Selecciona tu área</option>
-                                    <option value="Cultura">Cultura</option>
-                                    <option value="Customer Success">Customer Success</option>
-                                    <option value="Finance & Administration">Finance & Administration</option>
-                                    <option value="Fundación Siigo">Fundación Siigo</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="People Ops">People Ops</option>
-                                    <option value="Product">Product</option>
-                                    <option value="Sales">Sales</option>
-                                    <option value="Strategy">Strategy</option>
-                                    <option value="Tech">Tech</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál país estabas trabajando? *</label>
-                                <select id="q8" name="q8" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors appearance-none bg-white"
-                                        style="min-height: 64px; height: 64px; padding: 16px 40px 16px 16px; font-size: 16px;">
-                                    <option value="">Selecciona tu país</option>
-                                    <option value="Colombia">Colombia</option>
-                                    <option value="Ecuador">Ecuador</option>
-                                    <option value="Uruguay">Uruguay</option>
-                                    <option value="México">México</option>
-                                    <option value="Perú">Perú</option>
-                                </select>
-                            </div>
-                            
-                            <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el nombre del último líder que tuviste en Siigo? *</label>
                                 <input type="text" id="q9" name="q9" required 
                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
@@ -487,8 +301,8 @@
                         </div>
                     </div>
 
-                    <!-- Step 3: Motivos de Retiro -->
-                    <div id="step-3" class="step hidden">
+                    <!-- Step 2: Motivos de Retiro -->
+                    <div id="step-2" class="step hidden">
                         <div class="text-center mb-8">
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">Motivos de Retiro</h2>
                             <p class="text-gray-600">Ayúdanos a entender tu decisión</p>
@@ -546,8 +360,8 @@
                         </div>
                     </div>
 
-                    <!-- Step 4: Evaluación y Feedback -->
-                    <div id="step-4" class="step hidden">
+                    <!-- Step 3: Evaluación y Feedback -->
+                    <div id="step-3" class="step hidden">
                         <div class="text-center mb-8">
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">Evaluación y Feedback</h2>
                             <p class="text-gray-600">Tu opinión es muy valiosa para nosotros</p>
@@ -701,97 +515,6 @@
                         </div>
                     </div>
 
-                    <!-- Step 5: Revisión y Envío -->
-                    <div id="step-5" class="step hidden">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Revisión y Envío</h2>
-                            <p class="text-gray-600">Por favor revisa tu información antes de enviar</p>
-                        </div>
-                        
-                        <div class="max-w-3xl mx-auto space-y-6">
-                            <!-- Resumen de respuestas -->
-                            <div class="bg-gray-50 rounded-2xl p-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen de tu entrevista:</h3>
-                                
-                                <div class="grid md:grid-cols-2 gap-6">
-                                    <div class="space-y-3">
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">Nombre:</p>
-                                                <p id="review-name" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">Área:</p>
-                                                <p id="review-area" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">País:</p>
-                                                <p id="review-country" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">Tiempo en Siigo:</p>
-                                                <p id="review-tenure" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-3">
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">Calificación de experiencia:</p>
-                                                <p id="review-rating" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">¿Recomendarías Siigo?</p>
-                                                <p id="review-recommend" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">¿Regresarías a Siigo?</p>
-                                                <p id="review-return" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-2 h-2 bg-siigo rounded-full mt-2 flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-medium text-gray-700">Fecha de retiro:</p>
-                                                <p id="review-exit-date" class="text-gray-600">-</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Mensaje final -->
-                            <div class="text-center bg-siigo-light rounded-2xl p-6">
-                                <h4 class="text-lg font-semibold text-siigo mb-2">¡Gracias por tu tiempo!</h4>
-                                <p class="text-gray-700">Tu feedback es muy valioso para nosotros y nos ayudará a seguir mejorando como organización. ¡Que tengas mucho éxito en tus próximos proyectos!</p>
-                            </div>
-                        </div>
-                    </div>
-
                 </form>
 
                 <!-- Success Message -->
@@ -829,20 +552,18 @@
                 </div>
             </div>
             
-            <!-- Navigation Buttons - Fixed at bottom -->
-            <div class="bg-gradient-to-r from-siigo to-siigo-dark py-3 px-4">
-                <div class="flex items-center justify-between w-full">
+            <!-- Navigation Buttons -->
+            <div class="bg-gradient-to-r from-siigo to-siigo-dark py-4 px-6">
+                <div class="flex items-center justify-between">
                     <button id="prev-btn" type="button" 
-                            class="btn btn-outline-light d-none"
-                            style="padding: 8px 16px;">
+                            class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hidden">
                         <i class="bi bi-arrow-left me-2"></i>
-                        <span class="d-none d-md-inline">Anterior</span>
+                        Anterior
                     </button>
                     
                     <button id="next-btn" type="button" 
-                            class="btn btn-outline-light"
-                            style="padding: 8px 16px;">
-                        <span class="d-none d-md-inline">Siguiente</span>
+                            class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                        Siguiente
                         <i class="bi bi-arrow-right ms-2"></i>
                     </button>
                 </div>
@@ -856,21 +577,76 @@
         const prevBtn = document.getElementById("prev-btn");
         const progressBar = document.getElementById("progress-bar");
         let currentStep = 0;
+        let currentUser = null;
 
         const indicators = [
             document.getElementById("indicator-1"),
             document.getElementById("indicator-2"),
-            document.getElementById("indicator-3"),
-            document.getElementById("indicator-4"),
-            document.getElementById("indicator-5")
+            document.getElementById("indicator-3")
         ];
 
         const lines = [
             document.getElementById("line-1"),
-            document.getElementById("line-2"),
-            document.getElementById("line-3"),
-            document.getElementById("line-4")
+            document.getElementById("line-2")
         ];
+
+        // Al cargar la página, verificar si hay un usuario en la URL
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user');
+            
+            if (userId) {
+                await loadUserData(userId);
+            }
+            
+            showStep(currentStep);
+        });
+
+        async function loadUserData(userId) {
+            try {
+                const response = await fetch(`/api/user-form/${userId}`);
+                if (response.ok) {
+                    currentUser = await response.json();
+                    displayUserInfo(currentUser);
+                } else {
+                    console.error('Usuario no encontrado');
+                    showError('No se pudo cargar la información del usuario. Verifica el enlace.');
+                }
+            } catch (error) {
+                console.error('Error cargando datos del usuario:', error);
+                showError('Error de conexión al cargar los datos del usuario.');
+            }
+        }
+
+        function displayUserInfo(user) {
+            const userInfoCard = document.getElementById('userInfoCard');
+            const userInfoGrid = document.getElementById('userInfoGrid');
+            
+            userInfoGrid.innerHTML = `
+                <div class="user-info-item">
+                    <div class="user-info-label">Nombre Completo</div>
+                    <div class="user-info-value">${user.full_name}</div>
+                </div>
+                <div class="user-info-item">
+                    <div class="user-info-label">Identificación</div>
+                    <div class="user-info-value">${user.identification}</div>
+                </div>
+                <div class="user-info-item">
+                    <div class="user-info-label">Área</div>
+                    <div class="user-info-value">${user.area}</div>
+                </div>
+                <div class="user-info-item">
+                    <div class="user-info-label">País</div>
+                    <div class="user-info-value">${user.country}</div>
+                </div>
+                <div class="user-info-item">
+                    <div class="user-info-label">Fecha de Retiro</div>
+                    <div class="user-info-value">${new Date(user.exit_date).toLocaleDateString('es-ES')}</div>
+                </div>
+            `;
+            
+            userInfoCard.style.display = 'block';
+        }
 
         function updateIndicators(stepIndex) {
             indicators.forEach((indicator, index) => {
@@ -919,19 +695,6 @@
             return true;
         }
 
-        function updateReviewData() {
-            if (currentStep === 4) { // Step 5 (review)
-                document.getElementById('review-name').textContent = document.getElementById('q3').value || '-';
-                document.getElementById('review-area').textContent = document.getElementById('q7').value || '-';
-                document.getElementById('review-country').textContent = document.getElementById('q8').value || '-';
-                document.getElementById('review-tenure').textContent = document.querySelector('input[name="q6"]:checked')?.value || '-';
-                document.getElementById('review-rating').textContent = document.querySelector('input[name="q12"]:checked')?.value ? `${document.querySelector('input[name="q12"]:checked').value}/10` : '-';
-                document.getElementById('review-recommend').textContent = document.querySelector('input[name="q13"]:checked')?.value || '-';
-                document.getElementById('review-return').textContent = document.querySelector('input[name="q18"]:checked')?.value || '-';
-                document.getElementById('review-exit-date').textContent = document.getElementById('q5').value || '-';
-            }
-        }
-
         function showStep(index) {
             steps.forEach((step, i) => {
                 step.classList.toggle("hidden", i !== index);
@@ -940,25 +703,23 @@
                 }
             });
             
-            prevBtn.classList.toggle("d-none", index === 0);
+            prevBtn.classList.toggle("hidden", index === 0);
             
             if (index === steps.length - 1) {
                 nextBtn.innerHTML = `
-                    <span class="d-none d-md-inline">Enviar Entrevista</span>
+                    Enviar Entrevista
                     <i class="bi bi-check-circle ms-2"></i>
                 `;
             } else {
                 nextBtn.innerHTML = `
-                    <span class="d-none d-md-inline">Siguiente</span>
+                    Siguiente
                     <i class="bi bi-arrow-right ms-2"></i>
                 `;
             }
             
             updateIndicators(index);
             updateProgressBar(index);
-            updateReviewData();
             
-            // Scroll to top on mobile when changing steps
             if (window.innerWidth <= 768) {
                 window.scrollTo({ 
                     top: 0, 
@@ -972,8 +733,17 @@
                 // Recopilar todas las respuestas
                 const responses = {};
                 
+                // Si hay usuario registrado, usar sus datos
+                if (currentUser) {
+                    responses.full_name = currentUser.full_name;
+                    responses.identification = currentUser.identification;
+                    responses.exit_date = currentUser.exit_date;
+                    responses.area = currentUser.area;
+                    responses.country = currentUser.country;
+                }
+                
                 // Preguntas simples
-                ['q3', 'q4', 'q5', 'q7', 'q8', 'q9', 'q10', 'q14', 'q15', 'q17'].forEach(id => {
+                ['q9', 'q10', 'q14', 'q15', 'q17'].forEach(id => {
                     const input = document.getElementById(id);
                     if (input && input.value) {
                         responses[id] = input.value;
@@ -992,7 +762,7 @@
                 const matrixResponses = {};
                 const matrixItems = [
                     "Liderazgo de tu líder directo",
-                    "Ambiente laboral en tu equipo",
+                    "Ambiente laboral en tu equipo", 
                     "Cultura organizacional y valores",
                     "Beneficios emocionales o no económicos",
                     "Modalidad de trabajo remoto",
@@ -1009,12 +779,17 @@
                 responses['q16'] = matrixResponses;
 
                 // Enviar al servidor
+                const requestBody = { responses };
+                if (currentUser) {
+                    requestBody.userId = currentUser.id;
+                }
+
                 const response = await fetch('/api/responses', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ responses })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (response.ok) {
@@ -1077,9 +852,6 @@
                 showStep(currentStep);
             }
         });
-
-        // Inicializar
-        showStep(currentStep);
 
         // Auto-save en localStorage (opcional)
         document.addEventListener('input', () => {

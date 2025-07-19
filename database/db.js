@@ -18,6 +18,7 @@ class Database {
     this.db.run(`
       CREATE TABLE IF NOT EXISTS responses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
         full_name TEXT,
         identification TEXT,
         exit_date TEXT,
@@ -35,13 +36,20 @@ class Database {
         new_company_info TEXT,
         would_return TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
       )
     `, (err) => {
       if (err) {
         console.error('Error creando tabla:', err.message);
       } else {
         console.log('Tabla de respuestas inicializada');
+        // Agregar columna user_id si no existe (para bases de datos existentes)
+        this.db.run(`ALTER TABLE responses ADD COLUMN user_id INTEGER`, (err) => {
+          if (err && !err.message.includes('duplicate column')) {
+            console.error('Error agregando columna user_id:', err.message);
+          }
+        });
       }
     });
   }
@@ -50,12 +58,13 @@ class Database {
     return new Promise((resolve, reject) => {
       // Mapear las respuestas a los campos de la base de datos
       const data = {
-        full_name: responses['q3'] || '',
-        identification: responses['q4'] || '',
-        exit_date: responses['q5'] || '',
+        user_id: responses.userId || null,
+        full_name: responses['q3'] || responses.full_name || '',
+        identification: responses['q4'] || responses.identification || '',
+        exit_date: responses['q5'] || responses.exit_date || '',
         tenure: responses['q6'] || '',
-        area: responses['q7'] || '',
-        country: responses['q8'] || '',
+        area: responses['q7'] || responses.area || '',
+        country: responses['q8'] || responses.country || '',
         last_leader: responses['q9'] || '',
         exit_reason_detail: responses['q10'] || '',
         exit_reason_category: responses['q11'] || '',
@@ -70,15 +79,15 @@ class Database {
 
       const sql = `
         INSERT INTO responses (
-          full_name, identification, exit_date, tenure, area, country,
+          user_id, full_name, identification, exit_date, tenure, area, country,
           last_leader, exit_reason_detail, exit_reason_category,
           experience_rating, would_recommend, what_enjoyed, what_to_improve,
           satisfaction_ratings, new_company_info, would_return
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
-        data.full_name, data.identification, data.exit_date, data.tenure,
+        data.user_id, data.full_name, data.identification, data.exit_date, data.tenure,
         data.area, data.country, data.last_leader, data.exit_reason_detail,
         data.exit_reason_category, data.experience_rating, data.would_recommend,
         data.what_enjoyed, data.what_to_improve, data.satisfaction_ratings,
@@ -101,19 +110,22 @@ class Database {
     return new Promise((resolve, reject) => {
       const sql = `
         SELECT 
-          id,
-          full_name,
-          identification,
-          exit_date,
-          tenure,
-          area,
-          country,
-          experience_rating,
-          would_recommend,
-          would_return,
-          created_at
-        FROM responses 
-        ORDER BY created_at DESC
+          r.id,
+          r.user_id,
+          COALESCE(r.full_name, u.first_name || ' ' || u.last_name) as full_name,
+          COALESCE(r.identification, u.identification) as identification,
+          COALESCE(r.exit_date, u.exit_date) as exit_date,
+          r.tenure,
+          COALESCE(r.area, u.area) as area,
+          COALESCE(r.country, u.country) as country,
+          r.experience_rating,
+          r.would_recommend,
+          r.would_return,
+          r.created_at,
+          u.phone
+        FROM responses r
+        LEFT JOIN users u ON r.user_id = u.id
+        ORDER BY r.created_at DESC
       `;
 
       this.db.all(sql, [], (err, rows) => {
@@ -170,6 +182,22 @@ class Database {
           reject(err);
         } else {
           resolve(rows);
+        }
+      });
+    });
+  }
+
+  // Nuevo método para verificar si un usuario ya tiene respuesta
+  async hasUserResponse(userId) {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT id FROM responses WHERE user_id = ? LIMIT 1`;
+      
+      this.db.get(sql, [userId], (err, row) => {
+        if (err) {
+          console.error('Error verificando respuesta de usuario:', err.message);
+          reject(err);
+        } else {
+          resolve(!!row);
         }
       });
     });
