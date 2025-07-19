@@ -187,23 +187,30 @@
                 padding: 16px !important;
             }
             
-            /* Form fields same width */
+            /* Form fields same width and height */
             .mobile-input {
                 width: 100% !important;
                 padding: 16px !important;
                 font-size: 16px !important; /* Prevents zoom on iOS */
+                min-height: 56px !important; /* Consistent height */
+                box-sizing: border-box !important;
             }
             
-            /* Compact navigation */
+            /* Compact navigation - refined buttons */
             .mobile-nav {
-                padding: 12px 16px !important;
+                padding: 16px !important;
                 margin: 0 !important;
             }
             
             .mobile-btn {
-                padding: 12px 20px !important;
-                font-size: 0.875rem !important;
-                min-width: 80px;
+                padding: 16px 24px !important;
+                font-size: 0.9rem !important;
+                min-width: 60px !important;
+                max-width: 120px !important;
+                height: 56px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             
             /* Progress indicators smaller */
@@ -216,6 +223,12 @@
             .mobile-progress {
                 height: 6px !important;
                 margin-bottom: 20px !important;
+            }
+            
+            /* Radio buttons better spacing */
+            .mobile-radio {
+                padding: 16px !important;
+                margin-bottom: 12px !important;
             }
         }
     </style>
@@ -301,19 +314,22 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu nombre completo? *</label>
                                 <input type="text" id="q3" name="q3" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                       style="min-height: 56px;">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu número de Identificación? *</label>
                                 <input type="text" id="q4" name="q4" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                       style="min-height: 56px;">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Confirma tu fecha de retiro *</label>
                                 <input type="date" id="q5" name="q5" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                       style="min-height: 56px;">
                             </div>
                         </div>
                     </div>
@@ -329,27 +345,27 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿Cuál fue el tiempo total que duraste en Siigo? *</label>
                                 <div class="space-y-2">
-                                    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
                                         <input type="radio" name="q6" value="Menos de 2 meses" required class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">Menos de 2 meses</span>
                                     </label>
-                                    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
                                         <input type="radio" name="q6" value="Menos de 6 meses" required class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">Menos de 6 meses</span>
                                     </label>
-                                    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
                                         <input type="radio" name="q6" value="6 meses a 1 año" required class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">6 meses a 1 año</span>
                                     </label>
-                                    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
                                         <input type="radio" name="q6" value="1-2 años" required class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">1-2 años</span>
                                     </label>
-                                    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
                                         <input type="radio" name="q6" value="2-5 años" required class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">2-5 años</span>
                                     </label>
-                                    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
                                         <input type="radio" name="q6" value="Más de 5 años" required class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">Más de 5 años</span>
                                     </label>
@@ -359,7 +375,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál área estabas? *</label>
                                 <select id="q7" name="q7" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input appearance-none bg-white"
+                                        style="min-height: 56px;">
                                     <option value="">Selecciona tu área</option>
                                     <option value="Cultura">Cultura</option>
                                     <option value="Customer Success">Customer Success</option>
@@ -377,7 +394,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál país estabas trabajando? *</label>
                                 <select id="q8" name="q8" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input appearance-none bg-white"
+                                        style="min-height: 56px;">
                                     <option value="">Selecciona tu país</option>
                                     <option value="Colombia">Colombia</option>
                                     <option value="Ecuador">Ecuador</option>
@@ -390,7 +408,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el nombre del último líder que tuviste en Siigo? *</label>
                                 <input type="text" id="q9" name="q9" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                       style="min-height: 56px;">
                             </div>
                         </div>
                     </div>
@@ -701,9 +720,9 @@
                     </div>
 
                     <!-- Navigation Buttons -->
-                    <div class="flex justify-between items-center mt-8 md:mt-12 max-w-3xl mx-auto mobile-nav">
+                    <div class="flex justify-between items-center mt-8 md:mt-12 px-4 md:px-0 mobile-nav">
                         <button id="prev-btn" type="button" 
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 md:px-8 md:py-3 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn">
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn">
                             <span class="hidden md:inline">← Anterior</span>
                             <span class="md:hidden">←</span>
                         </button>
@@ -711,7 +730,7 @@
                         <div class="flex-1"></div>
                         
                         <button id="next-btn" type="button" 
-                                class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white px-4 py-3 md:px-8 md:py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 mobile-btn">
+                                class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 mobile-btn">
                             <span class="hidden md:inline">Siguiente →</span>
                             <span class="md:hidden">→</span>
                         </button>
