@@ -222,7 +222,7 @@
             
             /* Compact navigation - fixed button sizing */
             .mobile-nav {
-                padding: 16px !important;
+                padding: 0 !important; /* Remove extra padding */
                 margin: 0 !important;
             }
             
@@ -236,16 +236,6 @@
                 align-items: center !important;
                 justify-content: center !important;
                 border-radius: 12px !important; /* Same as input fields */
-            }
-            
-            /* Desktop button overrides */
-            @media (min-width: 768px) {
-                .mobile-btn {
-                    padding: 12px 32px !important; /* Desktop padding */
-                    min-width: 140px !important; /* Wider on desktop */
-                    max-width: 180px !important; /* Not too wide */
-                    height: 48px !important; /* Consistent height */
-                }
             }
             
             /* Progress indicators smaller */
@@ -264,6 +254,17 @@
             .mobile-radio {
                 padding: 16px !important;
                 margin-bottom: 12px !important;
+            }
+        }
+        
+        /* === DESKTOP OVERRIDES === */
+        @media (min-width: 769px) {
+            .mobile-btn {
+                padding: 12px 32px !important; /* Desktop padding */
+                min-width: 140px !important; /* Wider on desktop */
+                max-width: 180px !important; /* Not too wide */
+                height: 100px !important; /* Your test height */
+                border-radius: 12px !important;
             }
         }
     </style>
@@ -755,7 +756,7 @@
                     </div>
 
                     <!-- Navigation Buttons -->
-                    <div class="flex justify-between items-center mt-8 md:mt-12 px-4 md:px-0 mobile-nav">
+                    <div class="flex justify-between items-center mt-8 md:mt-12 mobile-nav">
                         <button id="prev-btn" type="button" 
                                 class="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn"
                                 style="border-radius: 12px;">
