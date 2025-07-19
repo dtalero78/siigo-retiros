@@ -220,22 +220,32 @@
                 padding-right: 40px !important;
             }
             
-            /* Compact navigation - longer, thinner buttons */
+            /* Compact navigation - fixed button sizing */
             .mobile-nav {
                 padding: 16px !important;
                 margin: 0 !important;
             }
             
             .mobile-btn {
-                padding: 12px 32px !important; /* Wider padding */
+                padding: 14px 28px !important; /* Better proportions */
                 font-size: 0.9rem !important;
-                min-width: 100px !important; /* Minimum width */
-                max-width: 160px !important; /* Maximum width */
-                height: 48px !important; /* Thinner height */
+                min-width: 120px !important; /* Longer minimum width */
+                max-width: 200px !important; /* Allow wider buttons */
+                height: 48px !important; /* Keep this height */
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                border-radius: 24px !important; /* More rounded */
+                border-radius: 12px !important; /* Same as input fields */
+            }
+            
+            /* Desktop button overrides */
+            @media (min-width: 768px) {
+                .mobile-btn {
+                    padding: 12px 32px !important; /* Desktop padding */
+                    min-width: 140px !important; /* Wider on desktop */
+                    max-width: 180px !important; /* Not too wide */
+                    height: 48px !important; /* Consistent height */
+                }
             }
             
             /* Progress indicators smaller */
@@ -747,7 +757,8 @@
                     <!-- Navigation Buttons -->
                     <div class="flex justify-between items-center mt-8 md:mt-12 px-4 md:px-0 mobile-nav">
                         <button id="prev-btn" type="button" 
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn">
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn"
+                                style="border-radius: 12px;">
                             <span class="hidden md:inline">← Anterior</span>
                             <span class="md:hidden">←</span>
                         </button>
@@ -755,7 +766,8 @@
                         <div class="flex-1"></div>
                         
                         <button id="next-btn" type="button" 
-                                class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 mobile-btn">
+                                class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 mobile-btn"
+                                style="border-radius: 12px;">
                             <span class="hidden md:inline">Siguiente →</span>
                             <span class="md:hidden">→</span>
                         </button>
