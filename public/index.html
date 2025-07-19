@@ -222,7 +222,7 @@
             
             /* Compact navigation - fixed button sizing */
             .mobile-nav {
-                padding: 0 !important; /* Remove extra padding */
+                padding: 24 !important; /* Remove extra padding */
                 margin: 0 !important;
             }
             
@@ -263,7 +263,7 @@
                 padding: 12px 32px !important; /* Desktop padding */
                 min-width: 140px !important; /* Wider on desktop */
                 max-width: 180px !important; /* Not too wide */
-                height: 100px !important; /* Your test height */
+                height: 48px !important; /* Your test height */
                 border-radius: 12px !important;
             }
         }
@@ -760,7 +760,7 @@
                         <button id="prev-btn" type="button" 
                                 class="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn"
                                 style="border-radius: 12px;">
-                            <span class="hidden md:inline">← Anterior</span>
+                            <span class="hidden md:inline">←</span>
                             <span class="md:hidden">←</span>
                         </button>
                         
@@ -769,7 +769,7 @@
                         <button id="next-btn" type="button" 
                                 class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 mobile-btn"
                                 style="border-radius: 12px;">
-                            <span class="hidden md:inline">Siguiente →</span>
+                            <span class="hidden md:inline">→</span>
                             <span class="md:hidden">→</span>
                         </button>
                     </div>
@@ -913,7 +913,7 @@
                 nextBtn.classList.add("from-green-500", "to-green-600");
             } else {
                 nextBtn.innerHTML = `
-                    <span class="hidden md:inline">Siguiente →</span>
+                    <span class="hidden md:inline"> →</span>
                     <span class="md:hidden">→</span>
                 `;
                 nextBtn.classList.remove("from-green-500", "to-green-600");
