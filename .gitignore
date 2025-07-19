@@ -150,3 +150,17 @@ temp/
 # Backup files
 *.backup
 backup/
+
+# Database files
+data/*.db
+data/*.db-*
+*.sqlite
+*.sqlite3
+
+# Temporary files
+temp/*
+!temp/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# OS generated files

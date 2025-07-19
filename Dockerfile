@@ -13,24 +13,29 @@ RUN npm install --only=production
 # Copiar el código de la aplicación
 COPY . .
 
-# Crear directorio para la base de datos
+# Crear directorios necesarios antes de cambiar de usuario
 RUN mkdir -p data
+RUN mkdir -p temp
+RUN mkdir -p uploads
 
-# Inicializar la base de datos
-RUN npm run init-db
+# Inicializar las bases de datos
+RUN node scripts/init-all.js
 
-# Exponer el puerto
-EXPOSE 3000
-
-# Crear usuario no-root para seguridad
+# Crear usuarios no-root para seguridad
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN adduser -S nextjs -u 1001 -G nodejs
 
-# Cambiar permisos del directorio data
+# Cambiar permisos de los directorios necesarios
 RUN chown -R nextjs:nodejs /app/data
+RUN chown -R nextjs:nodejs /app/temp
+RUN chown -R nextjs:nodejs /app/uploads
+RUN chmod 755 /app/data /app/temp /app/uploads
 
 # Cambiar a usuario no-root
 USER nextjs
+
+# Exponer el puerto
+EXPOSE 3000
 
 # Comando para iniciar la aplicación
 CMD ["npm", "start"]
