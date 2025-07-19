@@ -222,7 +222,7 @@ const questions = [
 
 // ================================
 // RUTAS API PARA RESPUESTAS
-// ================================
+// ================================ 
 
 app.get('/api/questions', (req, res) => {
   res.json(questions);
