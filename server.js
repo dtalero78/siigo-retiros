@@ -493,6 +493,83 @@ app.get('/api/users/stats', async (req, res) => {
   }
 });
 
+// Enviar mensaje de WhatsApp a usuario
+app.post('/api/users/send-whatsapp', async (req, res) => {
+  try {
+    const { userId, phone, name } = req.body;
+    
+    if (!userId || !phone || !name) {
+      return res.status(400).json({ error: 'Datos incompletos para enviar WhatsApp' });
+    }
+
+    // Verificar que el usuario existe
+    const user = await usersDb.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Limpiar número de teléfono (remover espacios, guiones, etc.)
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    // Verificar que el número tenga al menos 10 dígitos
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({ error: 'Número de teléfono inválido' });
+    }
+
+    // Formatear número para WhatsApp (agregar código de país si no lo tiene)
+    let whatsappNumber = cleanPhone;
+    if (!whatsappNumber.startsWith('57') && cleanPhone.length === 10) {
+      whatsappNumber = '57' + cleanPhone; // Código de Colombia
+    }
+
+    // URL del formulario (ajustar según tu dominio)
+    const formUrl = process.env.FORM_URL || 'https://tu-dominio.com';
+    
+    // Mensaje personalizado
+    const message = `Hola ${name.split(' ')[0]}. Antes de despedirnos queremos pedirte que realices la siguiente encuesta: ${formUrl}`;
+
+    // Configuración de Whapi
+    const whapiToken = process.env.WHAPI_TOKEN;
+    if (!whapiToken) {
+      return res.status(500).json({ error: 'Token de Whapi no configurado' });
+    }
+
+    // Enviar mensaje usando Whapi
+    const whapiResponse = await fetch('https://gate.whapi.cloud/messages/text', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${whapiToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        to: whatsappNumber,
+        body: message
+      })
+    });
+
+    if (whapiResponse.ok) {
+      const result = await whapiResponse.json();
+      
+      // Log del envío exitoso
+      console.log(`WhatsApp enviado a ${name} (${phone}): ${message}`);
+      
+      res.json({ 
+        success: true, 
+        message: 'Mensaje de WhatsApp enviado exitosamente',
+        whatsappId: result.id
+      });
+    } else {
+      const error = await whapiResponse.text();
+      console.error('Error de Whapi:', error);
+      res.status(500).json({ error: 'Error al enviar mensaje a través de Whapi' });
+    }
+
+  } catch (error) {
+    console.error('Error enviando WhatsApp:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // ================================
 // RUTAS DE PÁGINAS
 // ================================
