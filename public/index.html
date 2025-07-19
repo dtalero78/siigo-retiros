@@ -188,29 +188,54 @@
             }
             
             /* Form fields same width and height */
-            .mobile-input {
+            .mobile-input, 
+            input[type="date"],
+            select {
                 width: 100% !important;
                 padding: 16px !important;
                 font-size: 16px !important; /* Prevents zoom on iOS */
-                min-height: 56px !important; /* Consistent height */
+                min-height: 64px !important; /* Taller height */
+                height: 64px !important; /* Fixed height */
                 box-sizing: border-box !important;
+                border: 2px solid #d1d5db !important;
+                border-radius: 12px !important;
+                background-color: white !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
             }
             
-            /* Compact navigation - refined buttons */
+            /* Date picker specific fixes */
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                padding: 8px;
+                cursor: pointer;
+            }
+            
+            /* Select dropdown arrow */
+            select {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 12px center;
+                background-repeat: no-repeat;
+                background-size: 16px;
+                padding-right: 40px !important;
+            }
+            
+            /* Compact navigation - longer, thinner buttons */
             .mobile-nav {
                 padding: 16px !important;
                 margin: 0 !important;
             }
             
             .mobile-btn {
-                padding: 16px 24px !important;
+                padding: 12px 32px !important; /* Wider padding */
                 font-size: 0.9rem !important;
-                min-width: 60px !important;
-                max-width: 120px !important;
-                height: 56px !important;
+                min-width: 100px !important; /* Minimum width */
+                max-width: 160px !important; /* Maximum width */
+                height: 48px !important; /* Thinner height */
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
+                border-radius: 24px !important; /* More rounded */
             }
             
             /* Progress indicators smaller */
@@ -314,22 +339,22 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu nombre completo? *</label>
                                 <input type="text" id="q3" name="q3" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                       style="min-height: 56px;">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu número de Identificación? *</label>
                                 <input type="text" id="q4" name="q4" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                       style="min-height: 56px;">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Confirma tu fecha de retiro *</label>
                                 <input type="date" id="q5" name="q5" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                       style="min-height: 56px;">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
                             </div>
                         </div>
                     </div>
@@ -375,8 +400,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál área estabas? *</label>
                                 <select id="q7" name="q7" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input appearance-none bg-white"
-                                        style="min-height: 56px;">
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors appearance-none bg-white"
+                                        style="min-height: 64px; height: 64px; padding: 16px 40px 16px 16px; font-size: 16px;">
                                     <option value="">Selecciona tu área</option>
                                     <option value="Cultura">Cultura</option>
                                     <option value="Customer Success">Customer Success</option>
@@ -394,8 +419,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál país estabas trabajando? *</label>
                                 <select id="q8" name="q8" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input appearance-none bg-white"
-                                        style="min-height: 56px;">
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors appearance-none bg-white"
+                                        style="min-height: 64px; height: 64px; padding: 16px 40px 16px 16px; font-size: 16px;">
                                     <option value="">Selecciona tu país</option>
                                     <option value="Colombia">Colombia</option>
                                     <option value="Ecuador">Ecuador</option>
@@ -408,8 +433,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el nombre del último líder que tuviste en Siigo? *</label>
                                 <input type="text" id="q9" name="q9" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                       style="min-height: 56px;">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
                             </div>
                         </div>
                     </div>
