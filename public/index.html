@@ -33,6 +33,24 @@
             unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
         }
         
+        /* === LOGO STYLES === */
+        .logo {
+            height: 48px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Responsive logo */
+        @media (max-width: 768px) {
+            .logo {
+                height: 36px;
+            }
+        }
+        
         /* === VARIABLES === */
         :root {
             --siigo: #08acfc;
@@ -142,36 +160,93 @@
             .matrix-table td, .matrix-table th {
                 padding: 8px 4px;
             }
+            
+            /* MOBILE OPTIMIZATIONS */
+            .mobile-header {
+                padding: 20px 16px !important;
+            }
+            
+            .mobile-header h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .mobile-header p {
+                font-size: 0.875rem !important;
+                opacity: 0.8;
+            }
+            
+            .mobile-container {
+                margin: 0 !important;
+                border-radius: 0 !important;
+                min-height: 100vh;
+                box-shadow: none !important;
+            }
+            
+            .mobile-content {
+                padding: 16px !important;
+            }
+            
+            /* Form fields same width */
+            .mobile-input {
+                width: 100% !important;
+                padding: 16px !important;
+                font-size: 16px !important; /* Prevents zoom on iOS */
+            }
+            
+            /* Compact navigation */
+            .mobile-nav {
+                padding: 12px 16px !important;
+                margin: 0 !important;
+            }
+            
+            .mobile-btn {
+                padding: 12px 20px !important;
+                font-size: 0.875rem !important;
+                min-width: 80px;
+            }
+            
+            /* Progress indicators smaller */
+            .mobile-indicator {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.875rem !important;
+            }
+            
+            .mobile-progress {
+                height: 6px !important;
+                margin-bottom: 20px !important;
+            }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-muli">
-    <div class="min-h-screen flex items-center justify-center py-8 px-4">
-        <div class="w-full max-w-4xl bg-white shadow-2xl rounded-2xl overflow-hidden">
+<body class="bg-gray-100 md:bg-gradient-to-br md:from-blue-50 md:to-indigo-100 min-h-screen font-muli">
+    <div class="min-h-screen flex items-start md:items-center justify-center md:py-8 md:px-4">
+        <div class="w-full max-w-4xl bg-white shadow-none md:shadow-2xl rounded-none md:rounded-2xl overflow-hidden mobile-container">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-siigo to-siigo-dark text-white p-8">
+            <div class="bg-gradient-to-r from-siigo to-siigo-dark text-white p-8 mobile-header">
                 <div class="flex items-center justify-between">
                     <!-- Logo -->
                     <div class="flex items-center">
-                        <img src="/images/siigo-logo.png" alt="Siigo Logo" class="h-12 w-auto mr-4">
+                        <img src="/images/siigo-logo.png" alt="Siigo Logo" class="h-8 md:h-12 w-auto mr-3 md:mr-4">
                     </div>
                     
                     <!-- Título centrado -->
                     <div class="flex-1 text-center">
-                        <h1 class="text-3xl font-bold mb-2">Entrevista de Retiro</h1>
-                        <p class="text-blue-100 text-lg">¡Gracias por tu tiempo en Siigo!</p>
+                        <h1 class="text-xl md:text-3xl font-bold mb-1 md:mb-2">Entrevista de Retiro</h1>
+                        <p class="text-blue-100 text-sm md:text-lg">¡Gracias por tu tiempo en Siigo!</p>
                     </div>
                     
                     <!-- Espacio para balance visual -->
-                    <div class="w-16"></div>
+                    <div class="w-8 md:w-16"></div>
                 </div>
             </div>
 
-            <div class="p-8">
+            <div class="p-4 md:p-8 mobile-content">
                 <!-- Intro Text -->
-                <div class="bg-siigo-light rounded-2xl p-6 mb-8 border-l-4 border-siigo">
-                    <p class="text-gray-700 mb-3"><strong>¡Gracias por tu tiempo en Siigo!</strong></p>
-                    <p class="text-gray-600 text-sm leading-relaxed">
+                <div class="bg-siigo-light rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-l-4 border-siigo">
+                    <p class="text-gray-700 mb-2 md:mb-3 text-sm md:text-base"><strong>¡Gracias por tu tiempo en Siigo!</strong></p>
+                    <p class="text-gray-600 text-xs md:text-sm leading-relaxed">
                         Para nosotros es muy valioso conocer tu experiencia y aprender de lo que funcionó bien. 
                         Este formulario es confidencial y nos ayudará a seguir creciendo como equipo. 
                         <strong>Completarlo te tomará menos de 10 minutos.</strong>
@@ -179,38 +254,38 @@
                 </div>
 
                 <!-- Step Indicators -->
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center gap-4 w-full">
+                <div class="flex items-center justify-between mb-6 md:mb-8">
+                    <div class="flex items-center gap-2 md:gap-4 w-full">
                         <!-- Step 1 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-1" class="w-12 h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10">1</div>
-                            <div id="line-1" class="absolute w-full h-1 bg-gray-300 left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
+                            <div id="indicator-1" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">1</div>
+                            <div id="line-1" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
                         </div>
                         <!-- Step 2 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-2" class="w-12 h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10">2</div>
-                            <div id="line-2" class="absolute w-full h-1 bg-gray-300 left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
+                            <div id="indicator-2" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">2</div>
+                            <div id="line-2" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
                         </div>
                         <!-- Step 3 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-3" class="w-12 h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10">3</div>
-                            <div id="line-3" class="absolute w-full h-1 bg-gray-300 left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
+                            <div id="indicator-3" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">3</div>
+                            <div id="line-3" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
                         </div>
                         <!-- Step 4 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-4" class="w-12 h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10">4</div>
-                            <div id="line-4" class="absolute w-full h-1 bg-gray-300 left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
+                            <div id="indicator-4" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">4</div>
+                            <div id="line-4" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
                         </div>
                         <!-- Step 5 -->
                         <div>
-                            <div id="indicator-5" class="w-12 h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10">5</div>
+                            <div id="indicator-5" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base mobile-indicator">5</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Progress Bar -->
-                <div class="w-full bg-gray-200 rounded-full h-3 mb-8">
-                    <div id="progress-bar" class="bg-gradient-to-r from-siigo to-siigo-dark h-3 rounded-full step-transition" style="width: 20%;"></div>
+                <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 mb-6 md:mb-8 mobile-progress">
+                    <div id="progress-bar" class="bg-gradient-to-r from-siigo to-siigo-dark h-2 md:h-3 rounded-full step-transition" style="width: 20%;"></div>
                 </div>
 
                 <!-- Form Content -->
@@ -226,19 +301,19 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu nombre completo? *</label>
                                 <input type="text" id="q3" name="q3" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu número de Identificación? *</label>
                                 <input type="text" id="q4" name="q4" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Confirma tu fecha de retiro *</label>
                                 <input type="date" id="q5" name="q5" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                             </div>
                         </div>
                     </div>
@@ -284,7 +359,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál área estabas? *</label>
                                 <select id="q7" name="q7" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors">
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                                     <option value="">Selecciona tu área</option>
                                     <option value="Cultura">Cultura</option>
                                     <option value="Customer Success">Customer Success</option>
@@ -302,7 +377,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál país estabas trabajando? *</label>
                                 <select id="q8" name="q8" required 
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors">
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                                     <option value="">Selecciona tu país</option>
                                     <option value="Colombia">Colombia</option>
                                     <option value="Ecuador">Ecuador</option>
@@ -315,7 +390,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el nombre del último líder que tuviste en Siigo? *</label>
                                 <input type="text" id="q9" name="q9" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                             </div>
                         </div>
                     </div>
@@ -626,17 +701,19 @@
                     </div>
 
                     <!-- Navigation Buttons -->
-                    <div class="flex justify-between mt-12 max-w-3xl mx-auto">
+                    <div class="flex justify-between items-center mt-8 md:mt-12 max-w-3xl mx-auto mobile-nav">
                         <button id="prev-btn" type="button" 
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-xl font-semibold transition-all duration-200 hidden">
-                            ← Anterior
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 md:px-8 md:py-3 rounded-xl font-semibold transition-all duration-200 hidden mobile-btn">
+                            <span class="hidden md:inline">← Anterior</span>
+                            <span class="md:hidden">←</span>
                         </button>
                         
                         <div class="flex-1"></div>
                         
                         <button id="next-btn" type="button" 
-                                class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105">
-                            Siguiente →
+                                class="bg-gradient-to-r from-siigo to-siigo-dark hover:from-siigo-dark hover:to-siigo text-white px-4 py-3 md:px-8 md:py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 mobile-btn">
+                            <span class="hidden md:inline">Siguiente →</span>
+                            <span class="md:hidden">→</span>
                         </button>
                     </div>
                 </form>
@@ -771,11 +848,17 @@
             prevBtn.classList.toggle("hidden", index === 0);
             
             if (index === steps.length - 1) {
-                nextBtn.textContent = "Enviar Entrevista";
+                nextBtn.innerHTML = `
+                    <span class="hidden md:inline">Enviar Entrevista</span>
+                    <span class="md:hidden">Enviar</span>
+                `;
                 nextBtn.classList.remove("from-siigo", "to-siigo-dark");
                 nextBtn.classList.add("from-green-500", "to-green-600");
             } else {
-                nextBtn.textContent = "Siguiente →";
+                nextBtn.innerHTML = `
+                    <span class="hidden md:inline">Siguiente →</span>
+                    <span class="md:hidden">→</span>
+                `;
                 nextBtn.classList.remove("from-green-500", "to-green-600");
                 nextBtn.classList.add("from-siigo", "to-siigo-dark");
             }
