@@ -954,6 +954,14 @@
             updateIndicators(index);
             updateProgressBar(index);
             updateReviewData();
+            
+            // Scroll to top on mobile when changing steps
+            if (window.innerWidth <= 768) {
+                window.scrollTo({ 
+                    top: 0, 
+                    behavior: 'smooth' 
+                });
+            }
         }
 
         async function submitForm() {
