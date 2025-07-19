@@ -106,25 +106,23 @@ class Database {
     });
   }
 
-  async getAllResponses() {
+async getAllResponses() {
     return new Promise((resolve, reject) => {
       const sql = `
         SELECT 
           r.id,
           r.user_id,
-          COALESCE(r.full_name, u.first_name || ' ' || u.last_name) as full_name,
-          COALESCE(r.identification, u.identification) as identification,
-          COALESCE(r.exit_date, u.exit_date) as exit_date,
+          r.full_name,
+          r.identification,
+          r.exit_date,
           r.tenure,
-          COALESCE(r.area, u.area) as area,
-          COALESCE(r.country, u.country) as country,
+          r.area,
+          r.country,
           r.experience_rating,
           r.would_recommend,
           r.would_return,
-          r.created_at,
-          u.phone
+          r.created_at
         FROM responses r
-        LEFT JOIN users u ON r.user_id = u.id
         ORDER BY r.created_at DESC
       `;
 
