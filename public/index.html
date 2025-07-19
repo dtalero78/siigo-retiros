@@ -218,7 +218,7 @@
             }
             
             .mobile-content {
-                padding: 16px !important;
+                padding: 24px !important; /* Aumentado de 16px a 24px */
             }
             
             /* Form fields same width and height */
@@ -942,13 +942,11 @@
             if (index === steps.length - 1) {
                 nextBtn.innerHTML = `
                     <span class="d-none d-md-inline">Enviar Entrevista</span>
-                    <span class="d-md-none">Enviar</span>
                     <i class="bi bi-check-circle ms-2"></i>
                 `;
             } else {
                 nextBtn.innerHTML = `
                     <span class="d-none d-md-inline">Siguiente</span>
-                    <span class="d-md-none">→</span>
                     <i class="bi bi-arrow-right ms-2"></i>
                 `;
             }
