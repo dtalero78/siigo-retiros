@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,36 +15,36 @@
             --siigo-dark: #0694d3;
             --siigo-light: #e6f7ff;
         }
-        
+
         body {
             background-color: #f5f6fa;
             font-family: 'Muli', sans-serif;
         }
-        
+
         .navbar {
             background: linear-gradient(45deg, var(--siigo), var(--siigo-dark));
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .navbar-brand {
             font-weight: 600;
             font-size: 1.25rem;
         }
-        
+
         .card {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 25px;
         }
-        
+
         .card-header {
             background: var(--siigo-light);
             border-bottom: 1px solid #dee2e6;
             font-weight: 600;
             border-radius: 12px 12px 0 0 !important;
         }
-        
+
         .stats-card {
             text-align: center;
             padding: 25px;
@@ -51,46 +52,46 @@
             color: white;
             margin-bottom: 20px;
         }
-        
+
         .stats-card.total {
             background: linear-gradient(135deg, #1e81b0 0%, #154c79 100%);
         }
-        
+
         .stats-card.rating {
             background: linear-gradient(135deg, #e28743 0%, #873e23 100%);
         }
-        
+
         .stats-card.recommend {
             background: linear-gradient(135deg, #76b5c5 0%, #abdbe3 100%);
         }
-        
+
         .stats-card.return {
             background: linear-gradient(135deg, #eab676 0%, #e28743 100%);
         }
-        
+
         .stats-number {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 5px;
         }
-        
+
         .stats-label {
             font-size: 1rem;
             opacity: 0.9;
         }
-        
+
         .table {
             border-radius: 8px;
             overflow: hidden;
         }
-        
+
         .table thead th {
             background-color: var(--siigo);
             color: white;
             border: none;
             font-weight: 600;
         }
-        
+
         .btn-view {
             background: linear-gradient(45deg, #28a745, #20c997);
             border: none;
@@ -100,13 +101,13 @@
             font-size: 0.875rem;
             transition: all 0.3s ease;
         }
-        
+
         .btn-view:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
             color: white;
         }
-        
+
         .btn-export {
             background: linear-gradient(45deg, var(--siigo), var(--siigo-dark));
             border: none;
@@ -116,22 +117,22 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .btn-export:hover {
             transform: translateY(-1px);
             box-shadow: 0 3px 10px rgba(8, 172, 252, 0.3);
             color: white;
         }
-        
+
         .modal-header {
             background: var(--siigo);
             color: white;
         }
-        
+
         .modal-header .btn-close {
             filter: invert(1);
         }
-        
+
         .response-detail {
             margin-bottom: 20px;
             padding: 15px;
@@ -139,58 +140,60 @@
             border-radius: 8px;
             border-left: 4px solid var(--siigo);
         }
-        
+
         .response-detail strong {
             display: block;
             margin-bottom: 8px;
             color: #333;
         }
-        
+
         .loading-spinner {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 200px;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #6c757d;
         }
-        
+
         .empty-state i {
             font-size: 4rem;
             margin-bottom: 20px;
             opacity: 0.5;
         }
-        
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .stats-card {
                 padding: 20px;
                 margin-bottom: 15px;
             }
-            
+
             .stats-number {
                 font-size: 2rem;
             }
-            
+
             .table-responsive {
                 font-size: 0.875rem;
             }
-            
+
             .btn-view {
                 padding: 6px 12px;
                 font-size: 0.8rem;
             }
-            
+
             .navbar-brand {
                 font-size: 1.1rem;
             }
         }
     </style>
 </head>
+
+
 <body>
     <nav class="navbar navbar-dark">
         <div class="container">
@@ -242,6 +245,12 @@
                 </div>
             </div>
         </div>
+        <div class="mb-4 flex justify-end">
+            <button id="analysisBtn" class="bg-siigo hover:bg-siigo-dark text-white font-semibold px-4 py-2 rounded-lg">
+                Análisis de Resultados
+            </button>
+        </div>
+
 
         <!-- Tabla de respuestas -->
         <div class="card">
@@ -317,7 +326,7 @@
         let allResponses = [];
 
         // Cargar datos al iniciar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadResponses();
         });
 
@@ -325,9 +334,9 @@
             try {
                 const response = await fetch('/api/responses');
                 allResponses = await response.json();
-                
+
                 document.getElementById('loadingSpinner').style.display = 'none';
-                
+
                 if (allResponses.length === 0) {
                     document.getElementById('emptyState').style.display = 'block';
                 } else {
@@ -350,7 +359,7 @@
                 const row = document.createElement('tr');
                 const createdDate = new Date(response.created_at).toLocaleDateString('es-ES');
                 const exitDate = response.exit_date ? new Date(response.exit_date).toLocaleDateString('es-ES') : '-';
-                
+
                 row.innerHTML = `
                     <td>${response.id}</td>
                     <td>${response.full_name || '-'}</td>
@@ -358,9 +367,9 @@
                     <td>${response.country || '-'}</td>
                     <td>${exitDate}</td>
                     <td>
-                        ${response.experience_rating ? 
-                            `<span class="badge bg-${response.experience_rating >= 7 ? 'success' : response.experience_rating >= 5 ? 'warning' : 'danger'}">${response.experience_rating}/10</span>` 
-                            : '-'}
+                        ${response.experience_rating ?
+                        `<span class="badge bg-${response.experience_rating >= 7 ? 'success' : response.experience_rating >= 5 ? 'warning' : 'danger'}">${response.experience_rating}/10</span>`
+                        : '-'}
                     </td>
                     <td>${createdDate}</td>
                     <td>
@@ -399,7 +408,7 @@
             try {
                 const response = await fetch(`/api/responses/${id}`);
                 const data = await response.json();
-                
+
                 const modalBody = document.getElementById('responseModalBody');
                 modalBody.innerHTML = `
                     <div class="response-detail">
@@ -440,9 +449,9 @@
                     ${data.satisfaction_ratings ? `
                     <div class="response-detail">
                         <strong>Calificaciones de Satisfacción</strong>
-                        ${Object.entries(data.satisfaction_ratings).map(([key, value]) => 
-                            `<p><strong>${key}:</strong> ${value}/5</p>`
-                        ).join('')}
+                        ${Object.entries(data.satisfaction_ratings).map(([key, value]) =>
+                    `<p><strong>${key}:</strong> ${value}/5</p>`
+                ).join('')}
                     </div>
                     ` : ''}
 
@@ -526,5 +535,28 @@
         // Actualizar datos cada 30 segundos
         setInterval(loadResponses, 30000);
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('analysisBtn');
+            btn.addEventListener('click', async () => {
+                btn.disabled = true;
+                btn.textContent = 'Analizando...';
+                try {
+                    const res = await fetch('/api/analysis', { method: 'POST' });
+                    if (!res.ok) throw new Error('Falló el análisis');
+                    const data = await res.json();
+                    const w = window.open();
+                    w.document.write('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                } catch (e) {
+                    alert('Error al generar análisis: ' + e.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Análisis de Resultados';
+                }
+            });
+        });
+    </script>
+
 </body>
+
 </html>

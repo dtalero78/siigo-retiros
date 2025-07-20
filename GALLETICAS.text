@@ -1,3 +1,3 @@
 git add .
-git commit -m "este commit funciona hasta el envío del formulario"
+git commit -m "m"
 git push

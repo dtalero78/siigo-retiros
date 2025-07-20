@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -11,6 +12,13 @@ const UsersDatabase = require('./database/users-db');
 const app = express();
 app.set('trust proxy', true);
 const PORT = process.env.PORT || 3000;
+
+const OpenAI = require('openai');
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 
 // Configurar multer para subida de archivos
 const upload = multer({
@@ -538,7 +546,7 @@ app.get('/api/users/stats', async (req, res) => {
 app.post('/api/users/send-whatsapp', async (req, res) => {
   try {
     const { userId, phone, name } = req.body;
-    
+
     if (!userId || !phone || !name) {
       return res.status(400).json({ error: 'Datos incompletos para enviar WhatsApp' });
     }
@@ -551,7 +559,7 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
 
     // Limpiar número de teléfono
     const cleanPhone = phone.replace(/\D/g, '');
-    
+
     if (cleanPhone.length < 10) {
       return res.status(400).json({ error: 'Número de teléfono inválido' });
     }
@@ -565,7 +573,7 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
     // URL del formulario con ID del usuario
     const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
     const formUrl = `${baseUrl}/?user=${userId}`;
-    
+
     // Mensaje personalizado con la URL que incluye el ID
     const message = `Hola ${name.split(' ')[0]}. Antes de despedirnos queremos pedirte que realices la siguiente encuesta: ${formUrl}`;
 
@@ -590,12 +598,12 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
 
     if (whapiResponse.ok) {
       const result = await whapiResponse.json();
-      
+
       // Log del envío exitoso
       console.log(`WhatsApp enviado a ${name} (${phone}): ${formUrl}`);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: 'Mensaje de WhatsApp enviado exitosamente',
         whatsappId: result.id,
         formUrl: formUrl
@@ -611,6 +619,43 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
+// ================================
+// RUTAS DE ANÁLISIS OPENAI
+// ================================
+
+app.post('/api/analysis', async (req, res) => {
+  try {
+    const allResponses = await db.getAllResponses();
+    const analyses = [];
+
+    for (let resp of allResponses) {
+      const prompt = `
+Analiza esta respuesta de salida de entrevista:
+${JSON.stringify(resp.responses, null, 2)}
+
+Devuélveme un breve resumen, puntos más frecuentes y sugerencias de mejora.
+`;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: prompt }]
+      });
+
+      analyses.push({
+        id: resp.id,
+        analysis: completion.choices[0].message.content.trim()
+      });
+    }
+
+    res.json(analyses);
+  } catch (err) {
+    console.error('Error en /api/analysis:', err);
+    res.status(500).json({ error: 'No se pudo generar el análisis' });
+  }
+});
+
+
 
 // ================================
 // RUTAS DE PÁGINAS
@@ -641,6 +686,9 @@ app.use((error, req, res, next) => {
   console.error('Error:', error);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
+
+
+
 
 // Iniciar servidor
 app.listen(PORT, '0.0.0.0', () => {
