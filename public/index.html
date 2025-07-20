@@ -765,6 +765,10 @@
         function validateCurrentStep() {
             const currentStepElement = steps[currentStep];
             const requiredInputs = currentStepElement.querySelectorAll('[required]');
+            const errors = [];
+            
+            console.log(`=== VALIDANDO PASO ${currentStep + 1} (CON REPORTE) ===`);
+            console.log(`Campos requeridos encontrados: ${requiredInputs.length}`);
             
             // Si hay usuario pre-registrado, excluir campos q3-q8 de la validación
             const fieldsToExclude = currentUser ? ['q3', 'q4', 'q5', 'q7', 'q8'] : [];
@@ -779,16 +783,99 @@
                     const radioGroup = currentStepElement.querySelectorAll(`[name="${input.name}"]`);
                     const isChecked = Array.from(radioGroup).some(radio => radio.checked);
                     if (!isChecked) {
-                        input.focus();
-                        return false;
+                        errors.push({
+                            field: input.name,
+                            label: getFieldLabel(input.name),
+                            element: input
+                        });
+                    }
+                } else if (input.type === 'select-one' || input.tagName === 'SELECT') {
+                    if (!input.value || input.value.trim() === '') {
+                        errors.push({
+                            field: input.id || input.name,
+                            label: getFieldLabel(input.id || input.name),
+                            element: input
+                        });
                     }
                 } else if (!input.value.trim()) {
-                    input.focus();
-                    return false;
+                    errors.push({
+                        field: input.id || input.name,
+                        label: getFieldLabel(input.id || input.name),
+                        element: input
+                    });
                 }
             }
+            
+            if (errors.length > 0) {
+                console.error(`❌ VALIDACIÓN FALLÓ: ${errors.length} campos sin completar`);
+                errors.forEach(e => console.error(`  - ${e.field}: ${e.label}`));
+                showValidationSummary(errors);
+                errors[0].element.focus();
+                return false;
+            }
+            
+            console.log('✅ TODOS LOS CAMPOS VALIDADOS CORRECTAMENTE');
             return true;
         }
+
+               
+        function showValidationSummary(errors) {
+            // Resaltar todos los campos con error
+            errors.forEach(error => {
+                if (error.field.startsWith('q16_')) {
+                    // Para la matriz, resaltar la fila
+                    const rowIndex = parseInt(error.field.split('_')[1]);
+                    const radioGroup = document.querySelectorAll(`input[name="${error.field}"]`);
+                    if (radioGroup.length > 0) {
+                        const row = radioGroup[0].closest('tr');
+                        if (row) {
+                            row.style.backgroundColor = '#fee2e2';
+                        }
+                    }
+                } else if (error.element.type === 'radio') {
+                    // Para otros radio buttons, resaltar los labels
+                    const radioGroup = document.querySelectorAll(`input[name="${error.field}"]`);
+                    radioGroup.forEach(radio => {
+                        radio.closest('label')?.classList.add('border-red-500');
+                    });
+                } else {
+                    // Para campos de texto y select
+                    error.element.classList.add('border-red-500');
+                }
+            });
+            
+            // Remover resaltados después de 5 segundos
+            setTimeout(() => {
+                document.querySelectorAll('.border-red-500').forEach(el => {
+                    el.classList.remove('border-red-500');
+                });
+                document.querySelectorAll('tr[style*="background-color"]').forEach(row => {
+                    row.style.backgroundColor = '';
+                });
+            }, 5000);
+            
+            const errorList = errors.map(e => `• ${e.label}`).join('<br>');
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 max-w-md';
+            toast.innerHTML = `
+                <div>
+                    <div class="flex items-center mb-2">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <strong>Por favor completa los siguientes campos:</strong>
+                    </div>
+                    <div class="text-sm ml-6">
+                        ${errorList}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 6000);
+        }
+        
 
         function showStep(index) {
             steps.forEach((step, i) => {
