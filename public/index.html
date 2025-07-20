@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,11 +30,11 @@
             --siigo-dark: #0694d3;
             --siigo-light: #e6f7ff;
         }
-        
+
         .step-transition {
             transition: all 0.3s ease-in-out;
         }
-        
+
         .scale-container {
             display: flex;
             justify-content: space-between;
@@ -43,12 +44,12 @@
             padding: 20px;
             border-radius: 12px;
         }
-        
+
         .scale-item {
             text-align: center;
             flex: 1;
         }
-        
+
         .scale-item input[type="radio"] {
             width: 1.5em;
             height: 1.5em;
@@ -56,7 +57,7 @@
             display: block;
             accent-color: #08acfc;
         }
-        
+
         .scale-labels {
             display: flex;
             justify-content: space-between;
@@ -64,71 +65,80 @@
             font-size: 0.9rem;
             color: #64748b;
         }
-        
+
         .matrix-table {
             width: 100%;
             margin-top: 15px;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
-        .matrix-table th, .matrix-table td {
+
+        .matrix-table th,
+        .matrix-table td {
             text-align: center;
             padding: 12px;
             border: 1px solid #e2e8f0;
         }
-        
+
         .matrix-table th {
             background-color: #f1f5f9;
             font-weight: 600;
             color: #374151;
         }
-        
+
         .matrix-table td:first-child {
             text-align: left;
             font-weight: 500;
             background-color: #f8fafc;
             min-width: 200px;
         }
-        
+
         .matrix-table input[type="radio"] {
             accent-color: #08acfc;
         }
-        
+
         input[type="radio"]:checked {
             accent-color: #08acfc;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         .fade-in {
             animation: fadeIn 0.3s ease-out;
         }
-        
+
         /* RESPONSIVE STYLES */
         @media (max-width: 768px) {
             .scale-container {
                 flex-wrap: wrap;
                 gap: 10px;
             }
-            
+
             .scale-item {
                 flex: 0 0 calc(20% - 8px);
             }
-            
+
             .matrix-table {
                 font-size: 0.875rem;
             }
-            
-            .matrix-table td, .matrix-table th {
+
+            .matrix-table td,
+            .matrix-table th {
                 padding: 8px 4px;
             }
-            
-            .mobile-input, 
+
+            .mobile-input,
             input[type="date"],
             select {
                 width: 100% !important;
@@ -144,13 +154,13 @@
                 -webkit-appearance: none !important;
                 -moz-appearance: none !important;
             }
-            
+
             .mobile-radio {
                 padding: 16px !important;
                 margin-bottom: 12px !important;
             }
         }
-        
+
         .user-info-card {
             background: linear-gradient(135deg, var(--siigo-light) 0%, #f0f9ff 100%);
             border: 1px solid var(--siigo);
@@ -158,27 +168,27 @@
             padding: 20px;
             margin-bottom: 30px;
         }
-        
+
         .user-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
-        
+
         .user-info-item {
             background: white;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
         }
-        
+
         .user-info-label {
             font-size: 0.875rem;
             color: #6b7280;
             font-weight: 500;
         }
-        
+
         .user-info-value {
             font-size: 1rem;
             color: #1f2937;
@@ -187,6 +197,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100 md:bg-gradient-to-br md:from-blue-50 md:to-indigo-100 min-h-screen font-muli">
     <div class="min-h-screen flex items-start md:items-center justify-center md:py-8 md:px-4">
         <div class="w-full max-w-4xl bg-white shadow-none md:shadow-2xl rounded-none md:rounded-2xl overflow-hidden">
@@ -211,7 +222,8 @@
                         <i class="bi bi-person-check me-2 text-siigo"></i>
                         Información del Usuario
                     </h3>
-                    <p class="text-gray-600 text-sm mb-3">Hemos pre-llenado tu información básica. Solo necesitas completar la entrevista.</p>
+                    <p class="text-gray-600 text-sm mb-3">Hemos pre-llenado tu información básica. Solo necesitas
+                        completar la entrevista.</p>
                     <div class="user-info-grid" id="userInfoGrid">
                         <!-- Info será llenada dinámicamente -->
                     </div>
@@ -219,10 +231,11 @@
 
                 <!-- Intro Text -->
                 <div class="bg-siigo-light rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-l-4 border-siigo">
-                    <p class="text-gray-700 mb-2 md:mb-3 text-sm md:text-base"><strong>¡Gracias por tu tiempo en Siigo!</strong></p>
+                    <p class="text-gray-700 mb-2 md:mb-3 text-sm md:text-base"><strong>¡Gracias por tu tiempo en
+                            Siigo!</strong></p>
                     <p class="text-gray-600 text-xs md:text-sm leading-relaxed">
-                        Para nosotros es muy valioso conocer tu experiencia y aprender de lo que funcionó bien. 
-                        Este formulario es confidencial y nos ayudará a seguir creciendo como equipo. 
+                        Para nosotros es muy valioso conocer tu experiencia y aprender de lo que funcionó bien.
+                        Este formulario es confidencial y nos ayudará a seguir creciendo como equipo.
                         <strong>Completarlo te tomará menos de 5 minutos.</strong>
                     </p>
                 </div>
@@ -232,24 +245,36 @@
                     <div class="flex items-center gap-2 md:gap-4 w-full">
                         <!-- Step 1 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-1" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10 text-sm md:text-base">1</div>
-                            <div id="line-1" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
+                            <div id="indicator-1"
+                                class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10 text-sm md:text-base">
+                                1</div>
+                            <div id="line-1"
+                                class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition">
+                            </div>
                         </div>
                         <!-- Step 2 -->
                         <div class="relative flex-1 flex items-center">
-                            <div id="indicator-2" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">2</div>
-                            <div id="line-2" class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition"></div>
+                            <div id="indicator-2"
+                                class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">
+                                2</div>
+                            <div id="line-2"
+                                class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition">
+                            </div>
                         </div>
                         <!-- Step 3 -->
                         <div>
-                            <div id="indicator-3" class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">3</div>
+                            <div id="indicator-3"
+                                class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">
+                                3</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Progress Bar -->
                 <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 mb-6 md:mb-8">
-                    <div id="progress-bar" class="bg-gradient-to-r from-siigo to-siigo-dark h-2 md:h-3 rounded-full step-transition" style="width: 33.33%;"></div>
+                    <div id="progress-bar"
+                        class="bg-gradient-to-r from-siigo to-siigo-dark h-2 md:h-3 rounded-full step-transition"
+                        style="width: 33.33%;"></div>
                 </div>
 
                 <!-- Form Content -->
@@ -260,34 +285,43 @@
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">Información Personal y Laboral</h2>
                             <p class="text-gray-600">Cuéntanos sobre ti y tu experiencia en Siigo</p>
                         </div>
-                        
+
                         <div class="space-y-6 max-w-2xl mx-auto">
                             <!-- Campos de información personal (solo si no hay usuario pre-registrado) -->
                             <div id="personalInfoFields" style="display: none;">
+
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu nombre completo? *</label>
-                                    <input type="text" id="q3" name="q3" required 
-                                           class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                           placeholder="Nombre completo">
+                                    <label for="q3" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        ¿Cuál es tu nombre completo? *
+                                    </label>
+                                    <input type="text" id="q3" name="q3" required
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                        placeholder="Nombre completo">
                                 </div>
-                                
+
                                 <div class="mt-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu número de Identificación? *</label>
-                                    <input type="text" id="q4" name="q4" required 
-                                           class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                           placeholder="Número de identificación">
+                                    <label for="q4" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        ¿Cuál es tu número de Identificación? *
+                                    </label>
+                                    <input type="text" id="q4" name="q4" required
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                        placeholder="Número de identificación">
                                 </div>
-                                
+
                                 <div class="mt-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Confirma tu fecha de retiro *</label>
-                                    <input type="date" id="q5" name="q5" required 
-                                           class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                    <label for="q5" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Confirma tu fecha de retiro *
+                                    </label>
+                                    <input type="date" id="q5" name="q5" required
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                                 </div>
-                                
+
                                 <div class="mt-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál área estabas? *</label>
-                                    <select id="q7" name="q7" required 
-                                            class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                    <label for="q7" class="block text-sm font-semibold text-gray-700 mb-3">
+                                        ¿En cuál área estabas? *
+                                    </label>
+                                    <select id="q7" name="q7" required
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                                         <option value="">Selecciona un área</option>
                                         <option value="Cultura">Cultura</option>
                                         <option value="Customer Success">Customer Success</option>
@@ -301,11 +335,13 @@
                                         <option value="Tech">Tech</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="mt-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál país estabas trabajando? *</label>
-                                    <select id="q8" name="q8" required 
-                                            class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                    <label for="q8" class="block text-sm font-semibold text-gray-700 mb-3">
+                                        ¿En cuál país estabas trabajando? *
+                                    </label>
+                                    <select id="q8" name="q8" required
+                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
                                         <option value="">Selecciona un país</option>
                                         <option value="Colombia">Colombia</option>
                                         <option value="Ecuador">Ecuador</option>
@@ -314,45 +350,63 @@
                                         <option value="Perú">Perú</option>
                                     </select>
                                 </div>
-                                
+
                                 <hr class="my-6 border-gray-200">
+
                             </div>
-                            
+
+                            <!-- Resto del formulario sigue igual -->
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿Cuál fue el tiempo total que duraste en Siigo? *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿Cuál fue el tiempo total
+                                    que duraste en Siigo? *</label>
                                 <div class="space-y-2">
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="Menos de 2 meses" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
+                                        <input type="radio" name="q6" value="Menos de 2 meses" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">Menos de 2 meses</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="Menos de 6 meses" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
+                                        <input type="radio" name="q6" value="Menos de 6 meses" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">Menos de 6 meses</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="6 meses a 1 año" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
+                                        <input type="radio" name="q6" value="6 meses a 1 año" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">6 meses a 1 año</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="1-2 años" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
+                                        <input type="radio" name="q6" value="1-2 años" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">1-2 años</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="2-5 años" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
+                                        <input type="radio" name="q6" value="2-5 años" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">2-5 años</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="Más de 5 años" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
+                                        <input type="radio" name="q6" value="Más de 5 años" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3">Más de 5 años</span>
                                     </label>
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el nombre del último líder que tuviste en Siigo? *</label>
-                                <input type="text" id="q9" name="q9" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                       placeholder="Nombre de tu último líder">
+                                <label for="q9" class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el
+                                    nombre del
+                                    último líder que tuviste en Siigo? *</label>
+                                <input type="text" id="q9" name="q9" required
+                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                    placeholder="Nombre de tu último líder">
                             </div>
                         </div>
                     </div>
@@ -363,65 +417,115 @@
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">Motivos de Retiro</h2>
                             <p class="text-gray-600">Ayúdanos a entender tu decisión</p>
                         </div>
-                        
+
                         <div class="space-y-6 max-w-3xl mx-auto">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Por favor confirma cuál fue el motivo principal que te llevó a tomar la decisión de retirarte de Siigo? *</label>
-                                <textarea id="q10" name="q10" required rows="4" 
-                                         class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                         placeholder="Describe detalladamente tu motivo principal..."></textarea>
+                                <label for="q10" class="block text-sm font-semibold text-gray-700 mb-2">¿Por favor
+                                    confirma cuál
+                                    fue el motivo principal que te llevó a tomar la decisión de retirarte de Siigo?
+                                    *</label>
+                                <textarea id="q10" name="q10" required rows="4"
+                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                    placeholder="Describe detalladamente tu motivo principal..."></textarea>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">Selecciona la categoría que mejor representa el motivo principal de tu decisión de retirarte: *</label>
+                                <label for="q11" class="block text-sm font-semibold text-gray-700 mb-3">Selecciona la categoría
+                                    que mejor representa el motivo principal de tu decisión de retirarte: *</label>
                                 <div class="space-y-2 max-h-64 overflow-y-auto">
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Cultura organizacional (falta de alineación con el proposito y los valores de Siigo)" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Cultura organizacional (falta de alineación con el propósito y los valores de Siigo)</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Cultura organizacional (falta de alineación con el proposito y los valores de Siigo)"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Cultura organizacional (falta de alineación con el
+                                            propósito y los valores de Siigo)</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Decisión relacionada con un nuevo proyecto, emprendimiento, estudios u objetivos personales" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Decisión relacionada con un nuevo proyecto, emprendimiento, estudios u objetivos personales</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Decisión relacionada con un nuevo proyecto, emprendimiento, estudios u objetivos personales"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Decisión relacionada con un nuevo proyecto,
+                                            emprendimiento, estudios u objetivos personales</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Dificultad para equilibrar las responsabilidades laborales con la vida personal o familiar" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Dificultad para equilibrar las responsabilidades laborales con la vida personal o familiar</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Dificultad para equilibrar las responsabilidades laborales con la vida personal o familiar"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Dificultad para equilibrar las responsabilidades
+                                            laborales con la vida personal o familiar</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Mejor oferta económica" required class="text-siigo focus:ring-siigo mt-1">
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11" value="Mejor oferta económica" required
+                                            class="text-siigo focus:ring-siigo mt-1">
                                         <span class="ml-3 text-sm">Mejor oferta económica</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Falta de oportunidades de desarrollo, promoción o nuevos desafíos profesionales" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Falta de oportunidades de desarrollo, promoción o nuevos desafíos profesionales</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Falta de oportunidades de desarrollo, promoción o nuevos desafíos profesionales"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Falta de oportunidades de desarrollo, promoción o
+                                            nuevos desafíos profesionales</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Dificultades en la relación o alineación con el estilo de liderazgo" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Dificultades en la relación o alineación con el estilo de liderazgo</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Dificultades en la relación o alineación con el estilo de liderazgo"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Dificultades en la relación o alineación con el
+                                            estilo de liderazgo</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Insatisfacción con los Beneficios emocionales o no económicos" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Insatisfacción con los Beneficios emocionales o no económicos</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Insatisfacción con los Beneficios emocionales o no económicos"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Insatisfacción con los Beneficios emocionales o no
+                                            económicos</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Modificación de condiciones laborales inicialmente acordadas" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Modificación de condiciones laborales inicialmente acordadas</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Modificación de condiciones laborales inicialmente acordadas"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Modificación de condiciones laborales inicialmente
+                                            acordadas</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Percepción de carga laboral alta o estrés que afectó
+                                            el equilibrio y la motivación personal</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral." required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral."
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Decisión tomada para anticipar una posible
+                                            terminación del contrato en medio de un proceso o evaluación laboral</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Falta de claridad, apoyo o efectividad en el proceso
+                                            de formación y desarrollo</span>
                                     </label>
-                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Percepción de inequidad o descontento con metas, comisiones (si aplica)" required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Percepción de inequidad o descontento con metas, comisiones (si aplica)</span>
+                                    <label
+                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11"
+                                            value="Percepción de inequidad o descontento con metas, comisiones (si aplica)"
+                                            required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Percepción de inequidad o descontento con metas,
+                                            comisiones (si aplica)</span>
                                     </label>
                                 </div>
                             </div>
@@ -434,58 +538,78 @@
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">Evaluación y Feedback</h2>
                             <p class="text-gray-600">Tu opinión es muy valiosa para nosotros</p>
                         </div>
-                        
+
                         <div class="space-y-8 max-w-4xl mx-auto">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-4">En una escala del 1 al 10, ¿Qué tan buena fue tu experiencia laboral en Siigo? *</label>
+                                <label for="q12" class="block text-sm font-semibold text-gray-700 mb-4">En una escala del 1 al 10,
+                                    ¿Qué tan buena fue tu experiencia laboral en Siigo? *</label>
                                 <div class="scale-container">
-                                    <div class="scale-item"><input type="radio" name="q12" value="1" required><label>1</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="2" required><label>2</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="3" required><label>3</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="4" required><label>4</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="5" required><label>5</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="6" required><label>6</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="7" required><label>7</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="8" required><label>8</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="9" required><label>9</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="10" required><label>10</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="1"
+                                            required><label>1</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="2"
+                                            required><label>2</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="3"
+                                            required><label>3</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="4"
+                                            required><label>4</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="5"
+                                            required><label>5</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="6"
+                                            required><label>6</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="7"
+                                            required><label>7</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="8"
+                                            required><label>8</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="9"
+                                            required><label>9</label></div>
+                                    <div class="scale-item"><input type="radio" name="q12" value="10"
+                                            required><label>10</label></div>
                                 </div>
                                 <div class="scale-labels">
                                     <span>Nada satisfecho</span>
                                     <span>Muy satisfecho</span>
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿Recomendarías trabajar en Siigo a un amigo o familiar? *</label>
+                                <label for="q13" class="block text-sm font-semibold text-gray-700 mb-3">¿Recomendarías trabajar en
+                                    Siigo a un amigo o familiar? *</label>
                                 <div class="flex gap-4">
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q13" value="SÍ" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
+                                        <input type="radio" name="q13" value="SÍ" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3 font-semibold">SÍ</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q13" value="NO" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
+                                        <input type="radio" name="q13" value="NO" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3 font-semibold">NO</span>
                                     </label>
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Qué fue lo que más disfrutaste de trabajar en Siigo? *</label>
-                                <textarea id="q14" name="q14" required rows="3" 
-                                         class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                         placeholder="Comparte lo que más valoraste de tu experiencia..."></textarea>
+                                <label for="q14" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué fue lo que más
+                                    disfrutaste de trabajar en Siigo? *</label>
+                                <textarea id="q14" name="q14" required rows="3"
+                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                    placeholder="Comparte lo que más valoraste de tu experiencia..."></textarea>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Qué crees que podríamos mejorar como organización? *</label>
-                                <textarea id="q15" name="q15" required rows="3" 
-                                         class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                         placeholder="Tus sugerencias nos ayudan a crecer..."></textarea>
+                                <label for="q15" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué crees que podríamos
+                                    mejorar como organización? *</label>
+                                <textarea id="q15" name="q15" required rows="3"
+                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                    placeholder="Tus sugerencias nos ayudan a crecer..."></textarea>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-4">Durante tu experiencia en Siigo, ¿cómo calificarías tu nivel de satisfacción con los siguientes aspectos? *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-4">Durante tu experiencia en
+                                    Siigo, ¿cómo calificarías tu nivel de satisfacción con los siguientes aspectos?
+                                    *</label>
                                 <div class="overflow-x-auto">
                                     <table class="matrix-table">
                                         <thead>
@@ -559,23 +683,30 @@
                                     </table>
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Puedes contarme a qué empresa te cambiaste y qué te gustó de su propuesta?</label>
-                                <textarea id="q17" name="q17" rows="3" 
-                                         class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                         placeholder="Opcional: Cuéntanos sobre tu nueva oportunidad..."></textarea>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Puedes contarme a qué
+                                    empresa te cambiaste y qué te gustó de su propuesta?</label>
+                                <textarea id="q17" name="q17" rows="3"
+                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
+                                    placeholder="Opcional: Cuéntanos sobre tu nueva oportunidad..."></textarea>
                             </div>
-                            
+
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿Estarías abierto(a) a regresar a Siigo en el futuro si se presenta una oportunidad que se alinee con tus intereses? *</label>
+                                <label for="q18" class="block text-sm font-semibold text-gray-700 mb-3">¿Estarías abierto(a) a
+                                    regresar a Siigo en el futuro si se presenta una oportunidad que se alinee con tus
+                                    intereses? *</label>
                                 <div class="flex gap-4">
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q18" value="SÍ" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
+                                        <input type="radio" name="q18" value="SÍ" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3 font-semibold">SÍ</span>
                                     </label>
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q18" value="NO" required class="text-siigo focus:ring-siigo">
+                                    <label
+                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
+                                        <input type="radio" name="q18" value="NO" required
+                                            class="text-siigo focus:ring-siigo">
                                         <span class="ml-3 font-semibold">NO</span>
                                     </label>
                                 </div>
@@ -591,12 +722,15 @@
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <svg class="h-6 w-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </div>
                             <div class="ml-3">
                                 <h3 class="text-lg font-semibold text-green-800">¡Entrevista enviada exitosamente!</h3>
-                                <p class="text-green-700 mt-1">Gracias por completar la entrevista de retiro. Tus respuestas han sido guardadas correctamente.</p>
+                                <p class="text-green-700 mt-1">Gracias por completar la entrevista de retiro. Tus
+                                    respuestas han sido guardadas correctamente.</p>
                             </div>
                         </div>
                     </div>
@@ -608,29 +742,32 @@
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <svg class="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </div>
                             <div class="ml-3">
                                 <h3 class="text-lg font-semibold text-red-800">Error al enviar</h3>
-                                <p id="errorMessage" class="text-red-700 mt-1">Hubo un problema al enviar tus respuestas. Por favor, intenta nuevamente.</p>
+                                <p id="errorMessage" class="text-red-700 mt-1">Hubo un problema al enviar tus
+                                    respuestas. Por favor, intenta nuevamente.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Navigation Buttons -->
             <div class="bg-gradient-to-r from-siigo to-siigo-dark py-4 px-6">
                 <div class="flex items-center justify-between">
-                    <button id="prev-btn" type="button" 
-                            class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hidden">
+                    <button id="prev-btn" type="button"
+                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hidden">
                         <i class="bi bi-arrow-left me-2"></i>
                         Anterior
                     </button>
-                    
-                    <button id="next-btn" type="button" 
-                            class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+
+                    <button id="next-btn" type="button"
+                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
                         Siguiente
                         <i class="bi bi-arrow-right ms-2"></i>
                     </button>
@@ -641,7 +778,7 @@
 
     <script>
         console.log('=== SCRIPT CARGADO - INICIANDO FORMULARIO ===');
-        
+
         const steps = document.querySelectorAll(".step");
         const nextBtn = document.getElementById("next-btn");
         const prevBtn = document.getElementById("prev-btn");
@@ -668,18 +805,18 @@
         ];
 
         // Al cargar la página, verificar si hay un usuario en la URL
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', async function () {
             console.log('DOM cargado completamente');
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('user');
-            
+
             if (userId) {
                 await loadUserData(userId);
             } else {
                 // Si no hay usuario pre-registrado, mostrar campos de información personal
                 document.getElementById('personalInfoFields').style.display = 'block';
             }
-            
+
             showStep(currentStep);
         });
 
@@ -708,7 +845,7 @@
         function displayUserInfo(user) {
             const userInfoCard = document.getElementById('userInfoCard');
             const userInfoGrid = document.getElementById('userInfoGrid');
-            
+
             userInfoGrid.innerHTML = `
                 <div class="user-info-item">
                     <div class="user-info-label">Nombre Completo</div>
@@ -731,7 +868,7 @@
                     <div class="user-info-value">${new Date(user.exit_date).toLocaleDateString('es-ES')}</div>
                 </div>
             `;
-            
+
             userInfoCard.style.display = 'block';
         }
 
@@ -761,24 +898,44 @@
             const progressPercentage = ((stepIndex + 1) / steps.length) * 100;
             progressBar.style.width = `${progressPercentage}%`;
         }
+        /**
+         * Busca el texto del <label> asociado al campo.
+         * — Si usas <label for="q3">…</label>, lo encontrará.
+         * — Si no, devuelve el propio ID como fallback.
+         */
+        function getFieldLabel(fieldId) {
+            // Intentamos buscar <label for="...">
+            const label = document.querySelector(`label[for="${fieldId}"]`);
+            if (label) {
+                // Quitamos el asterisco que pongas en tu texto y retornamos
+                return label.textContent.replace('*', '').trim();
+            }
+            // Si no hay for="", intentamos coger el <label> inmediato anterior
+            const input = document.getElementById(fieldId);
+            if (input && input.previousElementSibling?.tagName === 'LABEL') {
+                return input.previousElementSibling.textContent.replace('*', '').trim();
+            }
+            // Fallback
+            return fieldId;
+        }
 
         function validateCurrentStep() {
             const currentStepElement = steps[currentStep];
             const requiredInputs = currentStepElement.querySelectorAll('[required]');
             const errors = [];
-            
+
             console.log(`=== VALIDANDO PASO ${currentStep + 1} (CON REPORTE) ===`);
             console.log(`Campos requeridos encontrados: ${requiredInputs.length}`);
-            
+
             // Si hay usuario pre-registrado, excluir campos q3-q8 de la validación
             const fieldsToExclude = currentUser ? ['q3', 'q4', 'q5', 'q7', 'q8'] : [];
-            
+
             for (let input of requiredInputs) {
                 // Si el campo está en la lista de exclusión, saltarlo
                 if (fieldsToExclude.includes(input.id) || fieldsToExclude.includes(input.name)) {
                     continue;
                 }
-                
+
                 if (input.type === 'radio') {
                     const radioGroup = currentStepElement.querySelectorAll(`[name="${input.name}"]`);
                     const isChecked = Array.from(radioGroup).some(radio => radio.checked);
@@ -805,7 +962,7 @@
                     });
                 }
             }
-            
+
             if (errors.length > 0) {
                 console.error(`❌ VALIDACIÓN FALLÓ: ${errors.length} campos sin completar`);
                 errors.forEach(e => console.error(`  - ${e.field}: ${e.label}`));
@@ -813,12 +970,12 @@
                 errors[0].element.focus();
                 return false;
             }
-            
+
             console.log('✅ TODOS LOS CAMPOS VALIDADOS CORRECTAMENTE');
             return true;
         }
 
-               
+
         function showValidationSummary(errors) {
             // Resaltar todos los campos con error
             errors.forEach(error => {
@@ -843,7 +1000,7 @@
                     error.element.classList.add('border-red-500');
                 }
             });
-            
+
             // Remover resaltados después de 5 segundos
             setTimeout(() => {
                 document.querySelectorAll('.border-red-500').forEach(el => {
@@ -853,7 +1010,7 @@
                     row.style.backgroundColor = '';
                 });
             }, 5000);
-            
+
             const errorList = errors.map(e => `• ${e.label}`).join('<br>');
             const toast = document.createElement('div');
             toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 max-w-md';
@@ -869,13 +1026,13 @@
                 </div>
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.classList.add('opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 6000);
         }
-        
+
 
         function showStep(index) {
             steps.forEach((step, i) => {
@@ -884,9 +1041,9 @@
                     step.classList.add("fade-in");
                 }
             });
-            
+
             prevBtn.classList.toggle("hidden", index === 0);
-            
+
             if (index === steps.length - 1) {
                 nextBtn.innerHTML = `
                     Enviar Entrevista
@@ -898,14 +1055,14 @@
                     <i class="bi bi-arrow-right ms-2"></i>
                 `;
             }
-            
+
             updateIndicators(index);
             updateProgressBar(index);
-            
+
             if (window.innerWidth <= 768) {
-                window.scrollTo({ 
-                    top: 0, 
-                    behavior: 'smooth' 
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
                 });
             }
         }
@@ -915,9 +1072,9 @@
             try {
                 // Recopilar todas las respuestas
                 const responses = {};
-                
+
                 console.log('Usuario actual:', currentUser);
-                
+
                 // Si hay usuario registrado, usar sus datos
                 if (currentUser) {
                     responses.full_name = currentUser.full_name;
@@ -934,22 +1091,22 @@
                     const q5 = document.getElementById('q5');
                     const q7 = document.getElementById('q7');
                     const q8 = document.getElementById('q8');
-                    
+
                     console.log('Verificando campos básicos del formulario:', {
                         q3: q3 ? 'existe' : 'NO EXISTE',
-                        q4: q4 ? 'existe' : 'NO EXISTE', 
+                        q4: q4 ? 'existe' : 'NO EXISTE',
                         q5: q5 ? 'existe' : 'NO EXISTE',
                         q7: q7 ? 'existe' : 'NO EXISTE',
                         q8: q8 ? 'existe' : 'NO EXISTE'
                     });
-                    
+
                     if (q3 && q3.value) responses.q3 = q3.value;
                     if (q4 && q4.value) responses.q4 = q4.value;
                     if (q5 && q5.value) responses.q5 = q5.value;
                     if (q7 && q7.value) responses.q7 = q7.value;
                     if (q8 && q8.value) responses.q8 = q8.value;
                 }
-                
+
                 // Preguntas simples
                 ['q9', 'q10', 'q14', 'q15', 'q17'].forEach(id => {
                     const input = document.getElementById(id);
@@ -959,7 +1116,7 @@
                     }
                 });
                 console.log('Preguntas simples recopiladas');
-                
+
                 // Preguntas de radio
                 ['q6', 'q11', 'q12', 'q13', 'q18'].forEach(name => {
                     const input = document.querySelector(`input[name="${name}"]:checked`);
@@ -969,25 +1126,25 @@
                     }
                 });
                 console.log('Preguntas de radio recopiladas');
-                
+
                 // Matriz de satisfacción (q16)
                 const matrixResponses = {};
                 const matrixItems = [
                     "Liderazgo de tu líder directo",
-                    "Ambiente laboral en tu equipo", 
+                    "Ambiente laboral en tu equipo",
                     "Cultura organizacional y valores",
                     "Beneficios emocionales o no económicos",
                     "Modalidad de trabajo remoto",
                     "Proceso de formación y entrenamiento"
                 ];
-                
+
                 matrixItems.forEach((item, i) => {
                     const input = document.querySelector(`input[name="q16_${i}"]:checked`);
                     if (input) {
                         matrixResponses[item] = input.value;
                     }
                 });
-                
+
                 responses['q16'] = matrixResponses;
                 console.log('Respuestas matriz recopiladas');
                 console.log('TODAS LAS RESPUESTAS:', responses);
@@ -1016,7 +1173,7 @@
                     document.getElementById('exitInterviewForm').style.display = 'none';
                     document.getElementById('successAlert').classList.remove('hidden');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    
+
                     // Limpiar draft guardado
                     localStorage.removeItem('siigo-exit-interview-draft');
                 } else {
@@ -1043,7 +1200,7 @@
             console.log('=== BOTÓN SIGUIENTE/ENVIAR CLICKEADO ===');
             console.log('Paso actual:', currentStep);
             console.log('Total de pasos:', steps.length);
-            
+
             if (currentStep < steps.length - 1) {
                 console.log('No es el último paso, avanzando...');
                 if (validateCurrentStep()) {
@@ -1126,4 +1283,5 @@
         });
     </script>
 </body>
+
 </html>
