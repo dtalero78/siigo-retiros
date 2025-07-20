@@ -254,14 +254,70 @@
 
                 <!-- Form Content -->
                 <form id="exitInterviewForm">
-                    <!-- Step 1: Información Laboral -->
+                    <!-- Step 1: Información Personal y Laboral -->
                     <div id="step-1" class="step fade-in">
                         <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Información Laboral</h2>
-                            <p class="text-gray-600">Cuéntanos sobre tu experiencia en Siigo</p>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Información Personal y Laboral</h2>
+                            <p class="text-gray-600">Cuéntanos sobre ti y tu experiencia en Siigo</p>
                         </div>
                         
                         <div class="space-y-6 max-w-2xl mx-auto">
+                            <!-- Campos de información personal (solo si no hay usuario pre-registrado) -->
+                            <div id="personalInfoFields" style="display: none;">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu nombre completo? *</label>
+                                    <input type="text" id="q3" name="q3" required 
+                                           class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                           placeholder="Nombre completo">
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es tu número de Identificación? *</label>
+                                    <input type="text" id="q4" name="q4" required 
+                                           class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                           placeholder="Número de identificación">
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Confirma tu fecha de retiro *</label>
+                                    <input type="date" id="q5" name="q5" required 
+                                           class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál área estabas? *</label>
+                                    <select id="q7" name="q7" required 
+                                            class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                        <option value="">Selecciona un área</option>
+                                        <option value="Cultura">Cultura</option>
+                                        <option value="Customer Success">Customer Success</option>
+                                        <option value="Finance & Administration">Finance & Administration</option>
+                                        <option value="Fundación Siigo">Fundación Siigo</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="People Ops">People Ops</option>
+                                        <option value="Product">Product</option>
+                                        <option value="Sales">Sales</option>
+                                        <option value="Strategy">Strategy</option>
+                                        <option value="Tech">Tech</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">¿En cuál país estabas trabajando? *</label>
+                                    <select id="q8" name="q8" required 
+                                            class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
+                                        <option value="">Selecciona un país</option>
+                                        <option value="Colombia">Colombia</option>
+                                        <option value="Ecuador">Ecuador</option>
+                                        <option value="Uruguay">Uruguay</option>
+                                        <option value="México">México</option>
+                                        <option value="Perú">Perú</option>
+                                    </select>
+                                </div>
+                                
+                                <hr class="my-6 border-gray-200">
+                            </div>
+                            
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">¿Cuál fue el tiempo total que duraste en Siigo? *</label>
                                 <div class="space-y-2">
@@ -295,8 +351,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el nombre del último líder que tuviste en Siigo? *</label>
                                 <input type="text" id="q9" name="q9" required 
-                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                       style="min-height: 64px; height: 64px; padding: 16px; font-size: 16px;">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
+                                       placeholder="Nombre de tu último líder">
                             </div>
                         </div>
                     </div>
@@ -354,6 +410,18 @@
                                     <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
                                         <input type="radio" name="q11" value="Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal" required class="text-siigo focus:ring-siigo mt-1">
                                         <span class="ml-3 text-sm">Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal</span>
+                                    </label>
+                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11" value="Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral." required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral</span>
+                                    </label>
+                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11" value="Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo" required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo</span>
+                                    </label>
+                                    <label class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
+                                        <input type="radio" name="q11" value="Percepción de inequidad o descontento con metas, comisiones (si aplica)" required class="text-siigo focus:ring-siigo mt-1">
+                                        <span class="ml-3 text-sm">Percepción de inequidad o descontento con metas, comisiones (si aplica)</span>
                                     </label>
                                 </div>
                             </div>
@@ -572,12 +640,21 @@
     </div>
 
     <script>
+        console.log('=== SCRIPT CARGADO - INICIANDO FORMULARIO ===');
+        
         const steps = document.querySelectorAll(".step");
         const nextBtn = document.getElementById("next-btn");
         const prevBtn = document.getElementById("prev-btn");
         const progressBar = document.getElementById("progress-bar");
         let currentStep = 0;
         let currentUser = null;
+
+        console.log('Elementos encontrados:', {
+            steps: steps.length,
+            nextBtn: nextBtn ? 'encontrado' : 'NO ENCONTRADO',
+            prevBtn: prevBtn ? 'encontrado' : 'NO ENCONTRADO',
+            progressBar: progressBar ? 'encontrado' : 'NO ENCONTRADO'
+        });
 
         const indicators = [
             document.getElementById("indicator-1"),
@@ -592,11 +669,15 @@
 
         // Al cargar la página, verificar si hay un usuario en la URL
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM cargado completamente');
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('user');
             
             if (userId) {
                 await loadUserData(userId);
+            } else {
+                // Si no hay usuario pre-registrado, mostrar campos de información personal
+                document.getElementById('personalInfoFields').style.display = 'block';
             }
             
             showStep(currentStep);
@@ -608,13 +689,19 @@
                 if (response.ok) {
                     currentUser = await response.json();
                     displayUserInfo(currentUser);
+                    // Ocultar campos de información personal si hay usuario pre-registrado
+                    document.getElementById('personalInfoFields').style.display = 'none';
                 } else {
                     console.error('Usuario no encontrado');
                     showError('No se pudo cargar la información del usuario. Verifica el enlace.');
+                    // Mostrar campos de información personal si falla la carga
+                    document.getElementById('personalInfoFields').style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error cargando datos del usuario:', error);
                 showError('Error de conexión al cargar los datos del usuario.');
+                // Mostrar campos de información personal si hay error
+                document.getElementById('personalInfoFields').style.display = 'block';
             }
         }
 
@@ -679,7 +766,15 @@
             const currentStepElement = steps[currentStep];
             const requiredInputs = currentStepElement.querySelectorAll('[required]');
             
+            // Si hay usuario pre-registrado, excluir campos q3-q8 de la validación
+            const fieldsToExclude = currentUser ? ['q3', 'q4', 'q5', 'q7', 'q8'] : [];
+            
             for (let input of requiredInputs) {
+                // Si el campo está en la lista de exclusión, saltarlo
+                if (fieldsToExclude.includes(input.id) || fieldsToExclude.includes(input.name)) {
+                    continue;
+                }
+                
                 if (input.type === 'radio') {
                     const radioGroup = currentStepElement.querySelectorAll(`[name="${input.name}"]`);
                     const isChecked = Array.from(radioGroup).some(radio => radio.checked);
@@ -729,9 +824,12 @@
         }
 
         async function submitForm() {
+            console.log('=== INICIANDO submitForm() ===');
             try {
                 // Recopilar todas las respuestas
                 const responses = {};
+                
+                console.log('Usuario actual:', currentUser);
                 
                 // Si hay usuario registrado, usar sus datos
                 if (currentUser) {
@@ -740,23 +838,50 @@
                     responses.exit_date = currentUser.exit_date;
                     responses.area = currentUser.area;
                     responses.country = currentUser.country;
+                    console.log('Datos del usuario agregados a respuestas');
+                } else {
+                    console.log('NO HAY USUARIO PRE-REGISTRADO');
+                    // Si no hay usuario pre-registrado, debemos recopilar q3, q4, q5, q7 y q8
+                    const q3 = document.getElementById('q3');
+                    const q4 = document.getElementById('q4');
+                    const q5 = document.getElementById('q5');
+                    const q7 = document.getElementById('q7');
+                    const q8 = document.getElementById('q8');
+                    
+                    console.log('Verificando campos básicos del formulario:', {
+                        q3: q3 ? 'existe' : 'NO EXISTE',
+                        q4: q4 ? 'existe' : 'NO EXISTE', 
+                        q5: q5 ? 'existe' : 'NO EXISTE',
+                        q7: q7 ? 'existe' : 'NO EXISTE',
+                        q8: q8 ? 'existe' : 'NO EXISTE'
+                    });
+                    
+                    if (q3 && q3.value) responses.q3 = q3.value;
+                    if (q4 && q4.value) responses.q4 = q4.value;
+                    if (q5 && q5.value) responses.q5 = q5.value;
+                    if (q7 && q7.value) responses.q7 = q7.value;
+                    if (q8 && q8.value) responses.q8 = q8.value;
                 }
                 
                 // Preguntas simples
                 ['q9', 'q10', 'q14', 'q15', 'q17'].forEach(id => {
                     const input = document.getElementById(id);
+                    console.log(`Pregunta ${id}:`, input ? input.value : 'ELEMENTO NO ENCONTRADO');
                     if (input && input.value) {
                         responses[id] = input.value;
                     }
                 });
+                console.log('Preguntas simples recopiladas');
                 
                 // Preguntas de radio
                 ['q6', 'q11', 'q12', 'q13', 'q18'].forEach(name => {
                     const input = document.querySelector(`input[name="${name}"]:checked`);
+                    console.log(`Radio ${name}:`, input ? input.value : 'NO SELECCIONADO');
                     if (input) {
                         responses[name] = input.value;
                     }
                 });
+                console.log('Preguntas de radio recopiladas');
                 
                 // Matriz de satisfacción (q16)
                 const matrixResponses = {};
@@ -777,12 +902,17 @@
                 });
                 
                 responses['q16'] = matrixResponses;
+                console.log('Respuestas matriz recopiladas');
+                console.log('TODAS LAS RESPUESTAS:', responses);
 
                 // Enviar al servidor
                 const requestBody = { responses };
                 if (currentUser) {
                     requestBody.userId = currentUser.id;
                 }
+
+                console.log('Enviando POST a /api/responses...');
+                console.log('Body:', JSON.stringify(requestBody));
 
                 const response = await fetch('/api/responses', {
                     method: 'POST',
@@ -792,7 +922,10 @@
                     body: JSON.stringify(requestBody)
                 });
 
+                console.log('Respuesta del servidor:', response.status, response.statusText);
+
                 if (response.ok) {
+                    console.log('Respuesta exitosa del servidor');
                     document.getElementById('exitInterviewForm').style.display = 'none';
                     document.getElementById('successAlert').classList.remove('hidden');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -801,10 +934,12 @@
                     localStorage.removeItem('siigo-exit-interview-draft');
                 } else {
                     const errorData = await response.json();
+                    console.error('Error del servidor:', errorData);
                     showError(errorData.error || 'Error desconocido al enviar las respuestas');
                 }
             } catch (error) {
-                console.error('Error enviando respuestas:', error);
+                console.error('Error completo en submitForm:', error);
+                console.error('Stack trace:', error.stack);
                 showError('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
             }
         }
@@ -818,11 +953,17 @@
         }
 
         nextBtn.addEventListener("click", async () => {
+            console.log('=== BOTÓN SIGUIENTE/ENVIAR CLICKEADO ===');
+            console.log('Paso actual:', currentStep);
+            console.log('Total de pasos:', steps.length);
+            
             if (currentStep < steps.length - 1) {
+                console.log('No es el último paso, avanzando...');
                 if (validateCurrentStep()) {
                     currentStep++;
                     showStep(currentStep);
                 } else {
+                    console.log('Validación falló en paso', currentStep);
                     // Mostrar mensaje de validación
                     const toast = document.createElement('div');
                     toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
@@ -834,14 +975,24 @@
                     }, 3000);
                 }
             } else {
+                console.log('ES EL ÚLTIMO PASO - INTENTANDO ENVIAR FORMULARIO');
                 if (validateCurrentStep()) {
+                    console.log('Validación del último paso exitosa, enviando...');
                     nextBtn.disabled = true;
                     nextBtn.innerHTML = `
                         <span>Enviando...</span>
                         <i class="bi bi-hourglass-split ms-2"></i>
                     `;
-                    await submitForm();
+                    try {
+                        await submitForm();
+                        console.log('Formulario enviado exitosamente');
+                    } catch (error) {
+                        console.error('Error al enviar formulario:', error);
+                        alert('Error al enviar el formulario: ' + error.message);
+                    }
                     nextBtn.disabled = false;
+                } else {
+                    console.log('Validación del último paso falló');
                 }
             }
         });
