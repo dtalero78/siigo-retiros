@@ -626,34 +626,104 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
 
 app.post('/api/analysis', async (req, res) => {
   try {
+    // 1. Obtengo todas las respuestas desde la base de datos
     const allResponses = await db.getAllResponses();
     const analyses = [];
 
+    // 2. Itero sobre cada respuesta para enviarla a OpenAI
     for (let resp of allResponses) {
+      // Construyo el prompt a partir de los campos que guardaste en la tabla
       const prompt = `
+      Eres un experto en recursos humanos y ambiente laboral de la empresa SIIGO.
 Analiza esta respuesta de salida de entrevista:
-${JSON.stringify(resp.responses, null, 2)}
+${JSON.stringify({
+        full_name: resp.full_name,
+        identification: resp.identification,
+        exit_date: resp.exit_date,
+        tenure: resp.tenure,
+        area: resp.area,
+        country: resp.country,
+        last_leader: resp.last_leader,
+        exit_reason_category: resp.exit_reason_category,
+        exit_reason_detail: resp.exit_reason_detail,
+        experience_rating: resp.experience_rating,
+        would_recommend: resp.would_recommend,
+        would_return: resp.would_return,
+        what_enjoyed: resp.what_enjoyed,
+        what_to_improve: resp.what_to_improve,
+        satisfaction_ratings: resp.satisfaction_ratings,
+        new_company_info: resp.new_company_info
+      }, null, 2)}
 
-Devuélveme un breve resumen, puntos más frecuentes y sugerencias de mejora.
+Genera sugerencias de mejora con justificación de teorías de recursos humanos
 `;
 
-      const completion = await openai.chat.completions.create({
+      // 3. Llamada a la API de Chat Completions
+      const aiResponse = await openai.chat.completions.create({
         model: 'gpt-4',
-        messages: [{ role: 'user', content: prompt }]
+        messages: [
+          { role: 'user', content: prompt }
+        ]
       });
+
+      // 4. Extraigo el contenido generado
+      const content = aiResponse.choices[0].message.content.trim();
 
       analyses.push({
         id: resp.id,
-        analysis: completion.choices[0].message.content.trim()
+        analysis: content
       });
     }
 
+    // 5. Devuelvo el array de análisis
     res.json(analyses);
+
   } catch (err) {
     console.error('Error en /api/analysis:', err);
     res.status(500).json({ error: 'No se pudo generar el análisis' });
   }
 });
+
+//ANÁLISIS OPENAI PARA CADA REGISTRO
+app.post('/api/analysis/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resp = await db.getResponse(id);
+
+    if (!resp) return res.status(404).json({ error: 'Respuesta no encontrada' });
+
+    // Si YA existe el análisis, lo devolvemos directamente
+    if (resp.analysis && resp.analysis.trim() !== '') {
+      return res.json({ id, analysis: resp.analysis });
+    }
+
+    // Si NO existe, lo generamos con OpenAI
+    const prompt = `
+Eres un experto en RRHH de SIIGO.
+Analiza esta respuesta de salida:
+${JSON.stringify(resp, null, 2)}
+Genera sugerencias de mejora...
+`;
+
+    const ai = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }]
+    });
+    const analysisText = ai.choices[0].message.content.trim();
+
+    // Guardamos el análisis en la DB
+    await db.updateResponseAnalysis(id, analysisText);
+
+    // Devolvemos la respuesta
+    res.json({ id, analysis: analysisText });
+
+  } catch (err) {
+    console.error('Error en /api/analysis/:id:', err);
+    res.status(500).json({ error: 'No se pudo generar el análisis' });
+  }
+});
+
+
 
 
 
