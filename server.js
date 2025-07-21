@@ -692,16 +692,35 @@ app.post('/api/analysis/:id', async (req, res) => {
 
     if (!resp) return res.status(404).json({ error: 'Respuesta no encontrada' });
 
-    // Si YA existe el análisis, lo devolvemos directamente
     if (resp.analysis && resp.analysis.trim() !== '') {
       return res.json({ id, analysis: resp.analysis });
     }
 
-    // Si NO existe, lo generamos con OpenAI
+    // Construir objeto compacto igual al análisis general
+    const userData = {
+      full_name: resp.full_name,
+      identification: resp.identification,
+      exit_date: resp.exit_date,
+      tenure: resp.tenure,
+      area: resp.area,
+      country: resp.country,
+      last_leader: resp.last_leader,
+      exit_reason_category: resp.exit_reason_category,
+      exit_reason_detail: resp.exit_reason_detail,
+      experience_rating: resp.experience_rating,
+      would_recommend: resp.would_recommend,
+      would_return: resp.would_return,
+      what_enjoyed: resp.what_enjoyed,
+      what_to_improve: resp.what_to_improve,
+      satisfaction_ratings: resp.satisfaction_ratings,
+      new_company_info: resp.new_company_info
+    };
+
     const prompt = `
-Eres un experto en RRHH de SIIGO.
-Analiza esta respuesta de salida:
-${JSON.stringify(resp, null, 2)}
+Eres un experto en recursos humanos y ambiente laboral de la empresa SIIGO.
+Analiza esta respuesta de salida de entrevista:
+${JSON.stringify(userData, null, 2)}
+
 Genera sugerencias de mejora con justificación de teorías de recursos humanos
 `;
 
@@ -711,10 +730,8 @@ Genera sugerencias de mejora con justificación de teorías de recursos humanos
     });
     const analysisText = ai.choices[0].message.content.trim();
 
-    // Guardamos el análisis en la DB
     await db.updateResponseAnalysis(id, analysisText);
 
-    // Devolvemos la respuesta
     res.json({ id, analysis: analysisText });
 
   } catch (err) {
@@ -722,6 +739,7 @@ Genera sugerencias de mejora con justificación de teorías de recursos humanos
     res.status(500).json({ error: 'No se pudo generar el análisis' });
   }
 });
+
 
 
 
