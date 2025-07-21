@@ -702,7 +702,7 @@ app.post('/api/analysis/:id', async (req, res) => {
 Eres un experto en RRHH de SIIGO.
 Analiza esta respuesta de salida:
 ${JSON.stringify(resp, null, 2)}
-Genera sugerencias de mejora...
+Genera sugerencias de mejora con justificación de teorías de recursos humanos
 `;
 
     const ai = await openai.chat.completions.create({
