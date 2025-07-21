@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/css/fonts.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         /* === VARIABLES === */
         :root {
@@ -514,11 +516,9 @@
                 const ai = await resAI.json();
 
                 // 5. Una vez llegue la respuesta, reemplazar el loader por el texto
-                const section = document.getElementById('analysisSection');
-                section.innerHTML = ai.analysis
-                    .split('\n')
-                    .map(line => `<p>${line}</p>`)
-                    .join('');
+const section = document.getElementById('analysisSection');
+section.innerHTML = marked.parse(ai.analysis);
+
 
             } catch (error) {
                 console.error('Error cargando respuesta o análisis:', error);
