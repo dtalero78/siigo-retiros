@@ -278,7 +278,7 @@
                 </div>
 
                 <!-- Form Content -->
-                <form id="exitInterviewForm"> 
+                <form id="exitInterviewForm">
                     <!-- Step 1: Información Personal y Laboral -->
                     <div id="step-1" class="step fade-in">
                         <div class="text-center mb-8">
@@ -430,7 +430,8 @@
                             </div>
 
                             <div>
-                                <label for="q11" class="block text-sm font-semibold text-gray-700 mb-3">Selecciona la categoría
+                                <label for="q11" class="block text-sm font-semibold text-gray-700 mb-3">Selecciona la
+                                    categoría
                                     que mejor representa el motivo principal de tu decisión de retirarte: *</label>
                                 <div class="space-y-2 max-h-64 overflow-y-auto">
                                     <label
@@ -541,7 +542,8 @@
 
                         <div class="space-y-8 max-w-4xl mx-auto">
                             <div>
-                                <label for="q12" class="block text-sm font-semibold text-gray-700 mb-4">En una escala del 1 al 10,
+                                <label for="q12" class="block text-sm font-semibold text-gray-700 mb-4">En una escala
+                                    del 1 al 10,
                                     ¿Qué tan buena fue tu experiencia laboral en Siigo? *</label>
                                 <div class="scale-container">
                                     <div class="scale-item"><input type="radio" name="q12" value="1"
@@ -572,7 +574,8 @@
                             </div>
 
                             <div>
-                                <label for="q13" class="block text-sm font-semibold text-gray-700 mb-3">¿Recomendarías trabajar en
+                                <label for="q13" class="block text-sm font-semibold text-gray-700 mb-3">¿Recomendarías
+                                    trabajar en
                                     Siigo a un amigo o familiar? *</label>
                                 <div class="flex gap-4">
                                     <label
@@ -591,7 +594,8 @@
                             </div>
 
                             <div>
-                                <label for="q14" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué fue lo que más
+                                <label for="q14" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué fue lo que
+                                    más
                                     disfrutaste de trabajar en Siigo? *</label>
                                 <textarea id="q14" name="q14" required rows="3"
                                     class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
@@ -599,7 +603,8 @@
                             </div>
 
                             <div>
-                                <label for="q15" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué crees que podríamos
+                                <label for="q15" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué crees que
+                                    podríamos
                                     mejorar como organización? *</label>
                                 <textarea id="q15" name="q15" required rows="3"
                                     class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
@@ -693,7 +698,8 @@
                             </div>
 
                             <div>
-                                <label for="q18" class="block text-sm font-semibold text-gray-700 mb-3">¿Estarías abierto(a) a
+                                <label for="q18" class="block text-sm font-semibold text-gray-700 mb-3">¿Estarías
+                                    abierto(a) a
                                     regresar a Siigo en el futuro si se presenta una oportunidad que se alinee con tus
                                     intereses? *</label>
                                 <div class="flex gap-4">
@@ -1223,18 +1229,22 @@
                 if (validateCurrentStep()) {
                     console.log('Validación del último paso exitosa, enviando...');
                     nextBtn.disabled = true;
+                    const oldInnerHTML = nextBtn.innerHTML;
                     nextBtn.innerHTML = `
-                        <span>Enviando...</span>
-                        <i class="bi bi-hourglass-split ms-2"></i>
-                    `;
+    <span>Enviando...</span>
+    <i class="bi bi-hourglass-split ms-2"></i>
+`;
                     try {
                         await submitForm();
                         console.log('Formulario enviado exitosamente');
+                        // El formulario se oculta, así que no hace falta restaurar aquí
                     } catch (error) {
                         console.error('Error al enviar formulario:', error);
                         alert('Error al enviar el formulario: ' + error.message);
+                        nextBtn.innerHTML = oldInnerHTML; // Restaurar solo si hubo error
+                        nextBtn.disabled = false;         // Restaurar solo si hubo error
                     }
-                    nextBtn.disabled = false;
+
                 } else {
                     console.log('Validación del último paso falló');
                 }
