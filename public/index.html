@@ -161,40 +161,6 @@
             }
         }
 
-        .user-info-card {
-            background: linear-gradient(135deg, var(--siigo-light) 0%, #f0f9ff 100%);
-            border: 1px solid var(--siigo);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .user-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .user-info-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .user-info-label {
-            font-size: 0.875rem;
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .user-info-value {
-            font-size: 1rem;
-            color: #1f2937;
-            font-weight: 600;
-            margin-top: 4px;
-        }
     </style>
 </head>
 
@@ -216,18 +182,6 @@
             </div>
 
             <div class="p-4 md:p-8">
-                <!-- User Info Card (solo si hay usuario pre-registrado) -->
-                <div id="userInfoCard" class="user-info-card" style="display: none;">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
-                        <i class="bi bi-person-check me-2 text-siigo"></i>
-                        Información del Usuario
-                    </h3>
-                    <p class="text-gray-600 text-sm mb-3">Hemos pre-llenado tu información básica. Solo necesitas
-                        completar la entrevista.</p>
-                    <div class="user-info-grid" id="userInfoGrid">
-                        <!-- Info será llenada dinámicamente -->
-                    </div>
-                </div>
 
                 <!-- Intro Text -->
                 <div class="bg-siigo-light rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-l-4 border-siigo">
@@ -737,6 +691,10 @@
                                 <h3 class="text-lg font-semibold text-green-800">¡Entrevista enviada exitosamente!</h3>
                                 <p class="text-green-700 mt-1">Gracias por completar la entrevista de retiro. Tus
                                     respuestas han sido guardadas correctamente.</p>
+                                <p class="text-green-600 mt-2 text-sm">
+                                    <i class="bi bi-clock me-1"></i>
+                                    Un momento... <span id="countdown">3</span> segundos...
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -849,33 +807,8 @@
         }
 
         function displayUserInfo(user) {
-            const userInfoCard = document.getElementById('userInfoCard');
-            const userInfoGrid = document.getElementById('userInfoGrid');
-
-            userInfoGrid.innerHTML = `
-                <div class="user-info-item">
-                    <div class="user-info-label">Nombre Completo</div>
-                    <div class="user-info-value">${user.full_name}</div>
-                </div>
-                <div class="user-info-item">
-                    <div class="user-info-label">Identificación</div>
-                    <div class="user-info-value">${user.identification}</div>
-                </div>
-                <div class="user-info-item">
-                    <div class="user-info-label">Área</div>
-                    <div class="user-info-value">${user.area}</div>
-                </div>
-                <div class="user-info-item">
-                    <div class="user-info-label">País</div>
-                    <div class="user-info-value">${user.country}</div>
-                </div>
-                <div class="user-info-item">
-                    <div class="user-info-label">Fecha de Retiro</div>
-                    <div class="user-info-value">${new Date(user.exit_date).toLocaleDateString('es-ES')}</div>
-                </div>
-            `;
-
-            userInfoCard.style.display = 'block';
+            // Función eliminada para mantener anonimato de la encuesta
+            // Los datos del usuario ya no se muestran en el formulario
         }
 
         function updateIndicators(stepIndex) {
@@ -1176,20 +1109,60 @@
 
                 if (response.ok) {
                     console.log('Respuesta exitosa del servidor');
+                    
+                    // Mostrar mensaje de éxito brevemente antes de redirigir
                     document.getElementById('exitInterviewForm').style.display = 'none';
                     document.getElementById('successAlert').classList.remove('hidden');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
 
                     // Limpiar draft guardado
                     localStorage.removeItem('siigo-exit-interview-draft');
+                    
+                    // Contador regresivo para la redirección
+                    let countdown = 3;
+                    const countdownElement = document.getElementById('countdown');
+                    
+                    const countdownInterval = setInterval(() => {
+                        countdown--;
+                        if (countdownElement) {
+                            countdownElement.textContent = countdown;
+                        }
+                        
+                        if (countdown <= 0) {
+                            clearInterval(countdownInterval);
+                            window.location.href = 'https://www.siigo.com';
+                        }
+                    }, 1000);
                 } else {
                     const errorData = await response.json();
                     console.error('Error del servidor:', errorData);
+                    
+                    // Restaurar estado del botón en caso de error del servidor
+                    const nextBtn = document.getElementById('nextBtn');
+                    if (nextBtn) {
+                        nextBtn.innerHTML = `
+                            Enviar Entrevista
+                            <i class="bi bi-check-circle ms-2"></i>
+                        `;
+                        nextBtn.disabled = false;
+                    }
+                    
                     showError(errorData.error || 'Error desconocido al enviar las respuestas');
                 }
             } catch (error) {
                 console.error('Error completo en submitForm:', error);
                 console.error('Stack trace:', error.stack);
+                
+                // Restaurar estado del botón en caso de error
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) {
+                    nextBtn.innerHTML = `
+                        Enviar Entrevista
+                        <i class="bi bi-check-circle ms-2"></i>
+                    `;
+                    nextBtn.disabled = false;
+                }
+                
                 showError('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
             }
         }
