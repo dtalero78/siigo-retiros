@@ -15,25 +15,62 @@ class UsersDatabase {
   }
 
   init() {
-    this.db.run(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
-        identification TEXT NOT NULL UNIQUE,
-        phone TEXT,
-        exit_date TEXT NOT NULL,
-        area TEXT NOT NULL,
-        country TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `, (err) => {
-      if (err) {
-        console.error('Error creando tabla de usuarios:', err.message);
-      } else {
-        console.log('Tabla de usuarios inicializada');
-      }
+    this.db.serialize(() => {
+      // 1) Crear tabla si no existe (sin fechaInicio ni cargo, que añadiremos luego)
+      this.db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          first_name TEXT NOT NULL,
+          last_name TEXT NOT NULL,
+          identification TEXT NOT NULL UNIQUE,
+          phone TEXT,
+          exit_date TEXT NOT NULL,
+          area TEXT NOT NULL,
+          country TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `, (err) => {
+        if (err) console.error('Error creando tabla users:', err.message);
+        else console.log('Tabla users inicializada');
+      });
+
+      // 2) Verificar columnas existentes
+      this.db.all(`PRAGMA table_info(users)`, (err, cols) => {
+        if (err) {
+          console.error('Error leyendo estructura de users:', err.message);
+          return;
+        }
+        const existing = cols.map(c => c.name);
+        // 3) Añadir fechaInicio si falta
+        if (!existing.includes('fechaInicio')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN fechaInicio TEXT`, (err) => {
+            if (err) console.error('Error agregando columna fechaInicio:', err.message);
+            else console.log('Columna fechaInicio añadida a users');
+          });
+        }
+        // 4) Añadir cargo si falta
+        if (!existing.includes('cargo')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN cargo TEXT`, (err) => {
+            if (err) console.error('Error agregando columna cargo:', err.message);
+            else console.log('Columna cargo añadida a users');
+          });
+        }
+        // 5) Añadir whatsapp_sent_at si falta
+        if (!existing.includes('whatsapp_sent_at')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN whatsapp_sent_at DATETIME`, (err) => {
+            if (err) console.error('Error agregando columna whatsapp_sent_at:', err.message);
+            else console.log('Columna whatsapp_sent_at añadida a users');
+          });
+        }
+        // 6) Añadir whatsapp_message_id si falta
+        if (!existing.includes('whatsapp_message_id')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN whatsapp_message_id TEXT`, (err) => {
+            if (err) console.error('Error agregando columna whatsapp_message_id:', err.message);
+            else console.log('Columna whatsapp_message_id añadida a users');
+          });
+        }
+      });
     });
   }
 
@@ -42,8 +79,8 @@ class UsersDatabase {
       const sql = `
         INSERT INTO users (
           first_name, last_name, identification, phone, 
-          exit_date, area, country
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          exit_date, area, country, fechaInicio, cargo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
@@ -53,7 +90,9 @@ class UsersDatabase {
         userData.phone || null,
         userData.exit_date,
         userData.area,
-        userData.country
+        userData.country,
+        userData.fechaInicio || null,
+        userData.cargo || null
       ];
 
       this.db.run(sql, values, function(err) {
@@ -111,7 +150,7 @@ class UsersDatabase {
         UPDATE users SET 
           first_name = ?, last_name = ?, identification = ?, 
           phone = ?, exit_date = ?, area = ?, country = ?,
-          updated_at = CURRENT_TIMESTAMP
+          fechaInicio = ?, cargo = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `;
 
@@ -123,6 +162,8 @@ class UsersDatabase {
         userData.exit_date,
         userData.area,
         userData.country,
+        userData.fechaInicio || null,
+        userData.cargo || null,
         id
       ];
 
@@ -163,8 +204,8 @@ class UsersDatabase {
       const sql = `
         INSERT OR IGNORE INTO users (
           first_name, last_name, identification, phone, 
-          exit_date, area, country
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          exit_date, area, country, fechaInicio, cargo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       let inserted = 0;
@@ -178,7 +219,9 @@ class UsersDatabase {
           userData.phone || null,
           userData.exit_date,
           userData.area,
-          userData.country
+          userData.country,
+          userData.fechaInicio || null,
+          userData.cargo || null
         ];
 
         this.db.run(sql, values, function(err) {
@@ -248,6 +291,87 @@ class UsersDatabase {
           reject(err);
         } else {
           resolve(rows);
+        }
+      });
+    });
+  }
+
+  async updateWhatsAppStatus(userId, messageId) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        UPDATE users SET 
+          whatsapp_sent_at = CURRENT_TIMESTAMP,
+          whatsapp_message_id = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
+      this.db.run(sql, [messageId, userId], function(err) {
+        if (err) {
+          console.error('Error actualizando estado de WhatsApp:', err.message);
+          reject(err);
+        } else {
+          resolve(this.changes);
+        }
+      });
+    });
+  }
+
+  async getUsersWithWhatsAppStatus() {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT * FROM users 
+        ORDER BY exit_date DESC, created_at DESC
+      `;
+      this.db.all(sql, [], (err, rows) => {
+        if (err) {
+          console.error('Error obteniendo usuarios con estado WhatsApp:', err.message);
+          reject(err);
+        } else {
+          // Add has_response field set to 0 for now
+          // This will be populated by the server logic using the responses database
+          const usersWithStatus = rows.map(user => ({
+            ...user,
+            has_response: 0
+          }));
+          resolve(usersWithStatus);
+        }
+      });
+    });
+  }
+
+  async getFilteredUsers(filter) {
+    return new Promise((resolve, reject) => {
+      let sql = `SELECT * FROM users`;
+      
+      const conditions = [];
+      const params = [];
+      
+      if (filter === 'whatsapp_sent') {
+        conditions.push('whatsapp_sent_at IS NOT NULL');
+      } else if (filter === 'whatsapp_not_sent') {
+        conditions.push('whatsapp_sent_at IS NULL');
+      }
+      // Note: 'no_response' and 'has_response' filters will be handled by server logic
+      // since they require cross-database queries
+      
+      if (conditions.length > 0) {
+        sql += ' WHERE ' + conditions.join(' AND ');
+      }
+      
+      sql += ' ORDER BY exit_date DESC, created_at DESC';
+      
+      this.db.all(sql, params, (err, rows) => {
+        if (err) {
+          console.error('Error obteniendo usuarios filtrados:', err.message);
+          reject(err);
+        } else {
+          // Add has_response field set to 0 for now
+          // This will be populated by the server logic using the responses database
+          const usersWithStatus = rows.map(user => ({
+            ...user,
+            has_response: 0
+          }));
+          resolve(usersWithStatus);
         }
       });
     });

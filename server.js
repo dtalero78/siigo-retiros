@@ -256,7 +256,9 @@ app.get('/api/user-form/:id', async (req, res) => {
       exit_date: user.exit_date,
       area: user.area,
       country: user.country,
-      phone: user.phone
+      phone: user.phone,
+      fechaInicio: user.fechaInicio,
+      cargo: user.cargo
     };
 
     res.json(userData);
@@ -331,8 +333,34 @@ app.get('/api/responses/:id', async (req, res) => {
 // Obtener todos los usuarios
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await usersDb.getAllUsers();
-    res.json(users);
+    const { filter } = req.query;
+    
+    let users;
+    if (filter && ['whatsapp_sent', 'whatsapp_not_sent'].includes(filter)) {
+      users = await usersDb.getFilteredUsers(filter);
+    } else {
+      users = await usersDb.getUsersWithWhatsAppStatus();
+    }
+    
+    // Get all responses to check which users have responded
+    const responses = await db.getAllResponses();
+    const responseUserIds = new Set(responses.map(r => r.user_id).filter(id => id));
+    
+    // Update has_response field for each user
+    const usersWithResponses = users.map(user => ({
+      ...user,
+      has_response: responseUserIds.has(user.id) ? 1 : 0
+    }));
+    
+    // Apply response-based filters
+    let filteredUsers = usersWithResponses;
+    if (filter === 'no_response') {
+      filteredUsers = usersWithResponses.filter(u => u.whatsapp_sent_at && !u.has_response);
+    } else if (filter === 'has_response') {
+      filteredUsers = usersWithResponses.filter(u => u.has_response);
+    }
+    
+    res.json(filteredUsers);
   } catch (error) {
     console.error('Error obteniendo usuarios:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -370,7 +398,18 @@ app.post('/api/users', async (req, res) => {
     }
 
     // Validar área
-    const validAreas = ["Cultura", "Customer Success", "Finance & Administration", "Fundación Siigo", "Marketing", "People Ops", "Product", "Sales", "Strategy", "Tech"];
+    const validAreas = [
+      "Aliados", "Cargo en Entrenamiento", "Commercial Ops", "Compensation & Benefits", 
+      "Cross Selling", "Cultura", "Customer Success", "Data Analytics", 
+      "Digital Strategy Engineering", "Engagement & Retention Core", 
+      "Engagement & Retention Empresario", "Entrenamiento y Excelencia", 
+      "Finance & Administration", "Fundación Siigo", "Ingenieria Cloud", 
+      "Ingenieria Legacy", "Marketing", "Marketing Channels", 
+      "Marketing Valor Agregado / Training", "Onboarding", "People Ops", 
+      "Product", "Quality Assurance Cloud", "Renovaciones", "Sales", 
+      "Small and Medium Business", "Soporte Legacy", "Soporte Nube", 
+      "Strategy", "Talent Acquisition", "Tech", "Transformation & Innovation"
+    ];
     if (!validAreas.includes(userData.area)) {
       return res.status(400).json({ error: 'Área inválida' });
     }
@@ -472,7 +511,18 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
     }
 
     const users = [];
-    const validAreas = ["Cultura", "Customer Success", "Finance & Administration", "Fundación Siigo", "Marketing", "People Ops", "Product", "Sales", "Strategy", "Tech"];
+    const validAreas = [
+      "Aliados", "Cargo en Entrenamiento", "Commercial Ops", "Compensation & Benefits", 
+      "Cross Selling", "Cultura", "Customer Success", "Data Analytics", 
+      "Digital Strategy Engineering", "Engagement & Retention Core", 
+      "Engagement & Retention Empresario", "Entrenamiento y Excelencia", 
+      "Finance & Administration", "Fundación Siigo", "Ingenieria Cloud", 
+      "Ingenieria Legacy", "Marketing", "Marketing Channels", 
+      "Marketing Valor Agregado / Training", "Onboarding", "People Ops", 
+      "Product", "Quality Assurance Cloud", "Renovaciones", "Sales", 
+      "Small and Medium Business", "Soporte Legacy", "Soporte Nube", 
+      "Strategy", "Talent Acquisition", "Tech", "Transformation & Innovation"
+    ];
     const validCountries = ["Colombia", "Ecuador", "Uruguay", "México", "Perú"];
 
     // Procesar cada línea (omitir la primera si es header)
@@ -484,11 +534,11 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
       const columns = line.split(',').map(col => col.trim().replace(/^["']|["']$/g, ''));
 
-      if (columns.length < 7) {
+      if (columns.length < 9) {
         continue; // Saltar líneas incompletas
       }
 
-      const [firstName, lastName, identification, phone, exitDate, area, country] = columns;
+      const [identification, firstName, lastName, country, area, cargo, phone, fechaInicio, exitDate] = columns;
 
       // Validar datos
       if (!firstName || !lastName || !identification || !exitDate || !area || !country) {
@@ -506,7 +556,9 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
         phone: phone || null,
         exit_date: exitDate,
         area: area,
-        country: country
+        country: country,
+        fechaInicio: fechaInicio || null,
+        cargo: cargo || null
       });
     }
 
@@ -598,6 +650,13 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
 
     if (whapiResponse.ok) {
       const result = await whapiResponse.json();
+
+      // Actualizar el registro del usuario con la información del WhatsApp enviado
+      try {
+        await usersDb.updateWhatsAppStatus(userId, result.id);
+      } catch (updateError) {
+        console.error('Error actualizando estado de WhatsApp en BD:', updateError);
+      }
 
       // Log del envío exitoso
       console.log(`WhatsApp enviado a ${name} (${phone}): ${formUrl}`);
