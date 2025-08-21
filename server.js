@@ -636,7 +636,19 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
     const formUrl = `${baseUrl}/?user=${userId}`;
 
     // Mensaje personalizado con la URL que incluye el ID
-    const message = `Hola ${name.split(' ')[0]}. Antes de despedirnos queremos pedirte que realices la siguiente encuesta: ${formUrl}`;
+    const message = `¡Hola! 👋 Gracias por haber hecho parte de Siigo 💙
+
+Desde el equipo de Cultura de Siigo queremos agradecerte de corazón por todo lo que aportaste durante tu tiempo en la compañía. 🙌
+
+Nos encantaría conocer tu experiencia a través de una breve entrevista de retiro. Tu opinión es muy valiosa y nos ayudará a seguir mejorando como organización.
+
+📝 Aquí puedes responder el formulario (toma menos de 10 min):
+${formUrl}
+
+¡Gracias por tu sinceridad y por habernos acompañado en este camino! 🌟
+
+Un abrazo,
+Equipo de Cultura – Siigo`;
 
     // Configuración de Whapi
     const whapiToken = process.env.WHAPI_TOKEN;
