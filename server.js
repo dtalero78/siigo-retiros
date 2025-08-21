@@ -414,6 +414,11 @@ app.post('/api/users', async (req, res) => {
       return res.status(400).json({ error: 'Área inválida' });
     }
 
+    // Asignar país por defecto si no se proporciona
+    if (!userData.country || userData.country.trim() === '') {
+      userData.country = 'Colombia';
+    }
+    
     // Validar país
     const validCountries = ["Colombia", "Ecuador", "Uruguay", "México", "Perú"];
     if (!validCountries.includes(userData.country)) {
@@ -534,11 +539,11 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
       const columns = line.split(',').map(col => col.trim().replace(/^["']|["']$/g, ''));
 
-      if (columns.length < 12) {
+      if (columns.length < 13) {
         continue; // Saltar líneas incompletas
       }
 
-      const [identification, firstName, lastName, country, area, subArea, cargo, lider, liderEntrenamiento, phone, fechaInicio, exitDate] = columns;
+      const [identification, firstName, lastName, country, paisContratacion, area, subArea, cargo, lider, liderEntrenamiento, phone, fechaInicio, exitDate] = columns;
 
       // Validar datos
       if (!firstName || !lastName || !identification || !exitDate || !area || !country) {
@@ -561,7 +566,8 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
         cargo: cargo || null,
         subArea: subArea || null,
         lider: lider || null,
-        liderEntrenamiento: liderEntrenamiento || null
+        liderEntrenamiento: liderEntrenamiento || null,
+        paisContratacion: paisContratacion || null
       });
     }
 

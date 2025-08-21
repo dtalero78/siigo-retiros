@@ -91,6 +91,13 @@ class UsersDatabase {
             else console.log('Columna liderEntrenamiento añadida a users');
           });
         }
+        // 10) Añadir paisContratacion si falta
+        if (!existing.includes('paisContratacion')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN paisContratacion TEXT`, (err) => {
+            if (err) console.error('Error agregando columna paisContratacion:', err.message);
+            else console.log('Columna paisContratacion añadida a users');
+          });
+        }
       });
     });
   }
@@ -101,8 +108,8 @@ class UsersDatabase {
         INSERT INTO users (
           first_name, last_name, identification, phone, 
           exit_date, area, country, fechaInicio, cargo,
-          subArea, lider, liderEntrenamiento
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          subArea, lider, liderEntrenamiento, paisContratacion
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
@@ -117,7 +124,8 @@ class UsersDatabase {
         userData.cargo || null,
         userData.subArea || null,
         userData.lider || null,
-        userData.liderEntrenamiento || null
+        userData.liderEntrenamiento || null,
+        userData.paisContratacion || null
       ];
 
       this.db.run(sql, values, function(err) {
@@ -175,7 +183,7 @@ class UsersDatabase {
         UPDATE users SET 
           first_name = ?, last_name = ?, identification = ?, 
           phone = ?, exit_date = ?, area = ?, country = ?,
-          fechaInicio = ?, cargo = ?, subArea = ?, lider = ?, liderEntrenamiento = ?,
+          fechaInicio = ?, cargo = ?, subArea = ?, lider = ?, liderEntrenamiento = ?, paisContratacion = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `;
@@ -193,6 +201,7 @@ class UsersDatabase {
         userData.subArea || null,
         userData.lider || null,
         userData.liderEntrenamiento || null,
+        userData.paisContratacion || null,
         id
       ];
 
@@ -234,8 +243,8 @@ class UsersDatabase {
         INSERT OR IGNORE INTO users (
           first_name, last_name, identification, phone, 
           exit_date, area, country, fechaInicio, cargo,
-          subArea, lider, liderEntrenamiento
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          subArea, lider, liderEntrenamiento, paisContratacion
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       let inserted = 0;
@@ -254,7 +263,8 @@ class UsersDatabase {
           userData.cargo || null,
           userData.subArea || null,
           userData.lider || null,
-          userData.liderEntrenamiento || null
+          userData.liderEntrenamiento || null,
+          userData.paisContratacion || null
         ];
 
         this.db.run(sql, values, function(err) {

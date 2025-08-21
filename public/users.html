@@ -418,7 +418,6 @@
                                     <th>SubÁrea</th>
                                     <th>Líder</th>
                                     <th>Líder Entrenamiento</th>
-                                    <th>País</th>
                                     <th>WhatsApp</th>
                                     <th>Respuesta</th>
                                     <th>Acciones</th>
@@ -534,17 +533,8 @@
                                     <option value="Transformation & Innovation">Transformation & Innovation</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="country" class="form-label">País *</label>
-                                <select class="form-control" id="country" name="country" required>
-                                    <option value="">Selecciona un país</option>
-                                    <option value="Colombia">Colombia</option>
-                                    <option value="Ecuador">Ecuador</option>
-                                    <option value="Uruguay">Uruguay</option>
-                                    <option value="México">México</option>
-                                    <option value="Perú">Perú</option>
-                                </select>
-                            </div>
+                            <input type="hidden" id="country" name="country" value="">
+                            <input type="hidden" id="paisContratacion" name="paisContratacion" value="">
                         </div>
                     </form>
                 </div>
@@ -574,10 +564,10 @@
                     <div class="mb-4">
                         <h6>Formato del archivo CSV:</h6>
                         <p class="text-muted">El archivo debe tener las siguientes columnas en este orden:</p>
-                        <code>Identificación, Nombre, Apellido, País, Área, SubÁrea, Cargo, Líder, Líder Entrenamiento, Teléfono, Fecha de Inicio, Fecha de Retiro</code>
+                        <code>Identificación, Nombre, Apellido, País, País de Contratación, Área, SubÁrea, Cargo, Líder, Líder Entrenamiento, Teléfono, Fecha de Inicio, Fecha de Retiro</code>
                         <br><br>
                         <strong>Ejemplo:</strong><br>
-                        <code>12345678, Juan, Pérez, Colombia, Tech, Cloud, Desarrollador Senior, Carlos López, María García, 3001234567, 2023-01-15, 2024-12-31</code>
+                        <code>12345678, Juan, Pérez, Colombia, Colombia, Tech, Cloud, Desarrollador Senior, Carlos López, María García, 3001234567, 2023-01-15, 2024-12-31</code>
                     </div>
                     
                     <div class="drag-drop-zone" onclick="document.getElementById('csvFile').click()">
@@ -863,7 +853,6 @@
                     <td>${user.subArea || '-'}</td>
                     <td>${user.lider || '-'}</td>
                     <td>${user.liderEntrenamiento || '-'}</td>
-                    <td><span class="badge bg-info">${user.country}</span></td>
                     <td>${whatsappStatus}</td>
                     <td>${responseStatus}</td>
                     <td>
@@ -937,7 +926,8 @@
             document.getElementById('lider').value = user.lider || '';
             document.getElementById('liderEntrenamiento').value = user.liderEntrenamiento || '';
             document.getElementById('area').value = user.area;
-            document.getElementById('country').value = user.country;
+            document.getElementById('country').value = user.country || '';
+            document.getElementById('paisContratacion').value = user.paisContratacion || '';
 
             document.getElementById('userModalTitle').innerHTML = `
                 <i class="bi bi-pencil me-2"></i>
@@ -968,7 +958,8 @@
                 lider: document.getElementById('lider').value.trim(),
                 liderEntrenamiento: document.getElementById('liderEntrenamiento').value.trim(),
                 area: document.getElementById('area').value,
-                country: document.getElementById('country').value
+                country: document.getElementById('country').value || 'Colombia',
+                paisContratacion: document.getElementById('paisContratacion').value || ''
             };
 
             try {
@@ -1107,7 +1098,7 @@
 
             const headers = [
                 'ID', 'Nombre', 'Apellido', 'Identificación', 'Celular',
-                'Fecha de Inicio', 'Fecha de Retiro', 'Cargo', 'Área', 'SubÁrea', 'Líder', 'Líder Entrenamiento', 'País', 'Fecha de Creación'
+                'Fecha de Inicio', 'Fecha de Retiro', 'Cargo', 'Área', 'SubÁrea', 'Líder', 'Líder Entrenamiento', 'Fecha de Creación'
             ];
 
             const csvContent = [
@@ -1125,7 +1116,6 @@
                     `"${user.subArea || ''}"`,
                     `"${user.lider || ''}"`,
                     `"${user.liderEntrenamiento || ''}"`,
-                    `"${user.country}"`,
                     user.created_at || ''
                 ].join(','))
             ].join('\n');
