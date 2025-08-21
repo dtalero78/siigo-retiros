@@ -77,7 +77,14 @@ class UsersDatabase {
             else console.log('Columna subArea añadida a users');
           });
         }
-        // 8) Añadir liderEntrenamiento si falta
+        // 8) Añadir lider si falta
+        if (!existing.includes('lider')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN lider TEXT`, (err) => {
+            if (err) console.error('Error agregando columna lider:', err.message);
+            else console.log('Columna lider añadida a users');
+          });
+        }
+        // 9) Añadir liderEntrenamiento si falta
         if (!existing.includes('liderEntrenamiento')) {
           this.db.run(`ALTER TABLE users ADD COLUMN liderEntrenamiento TEXT`, (err) => {
             if (err) console.error('Error agregando columna liderEntrenamiento:', err.message);
@@ -94,8 +101,8 @@ class UsersDatabase {
         INSERT INTO users (
           first_name, last_name, identification, phone, 
           exit_date, area, country, fechaInicio, cargo,
-          subArea, liderEntrenamiento
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          subArea, lider, liderEntrenamiento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
@@ -109,6 +116,7 @@ class UsersDatabase {
         userData.fechaInicio || null,
         userData.cargo || null,
         userData.subArea || null,
+        userData.lider || null,
         userData.liderEntrenamiento || null
       ];
 
@@ -167,7 +175,7 @@ class UsersDatabase {
         UPDATE users SET 
           first_name = ?, last_name = ?, identification = ?, 
           phone = ?, exit_date = ?, area = ?, country = ?,
-          fechaInicio = ?, cargo = ?, subArea = ?, liderEntrenamiento = ?,
+          fechaInicio = ?, cargo = ?, subArea = ?, lider = ?, liderEntrenamiento = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `;
@@ -183,6 +191,7 @@ class UsersDatabase {
         userData.fechaInicio || null,
         userData.cargo || null,
         userData.subArea || null,
+        userData.lider || null,
         userData.liderEntrenamiento || null,
         id
       ];
@@ -225,8 +234,8 @@ class UsersDatabase {
         INSERT OR IGNORE INTO users (
           first_name, last_name, identification, phone, 
           exit_date, area, country, fechaInicio, cargo,
-          subArea, liderEntrenamiento
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          subArea, lider, liderEntrenamiento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       let inserted = 0;
@@ -244,6 +253,7 @@ class UsersDatabase {
           userData.fechaInicio || null,
           userData.cargo || null,
           userData.subArea || null,
+          userData.lider || null,
           userData.liderEntrenamiento || null
         ];
 

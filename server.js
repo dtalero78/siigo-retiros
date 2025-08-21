@@ -534,11 +534,11 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
       const columns = line.split(',').map(col => col.trim().replace(/^["']|["']$/g, ''));
 
-      if (columns.length < 11) {
+      if (columns.length < 12) {
         continue; // Saltar líneas incompletas
       }
 
-      const [identification, firstName, lastName, country, area, subArea, cargo, liderEntrenamiento, phone, fechaInicio, exitDate] = columns;
+      const [identification, firstName, lastName, country, area, subArea, cargo, lider, liderEntrenamiento, phone, fechaInicio, exitDate] = columns;
 
       // Validar datos
       if (!firstName || !lastName || !identification || !exitDate || !area || !country) {
@@ -560,6 +560,7 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
         fechaInicio: fechaInicio || null,
         cargo: cargo || null,
         subArea: subArea || null,
+        lider: lider || null,
         liderEntrenamiento: liderEntrenamiento || null
       });
     }
