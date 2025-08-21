@@ -70,6 +70,20 @@ class UsersDatabase {
             else console.log('Columna whatsapp_message_id añadida a users');
           });
         }
+        // 7) Añadir subArea si falta
+        if (!existing.includes('subArea')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN subArea TEXT`, (err) => {
+            if (err) console.error('Error agregando columna subArea:', err.message);
+            else console.log('Columna subArea añadida a users');
+          });
+        }
+        // 8) Añadir liderEntrenamiento si falta
+        if (!existing.includes('liderEntrenamiento')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN liderEntrenamiento TEXT`, (err) => {
+            if (err) console.error('Error agregando columna liderEntrenamiento:', err.message);
+            else console.log('Columna liderEntrenamiento añadida a users');
+          });
+        }
       });
     });
   }
@@ -79,8 +93,9 @@ class UsersDatabase {
       const sql = `
         INSERT INTO users (
           first_name, last_name, identification, phone, 
-          exit_date, area, country, fechaInicio, cargo
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          exit_date, area, country, fechaInicio, cargo,
+          subArea, liderEntrenamiento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
@@ -92,7 +107,9 @@ class UsersDatabase {
         userData.area,
         userData.country,
         userData.fechaInicio || null,
-        userData.cargo || null
+        userData.cargo || null,
+        userData.subArea || null,
+        userData.liderEntrenamiento || null
       ];
 
       this.db.run(sql, values, function(err) {
@@ -150,7 +167,8 @@ class UsersDatabase {
         UPDATE users SET 
           first_name = ?, last_name = ?, identification = ?, 
           phone = ?, exit_date = ?, area = ?, country = ?,
-          fechaInicio = ?, cargo = ?, updated_at = CURRENT_TIMESTAMP
+          fechaInicio = ?, cargo = ?, subArea = ?, liderEntrenamiento = ?,
+          updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `;
 
@@ -164,6 +182,8 @@ class UsersDatabase {
         userData.country,
         userData.fechaInicio || null,
         userData.cargo || null,
+        userData.subArea || null,
+        userData.liderEntrenamiento || null,
         id
       ];
 
@@ -204,8 +224,9 @@ class UsersDatabase {
       const sql = `
         INSERT OR IGNORE INTO users (
           first_name, last_name, identification, phone, 
-          exit_date, area, country, fechaInicio, cargo
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          exit_date, area, country, fechaInicio, cargo,
+          subArea, liderEntrenamiento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       let inserted = 0;
@@ -221,7 +242,9 @@ class UsersDatabase {
           userData.area,
           userData.country,
           userData.fechaInicio || null,
-          userData.cargo || null
+          userData.cargo || null,
+          userData.subArea || null,
+          userData.liderEntrenamiento || null
         ];
 
         this.db.run(sql, values, function(err) {

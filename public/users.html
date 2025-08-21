@@ -415,6 +415,8 @@
                                     <th>Fecha Retiro</th>
                                     <th>Cargo</th>
                                     <th>Área</th>
+                                    <th>SubÁrea</th>
+                                    <th>Líder Entrenamiento</th>
                                     <th>País</th>
                                     <th>WhatsApp</th>
                                     <th>Respuesta</th>
@@ -477,6 +479,16 @@
                         <div class="mb-3">
                             <label for="cargo" class="form-label">Cargo</label>
                             <input type="text" class="form-control" id="cargo" name="cargo">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="subArea" class="form-label">SubÁrea</label>
+                                <input type="text" class="form-control" id="subArea" name="subArea">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="liderEntrenamiento" class="form-label">Líder de Entrenamiento</label>
+                                <input type="text" class="form-control" id="liderEntrenamiento" name="liderEntrenamiento">
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -557,10 +569,10 @@
                     <div class="mb-4">
                         <h6>Formato del archivo CSV:</h6>
                         <p class="text-muted">El archivo debe tener las siguientes columnas en este orden:</p>
-                        <code>Identificación, Nombre, Apellido, País, Área, Cargo, Teléfono, Fecha de Inicio, Fecha de Retiro</code>
+                        <code>Identificación, Nombre, Apellido, País, Área, SubÁrea, Cargo, Líder Entrenamiento, Teléfono, Fecha de Inicio, Fecha de Retiro</code>
                         <br><br>
                         <strong>Ejemplo:</strong><br>
-                        <code>12345678, Juan, Pérez, Colombia, Tech, Desarrollador Senior, 3001234567, 2023-01-15, 2024-12-31</code>
+                        <code>12345678, Juan, Pérez, Colombia, Tech, Cloud, Desarrollador Senior, María García, 3001234567, 2023-01-15, 2024-12-31</code>
                     </div>
                     
                     <div class="drag-drop-zone" onclick="document.getElementById('csvFile').click()">
@@ -843,6 +855,8 @@
                     <td>${exitDate}</td>
                     <td>${user.cargo || '-'}</td>
                     <td><span class="badge bg-primary">${user.area}</span></td>
+                    <td>${user.subArea || '-'}</td>
+                    <td>${user.liderEntrenamiento || '-'}</td>
                     <td><span class="badge bg-info">${user.country}</span></td>
                     <td>${whatsappStatus}</td>
                     <td>${responseStatus}</td>
@@ -913,6 +927,8 @@
             document.getElementById('fechaInicio').value = user.fechaInicio || '';
             document.getElementById('exitDate').value = user.exit_date;
             document.getElementById('cargo').value = user.cargo || '';
+            document.getElementById('subArea').value = user.subArea || '';
+            document.getElementById('liderEntrenamiento').value = user.liderEntrenamiento || '';
             document.getElementById('area').value = user.area;
             document.getElementById('country').value = user.country;
 
@@ -941,6 +957,8 @@
                 fechaInicio: document.getElementById('fechaInicio').value,
                 exit_date: document.getElementById('exitDate').value,
                 cargo: document.getElementById('cargo').value.trim(),
+                subArea: document.getElementById('subArea').value.trim(),
+                liderEntrenamiento: document.getElementById('liderEntrenamiento').value.trim(),
                 area: document.getElementById('area').value,
                 country: document.getElementById('country').value
             };
@@ -1081,7 +1099,7 @@
 
             const headers = [
                 'ID', 'Nombre', 'Apellido', 'Identificación', 'Celular',
-                'Fecha de Inicio', 'Fecha de Retiro', 'Cargo', 'Área', 'País', 'Fecha de Creación'
+                'Fecha de Inicio', 'Fecha de Retiro', 'Cargo', 'Área', 'SubÁrea', 'Líder Entrenamiento', 'País', 'Fecha de Creación'
             ];
 
             const csvContent = [
@@ -1096,6 +1114,8 @@
                     user.exit_date || '',
                     `"${user.cargo || ''}"`,
                     `"${user.area}"`,
+                    `"${user.subArea || ''}"`,
+                    `"${user.liderEntrenamiento || ''}"`,
                     `"${user.country}"`,
                     user.created_at || ''
                 ].join(','))
