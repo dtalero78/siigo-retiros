@@ -68,6 +68,13 @@ class Database {
             else console.log('Columna analysis añadida a responses');
           });
         }
+        // 5) Añadir lider_entrenamiento si falta
+        if (!existing.includes('lider_entrenamiento')) {
+          this.db.run(`ALTER TABLE responses ADD COLUMN lider_entrenamiento TEXT`, (err) => {
+            if (err) console.error('Error agregando columna lider_entrenamiento:', err.message);
+            else console.log('Columna lider_entrenamiento añadida a responses');
+          });
+        }
       });
     });
   }
@@ -83,6 +90,7 @@ class Database {
         area: responses['q7'] || responses.area || '',
         country: responses['q8'] || responses.country || '',
         last_leader: responses['q9'] || '',
+        lider_entrenamiento: responses['liderEntrenamiento'] || '',
         exit_reason_detail: responses['q10'] || '',
         exit_reason_category: responses['q11'] || '',
         experience_rating: parseInt(responses['q12']) || null,
@@ -98,14 +106,14 @@ class Database {
       const sql = `
         INSERT INTO responses (
           user_id, full_name, identification, exit_date, tenure, area, country,
-          last_leader, exit_reason_detail, exit_reason_category,
+          last_leader, lider_entrenamiento, exit_reason_detail, exit_reason_category,
           experience_rating, would_recommend, what_enjoyed, what_to_improve,
           satisfaction_ratings, new_company_info, would_return, analysis
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
       const values = [
         data.user_id, data.full_name, data.identification, data.exit_date, data.tenure,
-        data.area, data.country, data.last_leader, data.exit_reason_detail,
+        data.area, data.country, data.last_leader, data.lider_entrenamiento, data.exit_reason_detail,
         data.exit_reason_category, data.experience_rating, data.would_recommend,
         data.what_enjoyed, data.what_to_improve, data.satisfaction_ratings,
         data.new_company_info, data.would_return, data.analysis
