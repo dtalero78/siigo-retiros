@@ -701,6 +701,77 @@ Equipo de Cultura – Siigo`;
 });
 
 // ================================
+// ENDPOINT DE EMERGENCIA PARA RECUPERACIÓN
+// ================================
+
+app.get('/emergency-recovery', async (req, res) => {
+  try {
+    const Database = require('./database/db');
+    const UsersDatabase = require('./database/users-db');
+    
+    const db = new Database();
+    const usersDb = new UsersDatabase();
+    
+    // Verificar respuestas
+    const responses = await db.getAllResponses();
+    
+    let recoveryLog = [`🚨 RECOVERY LOG - ${new Date().toISOString()}`];
+    recoveryLog.push(`📊 Respuestas encontradas: ${responses.length}`);
+    
+    if (responses.length > 0) {
+      recoveryLog.push('\n📋 RESPUESTAS DISPONIBLES:');
+      responses.forEach((resp, i) => {
+        recoveryLog.push(`${i+1}. ${resp.full_name} - ${resp.area} - ${resp.country}`);
+      });
+      
+      // Intentar recuperar usuarios
+      let recovered = 0;
+      for (const response of responses) {
+        if (!response.full_name) continue;
+        
+        const nameParts = response.full_name.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
+        const userData = {
+          first_name: firstName,
+          last_name: lastName,
+          identification: response.identification || `REC-${Date.now()}-${response.id}`,
+          phone: null,
+          exit_date: response.exit_date || new Date().toISOString().split('T')[0],
+          area: response.area || 'Sin área',
+          country: response.country || 'Colombia',
+          fechaInicio: null,
+          cargo: null,
+          subArea: null,
+          lider: response.last_leader || null,
+          liderEntrenamiento: null,
+          paisContratacion: response.country || 'Colombia'
+        };
+        
+        try {
+          const newUserId = await usersDb.addUser(userData);
+          recovered++;
+          recoveryLog.push(`✅ Recuperado: ${response.full_name} (ID: ${newUserId})`);
+        } catch (error) {
+          recoveryLog.push(`❌ Error: ${response.full_name} - ${error.message}`);
+        }
+      }
+      
+      recoveryLog.push(`\n🎉 USUARIOS RECUPERADOS: ${recovered}/${responses.length}`);
+    }
+    
+    db.close();
+    usersDb.close();
+    
+    res.send('<pre>' + recoveryLog.join('\n') + '</pre>');
+    
+  } catch (error) {
+    res.send(`💥 ERROR: ${error.message}`);
+  }
+});
+
+// ================================
 // RUTAS DE ANÁLISIS OPENAI
 // ================================
 
