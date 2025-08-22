@@ -768,9 +768,42 @@ app.post('/api/users/send-apology-whatsapp', async (req, res) => {
             whatsappNumber = '57' + cleanPhone;
           }
 
-          // URL del formulario
+          // Necesitamos crear el usuario en la BD primero para obtener el ID
+          // Buscar si el usuario ya existe por identificación
+          let userId;
+          try {
+            const existingUser = await usersDb.getUserByIdentification(user.identificacion);
+            
+            if (existingUser) {
+              userId = existingUser.id;
+            } else {
+              // Crear usuario si no existe
+              const userData = {
+                first_name: user.nombre,
+                last_name: user.apellido,
+                identification: user.identificacion,
+                phone: user.telefono,
+                exit_date: user.fecha_retiro,
+                area: user.area,
+                country: user.pais,
+                fechaInicio: null,
+                cargo: null,
+                subArea: null,
+                lider: null,
+                liderEntrenamiento: null,
+                paisContratacion: user.pais
+              };
+              userId = await usersDb.addUser(userData);
+            }
+          } catch (dbError) {
+            console.error(`Error manejando usuario ${user.full_name}:`, dbError);
+            errorCount++;
+            continue;
+          }
+
+          // URL del formulario con ID del usuario
           const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
-          const formUrl = `${baseUrl}/`;
+          const formUrl = `${baseUrl}/?user=${userId}`;
 
           // Mensaje personalizado de disculpas
           const primerNombre = user.nombre;
