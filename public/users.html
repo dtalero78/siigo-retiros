@@ -378,10 +378,6 @@
                         <i class="bi bi-whatsapp me-2"></i>
                         Envío Masivo
                     </button>
-                    <button class="btn btn-warning" onclick="sendSecondWhatsApp()">
-                        <i class="bi bi-arrow-repeat me-2"></i>
-                        Segundo Envío
-                    </button>
                     <button class="btn btn-warning" onclick="showUsersWithoutResponse()">
                         <i class="bi bi-funnel me-2"></i>
                         Ver Sin Respuesta
@@ -1373,68 +1369,9 @@
             sendFilteredInBatches();
         }
 
-        async function sendSecondWhatsApp() {
-            console.log('sendSecondWhatsApp called');
-            
-            if (!confirm('¿Enviar segundo mensaje (seguimiento) a todos los usuarios que NO han diligenciado la encuesta?\n\n⚠️ Se enviará automáticamente a usuarios sin respuesta con número de teléfono registrado.\n\n⏱️ El proceso puede tomar varios minutos.')) {
-                return;
-            }
-
-            // Mostrar progreso
-            const progressToast = document.createElement('div');
-            progressToast.className = 'position-fixed top-0 end-0 p-3';
-            progressToast.style.zIndex = '9999';
-            progressToast.innerHTML = `
-                <div class="toast show bg-info text-white" role="alert">
-                    <div class="toast-body">
-                        <i class="bi bi-hourglass-split me-2"></i>
-                        <div>Enviando segundo mensaje...</div>
-                        <div class="small">Estado: <span id="secondSendStatus">Iniciando...</span></div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(progressToast);
-
-            try {
-                const statusElement = document.getElementById('secondSendStatus');
-                if (statusElement) {
-                    statusElement.textContent = 'Procesando usuarios sin respuesta...';
-                }
-
-                const response = await fetch('/api/users/send-second-whatsapp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                const result = await response.json();
-
-                // Remover toast de progreso
-                progressToast.remove();
-
-                if (response.ok) {
-                    if (result.sent === 0) {
-                        showToast(result.message, 'warning');
-                    } else {
-                        showToast(`${result.message}`, result.errors > 0 ? 'warning' : 'success');
-                    }
-                } else {
-                    showToast(result.error || 'Error al enviar segundo mensaje', 'error');
-                }
-
-                // Recargar datos para actualizar el estado
-                await loadUsers(currentFilter);
-
-            } catch (error) {
-                progressToast.remove();
-                console.error('Error enviando segundo WhatsApp:', error);
-                showToast('Error de conexión al enviar segundo mensaje', 'error');
-            }
-        }
-
         // Hacer las funciones disponibles globalmente
         window.sendWhatsApp = sendWhatsApp;
         window.sendMassWhatsApp = sendMassWhatsApp;
-        window.sendSecondWhatsApp = sendSecondWhatsApp;
         window.showUsersWithoutResponse = showUsersWithoutResponse;
         window.sendWhatsAppToFilteredUsers = sendWhatsAppToFilteredUsers;
         window.applyFilter = applyFilter;
