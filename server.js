@@ -606,7 +606,7 @@ app.get('/api/users/stats', async (req, res) => {
 // Enviar mensaje de WhatsApp a usuario
 app.post('/api/users/send-whatsapp', async (req, res) => {
   try {
-    const { userId, phone, name } = req.body;
+    const { userId, phone, name, isSecondMessage = false } = req.body;
 
     if (!userId || !phone || !name) {
       return res.status(400).json({ error: 'Datos incompletos para enviar WhatsApp' });
@@ -635,20 +635,32 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
     const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
     const formUrl = `${baseUrl}/?user=${userId}`;
 
-    // Mensaje personalizado con la URL que incluye el ID
-    const message = `¡Hola! 👋 Gracias por haber hecho parte de Siigo 💙
+    // Mensaje según el tipo de envío
+    let message;
+    if (isSecondMessage) {
+      // Mensaje para segundo envío (seguimiento)
+      const primerNombre = user.first_name || name.split(' ')[0];
+      message = `Hola ${primerNombre} nuevamente!
+
+Ayúdanos a realizar la encuesta. No toma más de 5 minutos y nos ayudas muchísimo a mejorar.
+
+${formUrl}`;
+    } else {
+      // Mensaje original
+      message = `¡Hola! 👋 Gracias por haber hecho parte de Siigo 💙
 
 Desde el equipo de Cultura de Siigo queremos agradecerte de corazón por todo lo que aportaste durante tu tiempo en la compañía. 🙌
 
 Nos encantaría conocer tu experiencia a través de una breve entrevista de retiro. Tu opinión es muy valiosa y nos ayudará a seguir mejorando como organización.
 
-📝 Aquí puedes responder el formulario (toma menos de 10 min):
+Aquí puedes responder el formulario (toma menos de 5 min):
 ${formUrl}
 
 ¡Gracias por tu sinceridad y por habernos acompañado en este camino! 🌟
 
 Un abrazo,
 Equipo de Cultura – Siigo`;
+    }
 
     // Configuración de Whapi
     const whapiToken = process.env.WHAPI_TOKEN;
@@ -696,6 +708,112 @@ Equipo de Cultura – Siigo`;
 
   } catch (error) {
     console.error('Error enviando WhatsApp:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Enviar segundo mensaje de WhatsApp (seguimiento) solo a usuarios sin respuesta
+app.post('/api/users/send-second-whatsapp', async (req, res) => {
+  try {
+    // Obtener todos los usuarios
+    const allUsers = await usersDb.getAllUsers();
+    
+    // Filtrar usuarios que no han respondido
+    const usersWithoutResponse = [];
+    for (const user of allUsers) {
+      const hasResponse = await db.hasUserResponse(user.id);
+      if (!hasResponse) {
+        usersWithoutResponse.push(user);
+      }
+    }
+    
+    if (usersWithoutResponse.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No hay usuarios sin respuesta para enviar seguimiento',
+        sent: 0,
+        total: 0
+      });
+    }
+
+    // Filtrar solo usuarios con teléfono
+    const usersWithPhone = usersWithoutResponse.filter(user => user.phone && user.phone.trim());
+    
+    if (usersWithPhone.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No hay usuarios sin respuesta con número de teléfono',
+        sent: 0,
+        total: usersWithoutResponse.length
+      });
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Configuración para evitar bloqueos
+    const BATCH_SIZE = 20;
+    const DELAY_BETWEEN_MESSAGES = 3000;
+    const DELAY_BETWEEN_BATCHES = 30000;
+
+    // Procesar en lotes
+    const batches = [];
+    for (let i = 0; i < usersWithPhone.length; i += BATCH_SIZE) {
+      batches.push(usersWithPhone.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+
+      for (let userIndex = 0; userIndex < batch.length; userIndex++) {
+        const user = batch[userIndex];
+        
+        try {
+          // Usar el mismo endpoint pero con isSecondMessage = true
+          const response = await fetch(`${req.protocol}://${req.get('host')}/api/users/send-whatsapp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              phone: user.phone,
+              name: `${user.first_name} ${user.last_name}`,
+              isSecondMessage: true
+            })
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            errorCount++;
+            console.warn(`Error enviando segundo mensaje a ${user.first_name}: ${response.statusText}`);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`Error enviando segundo mensaje a ${user.first_name}:`, error);
+        }
+
+        // Delay entre mensajes dentro del lote
+        if (userIndex < batch.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_MESSAGES));
+        }
+      }
+
+      // Delay más largo entre lotes
+      if (batchIndex < batches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Segundo envío completado: ${successCount} exitosos, ${errorCount} errores`,
+      sent: successCount,
+      errors: errorCount,
+      total: usersWithPhone.length
+    });
+
+  } catch (error) {
+    console.error('Error enviando segundo WhatsApp:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

@@ -420,6 +420,26 @@ class UsersDatabase {
     });
   }
 
+  async getUsersWithoutResponse() {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT * FROM users 
+        ORDER BY exit_date DESC, created_at DESC
+      `;
+      
+      this.db.all(sql, [], (err, rows) => {
+        if (err) {
+          console.error('Error obteniendo usuarios sin respuesta:', err.message);
+          reject(err);
+        } else {
+          // Return all users since filtering by response will be done at server level
+          // by checking against the responses database
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   close() {
     this.db.close((err) => {
       if (err) {
