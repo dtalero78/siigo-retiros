@@ -701,6 +701,152 @@ Equipo de Cultura – Siigo`;
 });
 
 // ================================
+// ENDPOINT PARA DISCULPAS MASIVAS A LOS 26 QUE YA RESPONDIERON
+// ================================
+
+app.post('/api/users/send-apology-whatsapp', async (req, res) => {
+  try {
+    const fs = require('fs');
+    
+    // Leer lista de usuarios que ya habían respondido
+    const respondersData = JSON.parse(fs.readFileSync('/app/responders_to_apologize.json', 'utf8'));
+    
+    if (respondersData.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No hay usuarios en la lista de disculpas',
+        sent: 0,
+        total: 0
+      });
+    }
+
+    // Filtrar usuarios con teléfono
+    const usersWithPhone = respondersData.filter(user => user.telefono && user.telefono.trim());
+    
+    if (usersWithPhone.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No hay usuarios en lista de disculpas con número de teléfono',
+        sent: 0,
+        total: respondersData.length
+      });
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Configuración para evitar bloqueos
+    const BATCH_SIZE = 15; // Más conservador para mensajes de disculpa
+    const DELAY_BETWEEN_MESSAGES = 5000; // 5 segundos entre mensajes
+    const DELAY_BETWEEN_BATCHES = 45000; // 45 segundos entre lotes
+
+    // Procesar en lotes
+    const batches = [];
+    for (let i = 0; i < usersWithPhone.length; i += BATCH_SIZE) {
+      batches.push(usersWithPhone.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+
+      for (let userIndex = 0; userIndex < batch.length; userIndex++) {
+        const user = batch[userIndex];
+        
+        try {
+          // Limpiar número de teléfono
+          const cleanPhone = user.telefono.replace(/\D/g, '');
+          
+          if (cleanPhone.length < 10) {
+            errorCount++;
+            console.warn(`Teléfono inválido para ${user.full_name}: ${user.telefono}`);
+            continue;
+          }
+
+          // Formatear número para WhatsApp
+          let whatsappNumber = cleanPhone;
+          if (!whatsappNumber.startsWith('57') && cleanPhone.length === 10) {
+            whatsappNumber = '57' + cleanPhone;
+          }
+
+          // URL del formulario
+          const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
+          const formUrl = `${baseUrl}/`;
+
+          // Mensaje personalizado de disculpas
+          const primerNombre = user.nombre;
+          const message = `Hola ${primerNombre}, disculpas por contactarte nuevamente 🙏
+
+Lamentamos informarte que por un error técnico se perdió tu respuesta anterior de la entrevista de retiro. 
+
+Sabemos que ya dedicaste tu tiempo a completarla y entendemos si esto es incómodo. 
+
+¿Nos ayudarías completando nuevamente la encuesta? No toma más de 5 minutos:
+${formUrl}
+
+Realmente valoramos tu feedback para seguir mejorando como organización.
+
+Mil disculpas por las molestias 🙏
+Equipo de Cultura – Siigo`;
+
+          // Configuración de Whapi
+          const whapiToken = process.env.WHAPI_TOKEN;
+          if (!whapiToken) {
+            throw new Error('Token de Whapi no configurado');
+          }
+
+          // Enviar mensaje usando Whapi
+          const whapiResponse = await fetch('https://gate.whapi.cloud/messages/text', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${whapiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              to: whatsappNumber,
+              body: message
+            })
+          });
+
+          if (whapiResponse.ok) {
+            successCount++;
+            console.log(`✅ Disculpa enviada a ${user.full_name} (${user.telefono})`);
+          } else {
+            errorCount++;
+            const errorText = await whapiResponse.text();
+            console.warn(`❌ Error enviando disculpa a ${user.full_name}: ${errorText}`);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`❌ Error enviando disculpa a ${user.full_name}:`, error.message);
+        }
+
+        // Delay entre mensajes dentro del lote
+        if (userIndex < batch.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_MESSAGES));
+        }
+      }
+
+      // Delay más largo entre lotes
+      if (batchIndex < batches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Disculpas enviadas: ${successCount} exitosos, ${errorCount} errores`,
+      sent: successCount,
+      errors: errorCount,
+      total: usersWithPhone.length
+    });
+
+  } catch (error) {
+    console.error('Error enviando disculpas WhatsApp:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ================================
 // ENDPOINT DE EMERGENCIA PARA RECUPERACIÓN
 // ================================
 

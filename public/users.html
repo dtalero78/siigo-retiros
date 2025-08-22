@@ -378,6 +378,10 @@
                         <i class="bi bi-whatsapp me-2"></i>
                         Envío Masivo
                     </button>
+                    <button class="btn btn-danger" onclick="sendApologyWhatsApp()">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Enviar Disculpas (26 usuarios)
+                    </button>
                     <button class="btn btn-warning" onclick="showUsersWithoutResponse()">
                         <i class="bi bi-funnel me-2"></i>
                         Ver Sin Respuesta
@@ -1369,9 +1373,76 @@
             sendFilteredInBatches();
         }
 
+        async function sendApologyWhatsApp() {
+            console.log('sendApologyWhatsApp called');
+            
+            if (!confirm('🚨 ENVIAR DISCULPAS A 25 USUARIOS QUE YA HABÍAN RESPONDIDO\n\n¿Enviar mensaje de disculpas a los 25 usuarios que perdieron sus respuestas por el error técnico?\n\n⚠️ Este mensaje explicará la situación y les pedirá que vuelvan a completar la encuesta.\n\n⏱️ El proceso tomará aproximadamente 10-15 minutos.\n\n¿Continuar?')) {
+                return;
+            }
+
+            // Mostrar progreso
+            const progressToast = document.createElement('div');
+            progressToast.className = 'position-fixed top-0 end-0 p-3';
+            progressToast.style.zIndex = '9999';
+            progressToast.innerHTML = `
+                <div class="toast show bg-warning text-dark" role="alert">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>Enviando disculpas...</div>
+                        <div class="small">Estado: <span id="apologyStatus">Iniciando...</span></div>
+                        <div class="small">⚠️ Por favor no cierres esta ventana</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(progressToast);
+
+            try {
+                const statusElement = document.getElementById('apologyStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Enviando mensajes de disculpa...';
+                }
+
+                const response = await fetch('/api/users/send-apology-whatsapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                // Remover toast de progreso
+                progressToast.remove();
+
+                if (response.ok) {
+                    if (result.sent === 0) {
+                        showToast(`⚠️ ${result.message}`, 'warning');
+                    } else {
+                        const messageType = result.errors > 0 ? 'warning' : 'success';
+                        const icon = result.errors > 0 ? '⚠️' : '✅';
+                        showToast(`${icon} ${result.message}`, messageType);
+                        
+                        // Mostrar resumen detallado
+                        setTimeout(() => {
+                            showToast(`📊 Resumen: ${result.sent} exitosos, ${result.errors} errores, de ${result.total} usuarios con teléfono`, 'info');
+                        }, 2000);
+                    }
+                } else {
+                    showToast(`❌ Error: ${result.error || 'Error al enviar disculpas'}`, 'error');
+                }
+
+                // Recargar datos
+                await loadUsers(currentFilter);
+
+            } catch (error) {
+                progressToast.remove();
+                console.error('Error enviando disculpas WhatsApp:', error);
+                showToast('❌ Error de conexión al enviar disculpas', 'error');
+            }
+        }
+
         // Hacer las funciones disponibles globalmente
         window.sendWhatsApp = sendWhatsApp;
         window.sendMassWhatsApp = sendMassWhatsApp;
+        window.sendApologyWhatsApp = sendApologyWhatsApp;
         window.showUsersWithoutResponse = showUsersWithoutResponse;
         window.sendWhatsAppToFilteredUsers = sendWhatsAppToFilteredUsers;
         window.applyFilter = applyFilter;

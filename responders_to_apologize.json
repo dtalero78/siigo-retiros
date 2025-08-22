@@ -1,0 +1,252 @@
+[
+  {
+    "identificacion": "1105304341",
+    "nombre": "Leany",
+    "apellido": "Montero",
+    "telefono": "3115817279",
+    "area": "Customer Success",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-09",
+    "full_name": "Leany Montero"
+  },
+  {
+    "identificacion": "1143829803",
+    "nombre": "Beatriz",
+    "apellido": "Alvarez",
+    "telefono": "3052380258",
+    "area": "Customer Success",
+    "pais": "México",
+    "fecha_retiro": "2025-07-28",
+    "full_name": "Beatriz Alvarez"
+  },
+  {
+    "identificacion": "1118864358",
+    "nombre": "Jesus",
+    "apellido": "Ramirez",
+    "telefono": "3136269128",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-28",
+    "full_name": "Jesus Ramirez"
+  },
+  {
+    "identificacion": "1026275481",
+    "nombre": "Sandra",
+    "apellido": "Riaño",
+    "telefono": "3123260122",
+    "area": "People Ops",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-03",
+    "full_name": "Sandra Riaño"
+  },
+  {
+    "identificacion": "20879069",
+    "nombre": "Viviana",
+    "apellido": "Estrada",
+    "telefono": "3133080724",
+    "area": "Sales",
+    "pais": "México",
+    "fecha_retiro": "2025-07-05",
+    "full_name": "Viviana Estrada"
+  },
+  {
+    "identificacion": "39101135",
+    "nombre": "Leidis",
+    "apellido": "Teheran",
+    "telefono": "3145702224",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-28",
+    "full_name": "Leidis Teheran"
+  },
+  {
+    "identificacion": "1140896332",
+    "nombre": "Angie",
+    "apellido": "Rodriguez",
+    "telefono": "3006011613",
+    "area": "Customer Success",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-24",
+    "full_name": "Angie Rodriguez"
+  },
+  {
+    "identificacion": "1110487087",
+    "nombre": "Roger",
+    "apellido": "Guzman",
+    "telefono": "3205780939",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-28",
+    "full_name": "Roger Guzman"
+  },
+  {
+    "identificacion": "1005368059",
+    "nombre": "Jessica",
+    "apellido": "Ramirez",
+    "telefono": "3128695368",
+    "area": "Marketing",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-25",
+    "full_name": "Jessica Ramirez"
+  },
+  {
+    "identificacion": "65796394",
+    "nombre": "Paola",
+    "apellido": "Acevedo",
+    "telefono": "3202047904",
+    "area": "Marketing",
+    "pais": "México",
+    "fecha_retiro": "2025-06-27",
+    "full_name": "Paola Acevedo"
+  },
+  {
+    "identificacion": "1069718087",
+    "nombre": "Edison",
+    "apellido": "Cagua",
+    "telefono": "3118183375",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-02",
+    "full_name": "Edison Cagua"
+  },
+  {
+    "identificacion": "53067529",
+    "nombre": "Luz",
+    "apellido": "Matabajoy",
+    "telefono": "3204779168",
+    "area": "Sales",
+    "pais": "México",
+    "fecha_retiro": "2025-07-28",
+    "full_name": "Luz Matabajoy"
+  },
+  {
+    "identificacion": "1006516726",
+    "nombre": "Jhon",
+    "apellido": "Canizales",
+    "telefono": "3228318068",
+    "area": "Customer Success",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-10",
+    "full_name": "Jhon Canizales"
+  },
+  {
+    "identificacion": "1022426051",
+    "nombre": "Paula",
+    "apellido": "Delgado",
+    "telefono": "3192870223",
+    "area": "Marketing",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-25",
+    "full_name": "Paula Delgado"
+  },
+  {
+    "identificacion": "1065006083",
+    "nombre": "Karen",
+    "apellido": "Melendez",
+    "telefono": "3117639966",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-25",
+    "full_name": "Karen Melendez"
+  },
+  {
+    "identificacion": "1068974610",
+    "nombre": "Yenny",
+    "apellido": "Leal",
+    "telefono": "3227357727",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-19",
+    "full_name": "Yenny Leal"
+  },
+  {
+    "identificacion": "1095907170",
+    "nombre": "Adriana",
+    "apellido": "Sanabria",
+    "telefono": "3229275966",
+    "area": "Customer Success",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-27",
+    "full_name": "Adriana Sanabria"
+  },
+  {
+    "identificacion": "53894733",
+    "nombre": "Neidy",
+    "apellido": "Jimenez",
+    "telefono": "3194530072",
+    "area": "Customer Success",
+    "pais": "Ecuador",
+    "fecha_retiro": "2025-06-11",
+    "full_name": "Neidy Jimenez"
+  },
+  {
+    "identificacion": "1015418497",
+    "nombre": "Maria",
+    "apellido": "Ramirez",
+    "telefono": "3144610426",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-01",
+    "full_name": "Maria Ramirez"
+  },
+  {
+    "identificacion": "1024528827",
+    "nombre": "Karen",
+    "apellido": "Escobar",
+    "telefono": "3017551578",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-11",
+    "full_name": "Karen Escobar"
+  },
+  {
+    "identificacion": "1085308383",
+    "nombre": "Cristian",
+    "apellido": "Navia",
+    "telefono": "3207478452",
+    "area": "Customer Success",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-24",
+    "full_name": "Cristian Navia"
+  },
+  {
+    "identificacion": "1019017196",
+    "nombre": "Cristian",
+    "apellido": "Coronado",
+    "telefono": "3024274516",
+    "area": "Customer Success",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-11",
+    "full_name": "Cristian Coronado"
+  },
+  {
+    "identificacion": "1128471494",
+    "nombre": "Sergio",
+    "apellido": "Cardona",
+    "telefono": "3232897090",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-09",
+    "full_name": "Sergio Cardona"
+  },
+  {
+    "identificacion": "1044432038",
+    "nombre": "Daniela",
+    "apellido": "Labao",
+    "telefono": "3005646479",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-06-30",
+    "full_name": "Daniela Labao"
+  },
+  {
+    "identificacion": "1067927536",
+    "nombre": "Leysli",
+    "apellido": "Rojas",
+    "telefono": "3118740936",
+    "area": "Sales",
+    "pais": "Colombia",
+    "fecha_retiro": "2025-07-28",
+    "full_name": "Leysli Rojas"
+  }
+]
