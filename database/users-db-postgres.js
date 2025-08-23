@@ -324,6 +324,42 @@ class UsersDbPostgres {
     }
   }
 
+  // Obtener usuarios filtrados por estado
+  async getFilteredUsers(filter) {
+    try {
+      let query = `SELECT * FROM users`;
+      const conditions = [];
+      const params = [];
+      
+      if (filter === 'whatsapp_sent') {
+        conditions.push('whatsapp_sent_at IS NOT NULL');
+      } else if (filter === 'whatsapp_not_sent') {
+        conditions.push('whatsapp_sent_at IS NULL');
+      }
+      // Note: 'no_response' and 'has_response' filters serán manejados por la lógica del servidor
+      // ya que requieren consultas cruzadas entre bases de datos
+      
+      if (conditions.length > 0) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
+      
+      query += ' ORDER BY exit_date DESC, created_at DESC';
+      
+      const result = await this.pool.query(query, params);
+      
+      // Agregar el campo has_response (será completado por la lógica del servidor)
+      const usersWithStatus = result.rows.map(user => ({
+        ...user,
+        has_response: 0 // Se actualizará con la lógica del servidor
+      }));
+      
+      return usersWithStatus;
+    } catch (error) {
+      console.error('Error obteniendo usuarios filtrados:', error);
+      throw error;
+    }
+  }
+
   // Cerrar conexión
   async close() {
     await this.pool.end();
