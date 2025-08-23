@@ -382,6 +382,10 @@
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         Enviar Disculpas (26 usuarios)
                     </button>
+                    <button class="btn btn-info" onclick="sendSecondReminder()">
+                        <i class="bi bi-arrow-repeat me-2"></i>
+                        Segundo Envío (Recordatorio)
+                    </button>
                     <button class="btn btn-warning" onclick="showUsersWithoutResponse()">
                         <i class="bi bi-funnel me-2"></i>
                         Ver Sin Respuesta
@@ -1371,6 +1375,62 @@
 
             // Ejecutar envío en lotes
             sendFilteredInBatches();
+        }
+
+        // Función para segundo envío masivo (recordatorio)
+        async function sendSecondReminder() {
+            console.log('sendSecondReminder called');
+            
+            const userCount = document.querySelectorAll('#usersTableBody tr').length;
+            const effectiveCount = Math.max(0, userCount - 25); // Restamos los 25 que ya recibieron disculpas
+            
+            if (!confirm(`📱 SEGUNDO ENVÍO - RECORDATORIO\n\n¿Enviar recordatorio a aproximadamente ${effectiveCount} usuarios?\n(Se excluyen los 25 usuarios que ya recibieron el mensaje de disculpas)\n\nMensaje:\n"Hola [nombre] nuevamente!\nAyúdanos a realizar la encuesta. No toma más de 5 minutos y nos ayudas muchísimo a mejorar."\n\n⏱️ Tiempo estimado: ${Math.ceil(effectiveCount * 5 / 60)} minutos\n\n¿Continuar?`)) {
+                return;
+            }
+
+            // Mostrar progreso
+            const progressToast = document.createElement('div');
+            progressToast.className = 'position-fixed top-0 end-0 p-3';
+            progressToast.style.zIndex = '9999';
+            progressToast.innerHTML = `
+                <div class="toast show bg-info text-white" role="alert">
+                    <div class="toast-body">
+                        <i class="bi bi-arrow-repeat me-2"></i>
+                        <div>Enviando segundo recordatorio...</div>
+                        <div class="small">Estado: <span id="reminderStatus">Iniciando...</span></div>
+                        <div class="small">⚠️ Por favor no cierres esta ventana</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(progressToast);
+
+            try {
+                const statusElement = document.getElementById('reminderStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Enviando recordatorios...';
+                }
+
+                const response = await fetch('/api/users/send-second-whatsapp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Segundo envío completado\n\nEnviados: ${result.sent}\nErrores: ${result.errors}\nTotal procesados: ${result.total}\nExcluidos (ya recibieron disculpas): ${result.excluded || 0}\n\n${result.details || ''}`);
+                } else {
+                    alert(`❌ Error en segundo envío: ${result.error}`);
+                }
+
+            } catch (error) {
+                console.error('Error en segundo envío:', error);
+                alert('Error al enviar recordatorios: ' + error.message);
+            } finally {
+                progressToast.remove();
+            }
         }
 
         async function sendApologyWhatsApp() {

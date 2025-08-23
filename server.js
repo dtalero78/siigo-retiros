@@ -6,8 +6,8 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
-const Database = require('./database/db');
-const UsersDatabase = require('./database/users-db');
+// Usar configuración flexible de base de datos
+const { getDatabase, getUsersDatabase } = require('./database/config');
 
 const app = express();
 app.set('trust proxy', true);
@@ -69,8 +69,9 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Inicializar bases de datos
-const db = new Database();
-const usersDb = new UsersDatabase();
+// Inicializar bases de datos usando la configuración flexible
+const db = getDatabase();
+const usersDb = getUsersDatabase();
 
 // Datos de las preguntas (extraídos del Excel)
 const questions = [
@@ -592,6 +593,44 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
   }
 });
 
+// Endpoint para descargar datos de respuestas
+app.get('/api/export/responses', async (req, res) => {
+  try {
+    const responses = await db.getAllResponses();
+    const csv = require('csv-stringify/sync');
+    
+    const output = csv.stringify(responses, {
+      header: true
+    });
+    
+    res.header('Content-Type', 'text/csv');
+    res.header('Content-Disposition', 'attachment; filename="responses_export.csv"');
+    res.send(output);
+  } catch (error) {
+    console.error('Error exportando respuestas:', error);
+    res.status(500).json({ error: 'Error exportando respuestas' });
+  }
+});
+
+// Endpoint para descargar datos de usuarios
+app.get('/api/export/users', async (req, res) => {
+  try {
+    const users = await usersDb.getAllUsers();
+    const csv = require('csv-stringify/sync');
+    
+    const output = csv.stringify(users, {
+      header: true
+    });
+    
+    res.header('Content-Type', 'text/csv');
+    res.header('Content-Disposition', 'attachment; filename="users_export.csv"');
+    res.send(output);
+  } catch (error) {
+    console.error('Error exportando usuarios:', error);
+    res.status(500).json({ error: 'Error exportando usuarios' });
+  }
+});
+
 // Obtener estadísticas de usuarios
 app.get('/api/users/stats', async (req, res) => {
   try {
@@ -697,6 +736,183 @@ Equipo de Cultura – Siigo`;
   } catch (error) {
     console.error('Error enviando WhatsApp:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ================================
+// ENDPOINT PARA SEGUNDO ENVÍO MASIVO (RECORDATORIO)
+// ================================
+
+app.post('/api/users/send-second-whatsapp', async (req, res) => {
+  try {
+    // Cargar lista de usuarios que NO deben recibir el mensaje (los 25 con disculpas)
+    const fs = require('fs');
+    let excludedIdentifications = [];
+    
+    try {
+      // Intentar cargar desde la ruta del servidor
+      const apologizedUsers = JSON.parse(fs.readFileSync('./responders_to_apologize.json', 'utf8'));
+      excludedIdentifications = apologizedUsers.map(u => u.identificacion);
+      console.log(`Excluyendo ${excludedIdentifications.length} usuarios que ya recibieron disculpas`);
+    } catch (err) {
+      console.log('No se pudo cargar lista de exclusión, continuando sin filtro');
+    }
+    
+    // Obtener todos los usuarios
+    const users = await usersDb.getAllUsers();
+    
+    if (users.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No hay usuarios en la base de datos',
+        sent: 0,
+        total: 0
+      });
+    }
+
+    // Filtrar usuarios: debe tener teléfono Y NO estar en la lista de exclusión
+    const usersWithPhone = users.filter(user => {
+      // Debe tener teléfono
+      if (!user.phone || !user.phone.trim()) return false;
+      
+      // NO debe estar en la lista de los 25 que recibieron disculpas
+      if (excludedIdentifications.includes(user.identification)) {
+        console.log(`Excluyendo a ${user.first_name} ${user.last_name} (${user.identification}) - ya recibió disculpas`);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    if (usersWithPhone.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No hay usuarios con número de teléfono',
+        sent: 0,
+        total: users.length
+      });
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Configuración para evitar bloqueos
+    const BATCH_SIZE = 20;
+    const DELAY_BETWEEN_MESSAGES = 5000; // 5 segundos entre mensajes
+    const DELAY_BETWEEN_BATCHES = 60000; // 60 segundos entre lotes
+
+    // Procesar en lotes
+    const batches = [];
+    for (let i = 0; i < usersWithPhone.length; i += BATCH_SIZE) {
+      batches.push(usersWithPhone.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+
+      for (let userIndex = 0; userIndex < batch.length; userIndex++) {
+        const user = batch[userIndex];
+        
+        try {
+          // Limpiar número de teléfono
+          const cleanPhone = user.phone.replace(/\D/g, '');
+          
+          if (cleanPhone.length < 10) {
+            errorCount++;
+            console.warn(`Teléfono inválido para ${user.first_name} ${user.last_name}: ${user.phone}`);
+            continue;
+          }
+
+          // Formatear número para WhatsApp
+          let whatsappNumber = cleanPhone;
+          if (!whatsappNumber.startsWith('57') && cleanPhone.length === 10) {
+            whatsappNumber = '57' + cleanPhone;
+          }
+
+          // URL del formulario con ID del usuario
+          const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
+          const formUrl = `${baseUrl}/?user=${user.id}`;
+
+          // Mensaje de segundo envío (recordatorio)
+          const primerNombre = user.first_name;
+          const message = `Hola ${primerNombre} nuevamente!
+
+Ayúdanos a realizar la encuesta. No toma más de 5 minutos y nos ayudas muchísimo a mejorar.
+
+${formUrl}`;
+
+          // Configuración de Whapi
+          const whapiToken = process.env.WHAPI_TOKEN;
+          if (!whapiToken) {
+            throw new Error('Token de Whapi no configurado');
+          }
+
+          // Enviar mensaje usando Whapi
+          const whapiResponse = await fetch('https://gate.whapi.cloud/messages/text', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${whapiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              to: whatsappNumber,
+              body: message
+            })
+          });
+
+          if (whapiResponse.ok) {
+            const result = await whapiResponse.json();
+            
+            // Actualizar estado en la BD
+            try {
+              await usersDb.updateWhatsAppStatus(user.id, result.id, 'second_reminder');
+            } catch (updateError) {
+              console.error('Error actualizando estado de WhatsApp:', updateError);
+            }
+            
+            successCount++;
+            console.log(`✅ Segundo envío a ${primerNombre} ${user.last_name} (${user.phone})`);
+          } else {
+            errorCount++;
+            const errorText = await whapiResponse.text();
+            console.warn(`❌ Error en segundo envío a ${primerNombre}: ${errorText}`);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`❌ Error en segundo envío a ${user.first_name}:`, error.message);
+        }
+
+        // Delay entre mensajes dentro del lote
+        if (userIndex < batch.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_MESSAGES));
+        }
+      }
+
+      // Delay entre lotes
+      if (batchIndex < batches.length - 1) {
+        console.log(`⏳ Esperando ${DELAY_BETWEEN_BATCHES/1000} segundos antes del siguiente lote...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
+    }
+
+    const excludedCount = users.filter(u => u.phone && excludedIdentifications.includes(u.identification)).length;
+    
+    res.json({
+      success: true,
+      message: 'Proceso de segundo envío completado',
+      sent: successCount,
+      errors: errorCount,
+      total: usersWithPhone.length,
+      excluded: excludedCount,
+      details: `Se excluyeron ${excludedCount} usuarios que ya recibieron disculpas`
+    });
+
+  } catch (error) {
+    console.error('Error en segundo envío masivo:', error);
+    res.status(500).json({ 
+      error: 'Error interno del servidor', 
+      message: error.message 
+    });
   }
 });
 
@@ -885,11 +1101,8 @@ Equipo de Cultura – Siigo`;
 
 app.get('/emergency-recovery', async (req, res) => {
   try {
-    const Database = require('./database/db');
-    const UsersDatabase = require('./database/users-db');
-    
-    const db = new Database();
-    const usersDb = new UsersDatabase();
+    const db = getDatabase();
+    const usersDb = getUsersDatabase();
     
     // Verificar respuestas
     const responses = await db.getAllResponses();
