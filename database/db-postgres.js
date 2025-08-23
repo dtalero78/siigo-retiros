@@ -75,6 +75,63 @@ class DatabasePostgres {
     }
   }
 
+  // Guardar respuesta del formulario (compatibilidad con el frontend)
+  async saveResponse(responses) {
+    try {
+      // Procesar datos del formulario para convertirlos al formato esperado
+      const data = {
+        user_id: responses.userId || null,
+        full_name: responses['q3'] || responses.full_name || '',
+        identification: responses['q4'] || responses.identification || '',
+        exit_date: responses['q5'] || responses.exit_date || '',
+        tenure: responses['q6'] || '',
+        area: responses['q7'] || responses.area || '',
+        country: responses['q8'] || responses.country || '',
+        last_leader: responses['q9'] || '',
+        exit_reason_detail: responses['q10'] || '',
+        exit_reason_category: responses['q11'] || '',
+        experience_rating: parseInt(responses['q12']) || null,
+        would_recommend: responses['q13'] === 'true' || responses['q13'] === true,
+        what_enjoyed: responses['q14'] || '',
+        what_to_improve: responses['q15'] || '',
+        satisfaction_ratings: responses['q16'] || {},
+        new_company_info: responses['q17'] || '',
+        would_return: responses['q18'] === 'true' || responses['q18'] === true,
+        fechaInicio: responses.fechaInicio || null,
+        cargo: responses.cargo || null,
+        subArea: responses.subArea || null,
+        lider: responses.lider || null,
+        liderEntrenamiento: responses['liderEntrenamiento'] || responses.lider_entrenamiento || null,
+        paisContratacion: responses.paisContratacion || null
+      };
+
+      // Usar el método addResponse existente
+      const responseId = await this.addResponse(data);
+
+      // Si hay un userId, actualizar el estado de respuesta del usuario
+      if (responses.userId) {
+        try {
+          const user = await this.pool.query('SELECT identification FROM users WHERE id = $1', [responses.userId]);
+          if (user.rows.length > 0) {
+            await this.pool.query(
+              'UPDATE users SET response_submitted = true, response_submitted_at = CURRENT_TIMESTAMP WHERE id = $1',
+              [responses.userId]
+            );
+          }
+        } catch (userUpdateError) {
+          console.warn('No se pudo actualizar estado del usuario:', userUpdateError);
+        }
+      }
+
+      console.log('Respuesta guardada con ID:', responseId);
+      return responseId;
+
+    } catch (error) {
+      console.error('Error guardando respuesta:', error);
+      throw error;
+    }
+  }
+
   // Agregar una respuesta
   async addResponse(data) {
     const query = `
