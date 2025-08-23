@@ -283,10 +283,16 @@
                     <i class="bi bi-table me-2"></i>
                     Respuestas Recibidas
                 </h5>
-                <button class="btn btn-export" onclick="exportData()">
-                    <i class="bi bi-download me-2"></i>
-                    Exportar CSV
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-export" onclick="exportData()">
+                        <i class="bi bi-download me-2"></i>
+                        Exportar CSV
+                    </button>
+                    <button class="btn btn-warning" onclick="generateGlobalAnalysis()">
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                        Análisis Global de la Organización
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div id="loadingSpinner" class="loading-spinner">
@@ -588,6 +594,234 @@ section.innerHTML = marked.parse(ai.analysis);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // Función para generar análisis global
+        async function generateGlobalAnalysis() {
+            if (allResponses.length === 0) {
+                alert('No hay respuestas disponibles para analizar.');
+                return;
+            }
+
+            const confirmed = confirm(`¿Generar análisis global de la organización?\n\nSe analizarán ${allResponses.length} respuestas para crear:\n• Estadísticas detalladas\n• 3 estrategias de mejora\n• Plan de acción con teorías de RRHH\n• Gráficos y métricas\n\nEsto tomará aproximadamente 30-60 segundos.`);
+            
+            if (!confirmed) return;
+
+            // Mostrar modal de progreso
+            const progressModal = `
+                <div class="modal fade" id="analysisModal" tabindex="-1" style="backdrop-filter: blur(5px);">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning text-dark">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-graph-up-arrow me-2"></i>
+                                    Análisis Global de la Organización
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" id="analysisModalBody">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-warning mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                        <span class="visually-hidden">Generando análisis...</span>
+                                    </div>
+                                    <h4>Generando Análisis Global...</h4>
+                                    <p class="text-muted">Analizando ${allResponses.length} respuestas con IA avanzada</p>
+                                    <div class="progress mt-3" style="height: 10px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                                             role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', progressModal);
+            const modal = new bootstrap.Modal(document.getElementById('analysisModal'));
+            modal.show();
+
+            try {
+                const response = await fetch('/api/analysis/global', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                const analysisData = await response.json();
+                
+                // Mostrar resultados en el modal
+                displayGlobalAnalysis(analysisData);
+
+            } catch (error) {
+                console.error('Error generando análisis global:', error);
+                document.getElementById('analysisModalBody').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>Error generando análisis</h4>
+                        <p>Hubo un problema al generar el análisis global: ${error.message}</p>
+                        <button class="btn btn-outline-danger" onclick="generateGlobalAnalysis()">
+                            Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayGlobalAnalysis(data) {
+            const stats = data.statistics;
+            const analysis = data.ai_analysis;
+
+            // Crear gráficos y estadísticas
+            const chartsHtml = `
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <h2>${stats.total_responses}</h2>
+                                <p>Total Respuestas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h2>${stats.average_experience_rating}/10</h2>
+                                <p>Rating Promedio</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <h2>${stats.would_recommend_percentage}%</h2>
+                                <p>Recomendarían</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-warning text-dark">
+                            <div class="card-body">
+                                <h2>${stats.would_return_percentage}%</h2>
+                                <p>Regresarían</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Razones de Salida</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.exit_reasons).map(([reason, count]) => `
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>${reason}</span>
+                                        <div>
+                                            <span class="badge bg-secondary me-2">${count}</span>
+                                            <div class="progress" style="width: 100px; height: 8px;">
+                                                <div class="progress-bar" style="width: ${(count / stats.total_responses) * 100}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Análisis por Área</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.areas_analysis).map(([area, data]) => `
+                                    <div class="mb-3">
+                                        <h6>${area} <span class="badge bg-primary">${data.count}</span></h6>
+                                        <small class="text-muted">
+                                            Rating: ${data.avg_experience}/10 | 
+                                            Recomiendan: ${data.would_recommend_percentage}%
+                                        </small>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const content = `
+                <div class="analysis-content">
+                    ${chartsHtml}
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Análisis Estratégico con IA</h5>
+                            <small class="text-muted">Generado el ${new Date(data.timestamp).toLocaleString('es-ES')}</small>
+                        </div>
+                        <div class="card-body">
+                            <div id="aiAnalysisContent">${marked.parse(analysis)}</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-success me-2" onclick="downloadAnalysis()">
+                            <i class="bi bi-download"></i> Descargar Reporte
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="printAnalysis()">
+                            <i class="bi bi-printer"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('analysisModalBody').innerHTML = content;
+            
+            // Guardar datos para descarga
+            window.currentAnalysis = data;
+        }
+
+        function downloadAnalysis() {
+            if (!window.currentAnalysis) return;
+            
+            const data = window.currentAnalysis;
+            const timestamp = new Date().toISOString().split('T')[0];
+            
+            // Crear contenido del reporte
+            const reportContent = `ANÁLISIS GLOBAL DE ORGANIZACIÓN - SIIGO
+Fecha: ${new Date(data.timestamp).toLocaleString('es-ES')}
+Respuestas analizadas: ${data.statistics.total_responses}
+
+ESTADÍSTICAS GENERALES:
+- Rating promedio de experiencia: ${data.statistics.average_experience_rating}/10
+- Porcentaje que recomendaría la empresa: ${data.statistics.would_recommend_percentage}%
+- Porcentaje que regresaría: ${data.statistics.would_return_percentage}%
+
+ANÁLISIS DETALLADO:
+${data.ai_analysis}
+
+---
+Generado automáticamente por el Sistema de Entrevistas de Retiro - Siigo
+            `;
+
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `analisis_global_siigo_${timestamp}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function printAnalysis() {
+            window.print();
         }
 
         // Actualizar datos cada 30 segundos
