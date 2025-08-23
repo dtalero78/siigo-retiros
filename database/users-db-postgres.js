@@ -303,6 +303,27 @@ class UsersDbPostgres {
     }
   }
 
+  // Obtener usuarios con estado de WhatsApp (para la página de usuarios)
+  async getUsersWithWhatsAppStatus() {
+    try {
+      const result = await this.pool.query(
+        `SELECT * FROM users 
+         ORDER BY exit_date DESC, created_at DESC`
+      );
+      
+      // Agregar el campo has_response (será completado por la lógica del servidor)
+      const usersWithStatus = result.rows.map(user => ({
+        ...user,
+        has_response: 0 // Se actualizará con la lógica del servidor
+      }));
+      
+      return usersWithStatus;
+    } catch (error) {
+      console.error('Error obteniendo usuarios con estado WhatsApp:', error);
+      throw error;
+    }
+  }
+
   // Cerrar conexión
   async close() {
     await this.pool.end();
