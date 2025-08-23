@@ -24,6 +24,26 @@ class DatabasePostgres {
     this.initDatabase();
   }
 
+  // Método auxiliar para parsear JSON de forma segura
+  safeJsonParse(value) {
+    if (typeof value !== 'string' || !value) {
+      return value;
+    }
+    
+    try {
+      // Si empieza con { o [ probablemente es JSON
+      if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
+        return JSON.parse(value);
+      }
+      // Si no, devolver como string
+      return value;
+    } catch (error) {
+      // Si falla el parsing, devolver el valor original
+      console.warn('Error parseando JSON:', value, error.message);
+      return value;
+    }
+  }
+
   async initDatabase() {
     try {
       // Crear tabla de respuestas si no existe
@@ -187,15 +207,11 @@ class DatabasePostgres {
         'SELECT * FROM responses ORDER BY created_at DESC'
       );
       
-      // Parsear los campos JSON
+      // Parsear los campos JSON de forma segura
       return result.rows.map(row => ({
         ...row,
-        satisfaction_ratings: typeof row.satisfaction_ratings === 'string' 
-          ? JSON.parse(row.satisfaction_ratings) 
-          : row.satisfaction_ratings,
-        new_company_info: typeof row.new_company_info === 'string' 
-          ? JSON.parse(row.new_company_info) 
-          : row.new_company_info
+        satisfaction_ratings: this.safeJsonParse(row.satisfaction_ratings),
+        new_company_info: this.safeJsonParse(row.new_company_info)
       }));
     } catch (error) {
       console.error('Error obteniendo respuestas:', error);
@@ -216,12 +232,8 @@ class DatabasePostgres {
       const row = result.rows[0];
       return {
         ...row,
-        satisfaction_ratings: typeof row.satisfaction_ratings === 'string' 
-          ? JSON.parse(row.satisfaction_ratings) 
-          : row.satisfaction_ratings,
-        new_company_info: typeof row.new_company_info === 'string' 
-          ? JSON.parse(row.new_company_info) 
-          : row.new_company_info
+        satisfaction_ratings: this.safeJsonParse(row.satisfaction_ratings),
+        new_company_info: this.safeJsonParse(row.new_company_info)
       };
     } catch (error) {
       console.error('Error obteniendo respuesta:', error);
