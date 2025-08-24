@@ -413,6 +413,9 @@
         <button class="btn btn-view btn-sm" onclick="viewResponse(${response.id})">
           <i class="bi bi-eye me-1"></i>Ver
         </button>
+        <button class="btn btn-danger btn-sm ms-1" onclick="deleteResponse(${response.id})" title="Eliminar">
+          <i class="bi bi-trash"></i>
+        </button>
       </td>
     `;
                 tbody.appendChild(row);
@@ -441,6 +444,76 @@
                 const returnPercent = ((wouldReturn / total) * 100).toFixed(0) + '%';
                 document.getElementById('returnPercent').textContent = returnPercent;
             }
+        }
+
+        async function deleteResponse(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar esta respuesta? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/responses/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    // Eliminar de la lista local
+                    allResponses = allResponses.filter(r => r.id !== id);
+                    
+                    // Re-renderizar la tabla
+                    renderResponsesTable();
+                    calculateStats();
+                    
+                    // Mostrar mensaje de éxito
+                    showToast('Respuesta eliminada exitosamente', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error al eliminar la respuesta', 'error');
+                }
+            } catch (error) {
+                console.error('Error eliminando respuesta:', error);
+                showToast('Error de conexión al eliminar', 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+            
+            const toastId = 'toast-' + Date.now();
+            const bgClass = type === 'success' ? 'bg-success' : 
+                           type === 'error' ? 'bg-danger' : 
+                           type === 'warning' ? 'bg-warning' : 'bg-info';
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            // Remover el elemento después de que se oculte
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+            return container;
         }
 
         async function viewResponse(id) {

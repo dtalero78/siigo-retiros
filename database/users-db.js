@@ -98,6 +98,13 @@ class UsersDatabase {
             else console.log('Columna paisContratacion añadida a users');
           });
         }
+        // 11) Añadir whatsapp_custom_message si falta
+        if (!existing.includes('whatsapp_custom_message')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN whatsapp_custom_message TEXT`, (err) => {
+            if (err) console.error('Error agregando columna whatsapp_custom_message:', err.message);
+            else console.log('Columna whatsapp_custom_message añadida a users');
+          });
+        }
       });
     });
   }

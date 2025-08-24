@@ -293,7 +293,7 @@
 
         <!-- Acciones principales -->
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
@@ -310,7 +310,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
@@ -327,7 +327,25 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-whatsapp me-2"></i>
+                            Mensaje Personalizado
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Envía mensajes personalizados por WhatsApp a usuarios filtrados.</p>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#whatsappMessageModal">
+                            <i class="bi bi-send me-2"></i>
+                            Configurar Mensaje
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+
 
         <!-- === FILTROS === -->
         <div class="card mb-3">
@@ -374,21 +392,9 @@
                         <i class="bi bi-download me-2"></i>
                         Exportar CSV
                     </button>
-                    <button class="btn btn-success" onclick="sendMassWhatsApp()">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#whatsappMessageModal">
                         <i class="bi bi-whatsapp me-2"></i>
                         Envío Masivo
-                    </button>
-                    <button class="btn btn-info" onclick="sendSecondReminder()">
-                        <i class="bi bi-arrow-repeat me-2"></i>
-                        Segundo Envío (Recordatorio)
-                    </button>
-                    <button class="btn btn-warning" onclick="showUsersWithoutResponse()">
-                        <i class="bi bi-funnel me-2"></i>
-                        Ver Sin Respuesta
-                    </button>
-                    <button id="sendToFilteredBtn" class="btn btn-warning" onclick="sendWhatsAppToFilteredUsers()" style="display: none;">
-                        <i class="bi bi-arrow-repeat me-2"></i>
-                        Enviar a Lista Actual
                     </button>
                 </div>
             </div>
@@ -547,6 +553,64 @@
                     <button type="button" class="btn btn-primary" onclick="saveUser()">
                         <i class="bi bi-save me-2"></i>
                         Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mensaje personalizado de WhatsApp -->
+    <div class="modal fade" id="whatsappMessageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-whatsapp me-2"></i>
+                        Envío de WhatsApp Personalizado
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="whatsappFilter" class="form-label">Seleccionar destinatarios:</label>
+                        <select class="form-control" id="whatsappFilter">
+                            <option value="all">Todos los usuarios con teléfono</option>
+                            <option value="whatsapp_not_sent">Usuarios sin mensaje previo</option>
+                            <option value="whatsapp_sent">Usuarios con mensaje previo (reenvío)</option>
+                            <option value="no_response">Usuarios sin respuesta</option>
+                            <option value="filtered">Usuarios filtrados actualmente</option>
+                        </select>
+                        <small class="text-muted">Se mostrarán <span id="recipientCount">0</span> usuarios según el filtro seleccionado</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="whatsappMessage" class="form-label">Mensaje a enviar:</label>
+                        <textarea class="form-control" id="whatsappMessage" rows="8" placeholder="Escribe aquí el mensaje que se enviará por WhatsApp...">Hola {nombre},
+
+Esperamos que te encuentres muy bien. Como parte de nuestro proceso de mejora continua, nos gustaría conocer tu experiencia en Siigo.
+
+Por favor, tómate unos minutos para completar nuestra entrevista de retiro: {link}
+
+Tu feedback es muy valioso para nosotros.
+
+Saludos,
+Equipo de Recursos Humanos - Siigo</textarea>
+                        <small class="text-muted">Usa {nombre} para el primer nombre del usuario y {link} para el enlace personalizado</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Vista previa del mensaje:</strong>
+                        <div id="messagePreview" class="mt-2" style="white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                            El mensaje aparecerá aquí...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="sendCustomWhatsApp()">
+                        <i class="bi bi-send me-2"></i>
+                        Enviar Mensajes
                     </button>
                 </div>
             </div>
@@ -792,6 +856,28 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, inicializando...');
             loadUsers();
+            
+            // Event listeners para el modal de mensaje personalizado
+            const messageTextarea = document.getElementById('whatsappMessage');
+            const filterSelect = document.getElementById('whatsappFilter');
+            
+            if (messageTextarea) {
+                messageTextarea.addEventListener('input', updateMessagePreview);
+                updateMessagePreview(); // Actualizar preview inicial
+            }
+            
+            if (filterSelect) {
+                filterSelect.addEventListener('change', updateRecipientCount);
+            }
+            
+            // Actualizar conteo cuando se abre el modal
+            const whatsappModal = document.getElementById('whatsappMessageModal');
+            if (whatsappModal) {
+                whatsappModal.addEventListener('shown.bs.modal', function() {
+                    updateRecipientCount();
+                    updateMessagePreview();
+                });
+            }
         });
 
         async function loadUsers(filter = null) {
@@ -1495,8 +1581,222 @@
             }
         }
 
+        // ===== FUNCIONES DE MENSAJE PERSONALIZADO =====
+        function updateMessagePreview() {
+            const message = document.getElementById('whatsappMessage').value;
+            const preview = document.getElementById('messagePreview');
+            
+            // Reemplazar variables con ejemplos
+            let previewText = message.replace('{nombre}', 'Juan');
+            previewText = previewText.replace('{link}', `${window.location.origin}/?user=64`);
+            
+            preview.textContent = previewText;
+        }
+
+        async function updateRecipientCount() {
+            const filter = document.getElementById('whatsappFilter').value;
+            const countSpan = document.getElementById('recipientCount');
+            
+            try {
+                let count = 0;
+                let filteredUsers = [];
+                
+                // Para filtros que requieren datos actualizados del servidor
+                if (filter === 'no_response' || filter === 'has_response') {
+                    const response = await fetch(`/api/users?filter=${filter}`);
+                    const serverUsers = await response.json();
+                    filteredUsers = serverUsers.filter(u => u.phone);
+                } else {
+                    // Para filtros simples usar datos locales
+                    switch(filter) {
+                        case 'all':
+                            filteredUsers = allUsers.filter(u => u.phone);
+                            break;
+                        case 'whatsapp_not_sent':
+                            filteredUsers = allUsers.filter(u => u.phone && !u.whatsapp_sent_at);
+                            break;
+                        case 'whatsapp_sent':
+                            filteredUsers = allUsers.filter(u => u.phone && u.whatsapp_sent_at);
+                            break;
+                        case 'filtered':
+                            filteredUsers = allUsers.filter(u => u.phone);
+                            break;
+                    }
+                }
+                
+                count = filteredUsers.length;
+                countSpan.textContent = count;
+            } catch (error) {
+                console.error('Error actualizando conteo de destinatarios:', error);
+                countSpan.textContent = '?';
+            }
+        }
+
+        async function sendCustomWhatsApp() {
+            const filter = document.getElementById('whatsappFilter').value;
+            const message = document.getElementById('whatsappMessage').value;
+            
+            if (!message || message.trim() === '') {
+                showToast('Por favor escribe un mensaje', 'error');
+                return;
+            }
+            
+            // Filtrar usuarios según la selección
+            let usersToSend = [];
+            
+            // Para filtros que requieren datos actualizados del servidor
+            if (filter === 'no_response' || filter === 'has_response') {
+                try {
+                    const response = await fetch(`/api/users?filter=${filter}`);
+                    const serverUsers = await response.json();
+                    usersToSend = serverUsers.filter(u => u.phone);
+                } catch (error) {
+                    console.error('Error obteniendo usuarios del servidor:', error);
+                    showToast('Error obteniendo datos actualizados del servidor', 'error');
+                    return;
+                }
+            } else {
+                // Para filtros simples usar datos locales
+                switch(filter) {
+                    case 'all':
+                        usersToSend = allUsers.filter(u => u.phone);
+                        break;
+                    case 'whatsapp_not_sent':
+                        usersToSend = allUsers.filter(u => u.phone && !u.whatsapp_sent_at);
+                        break;
+                    case 'whatsapp_sent':
+                        usersToSend = allUsers.filter(u => u.phone && u.whatsapp_sent_at);
+                        break;
+                    case 'filtered':
+                        usersToSend = allUsers.filter(u => u.phone);
+                        break;
+                }
+            }
+            
+            if (usersToSend.length === 0) {
+                showToast('No hay usuarios para enviar con el filtro seleccionado', 'warning');
+                return;
+            }
+            
+            // Confirmar envío
+            if (!confirm(`¿Deseas enviar el mensaje a ${usersToSend.length} usuario(s)?`)) {
+                return;
+            }
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('whatsappMessageModal'));
+            modal.hide();
+            
+            // Configuración de envío en lotes
+            const BATCH_SIZE = 10;
+            const DELAY_BETWEEN_MESSAGES = 3000;
+            const DELAY_BETWEEN_BATCHES = 30000;
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            // Mostrar progreso
+            const progressToast = document.createElement('div');
+            progressToast.style.position = 'fixed';
+            progressToast.style.top = '20px';
+            progressToast.style.right = '20px';
+            progressToast.style.zIndex = '9999';
+            progressToast.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-body">
+                        <strong>Enviando mensajes de WhatsApp...</strong>
+                        <div class="mt-2">
+                            <div>Progreso: <span id="progress">0/${usersToSend.length}</span></div>
+                            <div>Lote: <span id="batchProgress">0/0</span></div>
+                            <div>Estado: <span id="statusText">Iniciando...</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(progressToast);
+            
+            // Función para enviar mensajes en lotes
+            async function sendInBatches() {
+                const batches = [];
+                for (let i = 0; i < usersToSend.length; i += BATCH_SIZE) {
+                    batches.push(usersToSend.slice(i, i + BATCH_SIZE));
+                }
+                
+                for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+                    const batch = batches[batchIndex];
+                    const batchNum = batchIndex + 1;
+                    
+                    // Actualizar progreso
+                    document.getElementById('batchProgress').textContent = `${batchNum}/${batches.length}`;
+                    document.getElementById('statusText').textContent = `Procesando lote ${batchNum}...`;
+                    
+                    // Enviar mensajes del lote
+                    for (let i = 0; i < batch.length; i++) {
+                        const user = batch[i];
+                        const overallIndex = batchIndex * BATCH_SIZE + i;
+                        
+                        try {
+                            // Personalizar mensaje
+                            let personalizedMessage = message.replace('{nombre}', user.first_name);
+                            const formUrl = `${window.location.origin}/`;
+                            const userLink = `${formUrl}?user=${user.id}`;
+                            personalizedMessage = personalizedMessage.replace('{link}', userLink);
+                            
+                            const response = await fetch('/api/users/send-custom-whatsapp', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    userId: user.id,
+                                    phone: user.phone,
+                                    message: personalizedMessage
+                                })
+                            });
+                            
+                            if (response.ok) {
+                                successCount++;
+                            } else {
+                                errorCount++;
+                            }
+                        } catch (error) {
+                            errorCount++;
+                            console.error('Error enviando mensaje:', error);
+                        }
+                        
+                        // Actualizar progreso
+                        document.getElementById('progress').textContent = `${overallIndex + 1}/${usersToSend.length}`;
+                        
+                        // Delay entre mensajes
+                        if (i < batch.length - 1) {
+                            document.getElementById('statusText').textContent = `Esperando ${DELAY_BETWEEN_MESSAGES/1000}s...`;
+                            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_MESSAGES));
+                        }
+                    }
+                    
+                    // Delay entre lotes
+                    if (batchIndex < batches.length - 1) {
+                        document.getElementById('statusText').textContent = `Pausa entre lotes (${DELAY_BETWEEN_BATCHES/1000}s)...`;
+                        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+                    }
+                }
+                
+                // Remover toast de progreso
+                progressToast.remove();
+                
+                // Mostrar resultado
+                showToast(`Envío completado: ${successCount} exitosos, ${errorCount} errores`, 
+                         errorCount > 0 ? 'warning' : 'success');
+                
+                // Recargar datos
+                await loadUsers(currentFilter);
+            }
+            
+            // Ejecutar envío
+            sendInBatches();
+        }
+
         // Hacer las funciones disponibles globalmente
         window.sendWhatsApp = sendWhatsApp;
+        window.sendCustomWhatsApp = sendCustomWhatsApp;
         window.sendMassWhatsApp = sendMassWhatsApp;
         window.sendApologyWhatsApp = sendApologyWhatsApp;
         window.showUsersWithoutResponse = showUsersWithoutResponse;

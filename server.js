@@ -327,6 +327,35 @@ app.get('/api/responses/:id', async (req, res) => {
   }
 });
 
+// Eliminar una respuesta específica
+app.delete('/api/responses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Verificar que la respuesta existe
+    const response = await db.getResponse(id);
+    if (!response) {
+      return res.status(404).json({ error: 'Respuesta no encontrada' });
+    }
+    
+    // Eliminar la respuesta
+    const result = await db.deleteResponse(id);
+    
+    if (result) {
+      console.log(`Respuesta ${id} eliminada exitosamente`);
+      res.json({ 
+        success: true, 
+        message: 'Respuesta eliminada exitosamente' 
+      });
+    } else {
+      res.status(500).json({ error: 'No se pudo eliminar la respuesta' });
+    }
+  } catch (error) {
+    console.error('Error eliminando respuesta:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // ================================
 // RUTAS API PARA USUARIOS
 // ================================
@@ -345,18 +374,24 @@ app.get('/api/users', async (req, res) => {
     
     // Get all responses to check which users have responded
     const responses = await db.getAllResponses();
-    const responseUserIds = new Set(responses.map(r => r.user_id).filter(id => id));
+    // Create set of identification numbers from responses (since user_id might be null)
+    const responseIdentifications = new Set(
+      responses
+        .map(r => r.identification)
+        .filter(id => id)
+    );
     
-    // Update has_response field for each user
+    // Update has_response field for each user based on identification match
     const usersWithResponses = users.map(user => ({
       ...user,
-      has_response: responseUserIds.has(user.id) ? 1 : 0
+      has_response: responseIdentifications.has(user.identification) ? 1 : 0
     }));
     
     // Apply response-based filters
     let filteredUsers = usersWithResponses;
     if (filter === 'no_response') {
-      filteredUsers = usersWithResponses.filter(u => u.whatsapp_sent_at && !u.has_response);
+      // Todos los usuarios que NO han respondido la encuesta (independiente del WhatsApp)
+      filteredUsers = usersWithResponses.filter(u => !u.has_response);
     } else if (filter === 'has_response') {
       filteredUsers = usersWithResponses.filter(u => u.has_response);
     }
@@ -735,6 +770,82 @@ Equipo de Cultura – Siigo`;
 
   } catch (error) {
     console.error('Error enviando WhatsApp:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ================================
+// ENDPOINT PARA ENVÍO CON MENSAJE PERSONALIZADO
+// ================================
+
+app.post('/api/users/send-custom-whatsapp', async (req, res) => {
+  try {
+    const { userId, phone, message } = req.body;
+
+    if (!userId || !phone || !message) {
+      return res.status(400).json({ error: 'Datos incompletos para enviar WhatsApp' });
+    }
+
+    // Verificar que el usuario existe
+    const user = await usersDb.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Limpiar número de teléfono
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({ error: 'Número de teléfono inválido' });
+    }
+
+    // Formatear número para WhatsApp
+    let whatsappNumber = cleanPhone;
+    if (!whatsappNumber.startsWith('57') && cleanPhone.length === 10) {
+      whatsappNumber = '57' + cleanPhone; // Código de Colombia
+    }
+
+    // Configuración de Whapi
+    const whapiToken = process.env.WHAPI_TOKEN;
+    if (!whapiToken) {
+      return res.status(500).json({ error: 'Token de Whapi no configurado' });
+    }
+
+    // Enviar mensaje a través de Whapi
+    const whapiResponse = await fetch('https://gate.whapi.cloud/messages/text', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${whapiToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        to: whatsappNumber,
+        body: message
+      })
+    });
+
+    if (whapiResponse.ok) {
+      const result = await whapiResponse.json();
+      
+      // Actualizar el estado de WhatsApp en la base de datos
+      await usersDb.updateWhatsAppStatus(userId, result.id);
+
+      // Log del envío exitoso
+      console.log(`WhatsApp personalizado enviado a ${user.first_name} ${user.last_name} (${phone})`);
+
+      res.json({
+        success: true,
+        message: 'Mensaje de WhatsApp personalizado enviado exitosamente',
+        whatsappId: result.id
+      });
+    } else {
+      const error = await whapiResponse.text();
+      console.error('Error de Whapi:', error);
+      res.status(500).json({ error: 'Error al enviar mensaje a través de Whapi' });
+    }
+
+  } catch (error) {
+    console.error('Error enviando WhatsApp personalizado:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

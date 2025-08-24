@@ -233,6 +233,21 @@ class Database {
     });
   }
 
+  async deleteResponse(id) {
+    return new Promise((resolve, reject) => {
+      const sql = `DELETE FROM responses WHERE id = ?`;
+      this.db.run(sql, [id], function(err) {
+        if (err) {
+          console.error('Error eliminando respuesta:', err.message);
+          reject(err);
+        } else {
+          console.log('Respuesta eliminada, filas afectadas:', this.changes);
+          resolve(this.changes > 0);
+        }
+      });
+    });
+  }
+
   close() {
     this.db.close((err) => {
       if (err) console.error('Error cerrando base de datos:', err.message);
