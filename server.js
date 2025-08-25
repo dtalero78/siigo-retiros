@@ -846,7 +846,12 @@ app.post('/api/users/send-custom-whatsapp', async (req, res) => {
 
   } catch (error) {
     console.error('Error enviando WhatsApp personalizado:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Stack trace:', error.stack);
+    console.error('Request body:', req.body);
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      details: error.message 
+    });
   }
 });
 
@@ -1443,12 +1448,12 @@ app.post('/api/analysis/global', async (req, res) => {
       }
 
       // Recomendaciones
-      if (resp.would_recommend) {
+      if (resp.would_recommend === true || resp.would_recommend === 'SÍ') {
         recommendCount++;
       }
 
       // Regreso
-      if (resp.would_return) {
+      if (resp.would_return === true || resp.would_return === 'SÍ') {
         returnCount++;
       }
 
@@ -1472,8 +1477,8 @@ app.post('/api/analysis/global', async (req, res) => {
         if (resp.experience_rating) {
           stats.areas_analysis[resp.area].avg_experience += parseInt(resp.experience_rating);
         }
-        if (resp.would_recommend) stats.areas_analysis[resp.area].would_recommend++;
-        if (resp.would_return) stats.areas_analysis[resp.area].would_return++;
+        if (resp.would_recommend === true || resp.would_recommend === 'SÍ') stats.areas_analysis[resp.area].would_recommend++;
+        if (resp.would_return === true || resp.would_return === 'SÍ') stats.areas_analysis[resp.area].would_return++;
       }
 
       // Análisis por país

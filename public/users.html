@@ -1756,6 +1756,8 @@ Equipo de Recursos Humanos - Siigo</textarea>
                                 successCount++;
                             } else {
                                 errorCount++;
+                                const errorData = await response.json();
+                                console.error(`Error enviando mensaje a ${user.first_name} ${user.last_name}:`, errorData);
                             }
                         } catch (error) {
                             errorCount++;
