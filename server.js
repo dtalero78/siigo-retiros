@@ -1710,7 +1710,7 @@ Genera sugerencias de mejora con justificación de teorías de recursos humanos
     const analysisText = ai.choices[0].message.content.trim();
     console.log('✅ Análisis generado exitosamente');
 
-    await db.updateResponseAnalysis(id, analysisText);
+    await db.updateAnalysis(id, analysisText);
 
     res.json({ id, analysis: analysisText });
 

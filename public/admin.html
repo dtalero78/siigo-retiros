@@ -595,8 +595,26 @@
                 const ai = await resAI.json();
 
                 // 5. Una vez llegue la respuesta, reemplazar el loader por el texto
-const section = document.getElementById('analysisSection');
-section.innerHTML = marked.parse(ai.analysis);
+                const section = document.getElementById('analysisSection');
+                
+                if (ai.error) {
+                    section.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> ${ai.error}
+                            ${ai.details ? `<br><small>${ai.details}</small>` : ''}
+                        </div>
+                    `;
+                } else if (ai.analysis && ai.analysis.trim()) {
+                    section.innerHTML = marked.parse(ai.analysis);
+                } else {
+                    section.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No se pudo generar el análisis o está vacío.
+                        </div>
+                    `;
+                }
 
 
             } catch (error) {
@@ -838,7 +856,7 @@ section.innerHTML = marked.parse(ai.analysis);
                             <small class="text-muted">Generado el ${new Date(data.timestamp).toLocaleString('es-ES')}</small>
                         </div>
                         <div class="card-body">
-                            <div id="aiAnalysisContent">${marked.parse(analysis)}</div>
+                            <div id="aiAnalysisContent">${analysis && analysis.trim() ? marked.parse(analysis) : '<div class="text-muted">No hay análisis disponible</div>'}</div>
                         </div>
                     </div>
 
