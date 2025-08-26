@@ -791,6 +791,20 @@
 
         // ===== FUNCIONES PRINCIPALES =====
         
+        // Función para formatear número de teléfono para mostrar
+        function formatPhoneForDisplay(phone) {
+            if (!phone) return '';
+            let cleaned = phone.replace(/\D/g, '');
+            if (cleaned.length === 10) {
+                cleaned = '+57 ' + cleaned;
+            } else if (cleaned.length === 12 && cleaned.startsWith('57')) {
+                cleaned = '+57 ' + cleaned.substring(2);
+            } else if (!cleaned.startsWith('+')) {
+                cleaned = '+' + cleaned;
+            }
+            return cleaned;
+        }
+        
         async function sendWhatsApp(id) {
             console.log('sendWhatsApp called with id:', id);
             const user = allUsers.find(u => u.id === id);
@@ -799,8 +813,9 @@
                 return;
             }
 
-            // Confirmar envío
-            if (!confirm(`¿Enviar mensaje de WhatsApp a ${user.first_name} ${user.last_name} (${user.phone})?`)) {
+            // Confirmar envío con número formateado
+            const formattedPhone = formatPhoneForDisplay(user.phone);
+            if (!confirm(`¿Enviar mensaje de WhatsApp a ${user.first_name} ${user.last_name} (${formattedPhone})?`)) {
                 return;
             }
 
