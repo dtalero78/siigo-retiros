@@ -844,6 +844,178 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Niveles de Satisfacción por Categoría</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.satisfaction_ratings_avg).map(([category, rating]) => `
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">${category}</small>
+                                            <span class="badge ${parseFloat(rating) >= 4 ? 'bg-success' : parseFloat(rating) >= 3 ? 'bg-warning' : 'bg-danger'}">${rating}/5</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar ${parseFloat(rating) >= 4 ? 'bg-success' : parseFloat(rating) >= 3 ? 'bg-warning' : 'bg-danger'}" 
+                                                 style="width: ${(parseFloat(rating) / 5) * 100}%" 
+                                                 title="${category}: ${rating}/5">
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Distribución por País</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.countries_analysis).map(([country, count]) => `
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">${country === 'Colombia' ? '🇨🇴' : country === 'México' ? '🇲🇽' : country === 'Ecuador' ? '🇪🇨' : country === 'Uruguay' ? '🇺🇾' : country === 'Perú' ? '🇵🇪' : '🌍'}</span>
+                                            <span>${country}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-info me-2">${count}</span>
+                                            <span class="small text-muted">${((count / stats.total_responses) * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Tiempo en la Empresa</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.tenure_analysis).sort((a, b) => {
+                                    const order = ['Menos de 2 meses', 'Menos de 6 meses', '6 meses a 1 año', '1-2 años', '2-5 años', 'Más de 5 años'];
+                                    return order.indexOf(a[0]) - order.indexOf(b[0]);
+                                }).map(([tenure, count]) => `
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small">${tenure}</span>
+                                            <div>
+                                                <span class="badge bg-secondary me-1">${count}</span>
+                                                <span class="small text-muted">${((count / stats.total_responses) * 100).toFixed(1)}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-gradient" 
+                                                 style="width: ${(count / stats.total_responses) * 100}%; 
+                                                        background: linear-gradient(to right, #28a745, #17a2b8);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Distribución de Ratings de Experiencia</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <div class="display-4 text-success">${stats.average_experience_rating}/10</div>
+                                    <small class="text-muted">Rating Promedio</small>
+                                </div>
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="border rounded p-2">
+                                            <div class="h5 text-danger mb-1">🔻</div>
+                                            <div class="small">1-4 Puntos</div>
+                                            <div class="small text-muted">(Crítico)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="border rounded p-2">
+                                            <div class="h5 text-warning mb-1">⚖️</div>
+                                            <div class="small">5-7 Puntos</div>
+                                            <div class="small text-muted">(Neutral)</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="border rounded p-2">
+                                            <div class="h5 text-success mb-1">⭐</div>
+                                            <div class="small">8-10 Puntos</div>
+                                            <div class="small text-muted">(Excelente)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">🎯 Métricas de Retención y Recomendación</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">¿Recomendarían Siigo?</h6>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="flex-grow-1">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" style="width: ${stats.would_recommend_percentage}%">
+                                                        SÍ (${stats.would_recommend_percentage}%)
+                                                    </div>
+                                                    <div class="progress-bar bg-danger" style="width: ${100 - parseFloat(stats.would_recommend_percentage)}%">
+                                                        NO (${(100 - parseFloat(stats.would_recommend_percentage)).toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">¿Regresarían a Siigo?</h6>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="flex-grow-1">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-info" style="width: ${stats.would_return_percentage}%">
+                                                        SÍ (${stats.would_return_percentage}%)
+                                                    </div>
+                                                    <div class="progress-bar bg-secondary" style="width: ${100 - parseFloat(stats.would_return_percentage)}%">
+                                                        NO (${(100 - parseFloat(stats.would_return_percentage)).toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="alert ${parseFloat(stats.would_recommend_percentage) >= 60 ? 'alert-success' : parseFloat(stats.would_recommend_percentage) >= 40 ? 'alert-warning' : 'alert-danger'}" role="alert">
+                                            <strong>Análisis de Retención:</strong>
+                                            ${parseFloat(stats.would_recommend_percentage) >= 60 
+                                                ? '✅ Excelente nivel de satisfacción. Los empleados recomiendan activamente trabajar en Siigo.' 
+                                                : parseFloat(stats.would_recommend_percentage) >= 40 
+                                                ? '⚠️ Nivel de satisfacción moderado. Hay oportunidades de mejora significativas.' 
+                                                : '🚨 Nivel crítico de satisfacción. Se requiere acción inmediata para mejorar la experiencia del empleado.'
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             `;
 
             const content = `
