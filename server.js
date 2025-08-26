@@ -1650,6 +1650,16 @@ Genera sugerencias de mejora con justificación de teorías de recursos humanos
 app.post('/api/analysis/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Verificar si OpenAI está configurado
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('Error: OPENAI_API_KEY no está configurado');
+      return res.status(500).json({ 
+        error: 'API Key de OpenAI no configurado',
+        details: 'Contacte al administrador para configurar OPENAI_API_KEY'
+      });
+    }
+
     const resp = await db.getResponse(id);
 
     if (!resp) return res.status(404).json({ error: 'Respuesta no encontrada' });
@@ -1657,6 +1667,8 @@ app.post('/api/analysis/:id', async (req, res) => {
     if (resp.analysis && resp.analysis.trim() !== '') {
       return res.json({ id, analysis: resp.analysis });
     }
+
+    console.log(`🤖 Generando análisis OpenAI para respuesta ID: ${id}`);
 
     // Construir objeto compacto igual al análisis general
     const userData = {
@@ -1686,19 +1698,57 @@ ${JSON.stringify(userData, null, 2)}
 Genera sugerencias de mejora con justificación de teorías de recursos humanos
 `;
 
+    console.log('📤 Enviando solicitud a OpenAI...');
+
     const ai = await openai.chat.completions.create({
       model: 'gpt-4',
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1000,
+      temperature: 0.7
     });
+    
     const analysisText = ai.choices[0].message.content.trim();
+    console.log('✅ Análisis generado exitosamente');
 
     await db.updateResponseAnalysis(id, analysisText);
 
     res.json({ id, analysis: analysisText });
 
   } catch (err) {
-    console.error('Error en /api/analysis/:id:', err);
-    res.status(500).json({ error: 'No se pudo generar el análisis' });
+    console.error('❌ Error detallado en /api/analysis/:id:', {
+      message: err.message,
+      code: err.code,
+      status: err.status,
+      type: err.type,
+      stack: err.stack
+    });
+    
+    // Manejo específico de errores de OpenAI
+    if (err.code === 'insufficient_quota') {
+      return res.status(500).json({ 
+        error: 'Límite de créditos de OpenAI excedido',
+        details: 'La cuenta de OpenAI no tiene créditos suficientes'
+      });
+    }
+    
+    if (err.code === 'invalid_api_key') {
+      return res.status(500).json({ 
+        error: 'API Key de OpenAI inválido',
+        details: 'Verificar configuración de OPENAI_API_KEY'
+      });
+    }
+    
+    if (err.status === 429) {
+      return res.status(500).json({ 
+        error: 'Límite de solicitudes excedido',
+        details: 'Intente nuevamente en unos minutos'
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'No se pudo generar el análisis',
+      details: err.message
+    });
   }
 });
 
