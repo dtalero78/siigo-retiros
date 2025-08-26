@@ -559,19 +559,19 @@
         </div>
     </div>
 
-    <!-- Modal para mensaje personalizado de WhatsApp -->
+    <!-- Modal para envío masivo con template -->
     <div class="modal fade" id="whatsappMessageModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-whatsapp me-2"></i>
-                        Envío de WhatsApp Personalizado
+                        Envío Masivo con Botones Interactivos
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="whatsappFilter" class="form-label">Seleccionar destinatarios:</label>
                         <select class="form-control" id="whatsappFilter">
                             <option value="all">Todos los usuarios con teléfono</option>
@@ -580,37 +580,72 @@
                             <option value="no_response">Usuarios sin respuesta</option>
                             <option value="filtered">Usuarios filtrados actualmente</option>
                         </select>
-                        <small class="text-muted">Se mostrarán <span id="recipientCount">0</span> usuarios según el filtro seleccionado</small>
+                        <small class="text-muted">Se enviarán a <span id="recipientCount">0</span> usuarios según el filtro seleccionado</small>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="whatsappMessage" class="form-label">Mensaje a enviar:</label>
-                        <textarea class="form-control" id="whatsappMessage" rows="8" placeholder="Escribe aquí el mensaje que se enviará por WhatsApp...">Hola {nombre},
-
-Esperamos que te encuentres muy bien. Como parte de nuestro proceso de mejora continua, nos gustaría conocer tu experiencia en Siigo.
-
-Por favor, tómate unos minutos para completar nuestra entrevista de retiro: {link}
-
-Tu feedback es muy valioso para nosotros.
-
-Saludos,
-Equipo de Recursos Humanos - Siigo</textarea>
-                        <small class="text-muted">Usa {nombre} para el primer nombre del usuario y {link} para el enlace personalizado</small>
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <strong>Template Aprobado Configurado</strong>
+                        <p class="mb-2 mt-2">Se usará el template oficial aprobado por WhatsApp con botón interactivo:</p>
+                        <ul class="mb-2">
+                            <li><strong>Tipo:</strong> UTILITY (Transaccional)</li>
+                            <li><strong>Mensaje:</strong> Invitación personalizada a la encuesta de salida</li>
+                            <li><strong>Botón:</strong> "Iniciar Encuesta" - abre directamente el formulario</li>
+                            <li><strong>URL dinámica:</strong> https://www.siigo.digital/?user={id}</li>
+                        </ul>
                     </div>
                     
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Vista previa del mensaje:</strong>
-                        <div id="messagePreview" class="mt-2" style="white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                            El mensaje aparecerá aquí...
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-eye me-2"></i>
+                                Vista Previa del Mensaje
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #25D366;">
+                                <strong>Hola [Nombre del Usuario],</strong><br><br>
+                                Como parte de nuestro compromiso con la mejora continua en Siigo, te invitamos a completar tu formulario de retiro.<br><br>
+                                Tu opinión es muy valiosa para nosotros. La encuesta toma aproximadamente 5-10 minutos y tus respuestas serán tratadas de forma confidencial.<br><br>
+                                ¡Gracias por tu tiempo y por haber sido parte del equipo Siigo!<br><br>
+                                Atentamente,<br>
+                                Equipo de Talento Humano<br>
+                                Siigo<br><br>
+                                <div style="display: inline-block; background: #0084ff; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                                    🔗 Iniciar Encuesta
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label for="batchSize" class="form-label">Usuarios por lote:</label>
+                            <select class="form-control" id="batchSize">
+                                <option value="10">10 usuarios</option>
+                                <option value="15" selected>15 usuarios (recomendado)</option>
+                                <option value="20">20 usuarios</option>
+                                <option value="25">25 usuarios</option>
+                            </select>
+                            <small class="text-muted">Cantidad de mensajes por lote</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="messageDelay" class="form-label">Delay entre mensajes:</label>
+                            <select class="form-control" id="messageDelay">
+                                <option value="2000">2 segundos</option>
+                                <option value="3000">3 segundos</option>
+                                <option value="4000" selected>4 segundos (recomendado)</option>
+                                <option value="5000">5 segundos</option>
+                            </select>
+                            <small class="text-muted">Pausa entre cada mensaje</small>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" onclick="sendCustomWhatsApp()">
+                    <button type="button" class="btn btn-success" onclick="sendBulkWhatsApp()">
                         <i class="bi bi-send me-2"></i>
-                        Enviar Mensajes
+                        <span id="sendButtonText">Enviar con Botones</span>
                     </button>
                 </div>
             </div>
@@ -1632,14 +1667,10 @@ Equipo de Recursos Humanos - Siigo</textarea>
             }
         }
 
-        async function sendCustomWhatsApp() {
+        async function sendBulkWhatsApp() {
             const filter = document.getElementById('whatsappFilter').value;
-            const message = document.getElementById('whatsappMessage').value;
-            
-            if (!message || message.trim() === '') {
-                showToast('Por favor escribe un mensaje', 'error');
-                return;
-            }
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const messageDelay = parseInt(document.getElementById('messageDelay').value);
             
             // Filtrar usuarios según la selección
             let usersToSend = [];
@@ -1679,21 +1710,22 @@ Equipo de Recursos Humanos - Siigo</textarea>
             }
             
             // Confirmar envío
-            if (!confirm(`¿Deseas enviar el mensaje a ${usersToSend.length} usuario(s)?`)) {
+            const confirmMsg = `¿Deseas enviar mensajes con BOTONES INTERACTIVOS a ${usersToSend.length} usuario(s)?
+
+📱 Template: UTILITY (Aprobado)
+🔘 Con botón "Iniciar Encuesta"
+⚙️ Configuración: ${batchSize} por lote, ${messageDelay/1000}s entre mensajes`;
+
+            if (!confirm(confirmMsg)) {
                 return;
             }
+            
+            // Obtener IDs de usuarios
+            const userIds = usersToSend.map(u => u.id);
             
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('whatsappMessageModal'));
             modal.hide();
-            
-            // Configuración de envío en lotes
-            const BATCH_SIZE = 10;
-            const DELAY_BETWEEN_MESSAGES = 3000;
-            const DELAY_BETWEEN_BATCHES = 30000;
-            
-            let successCount = 0;
-            let errorCount = 0;
             
             // Mostrar progreso
             const progressToast = document.createElement('div');
@@ -1704,101 +1736,88 @@ Equipo de Recursos Humanos - Siigo</textarea>
             progressToast.innerHTML = `
                 <div class="toast show" role="alert">
                     <div class="toast-body">
-                        <strong>Enviando mensajes de WhatsApp...</strong>
+                        <strong>🚀 Enviando con Botones Interactivos</strong>
                         <div class="mt-2">
-                            <div>Progreso: <span id="progress">0/${usersToSend.length}</span></div>
-                            <div>Lote: <span id="batchProgress">0/0</span></div>
-                            <div>Estado: <span id="statusText">Iniciando...</span></div>
+                            <div><i class="bi bi-people"></i> Total: ${usersToSend.length} usuarios</div>
+                            <div><i class="bi bi-clock"></i> Estado: <span id="bulkStatusText">Iniciando...</span></div>
+                            <div><i class="bi bi-graph-up"></i> Progreso: <span id="bulkProgress">0%</span></div>
+                        </div>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 id="bulkProgressBar" role="progressbar" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             `;
             document.body.appendChild(progressToast);
             
-            // Función para enviar mensajes en lotes
-            async function sendInBatches() {
-                const batches = [];
-                for (let i = 0; i < usersToSend.length; i += BATCH_SIZE) {
-                    batches.push(usersToSend.slice(i, i + BATCH_SIZE));
+            try {
+                // Actualizar estado
+                document.getElementById('bulkStatusText').textContent = 'Enviando mensajes...';
+                
+                // Llamar al endpoint de envío masivo
+                const response = await fetch('/api/users/send-bulk-whatsapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userIds: userIds,
+                        options: {
+                            batch_size: batchSize,
+                            message_delay: messageDelay,
+                            batch_delay: 45000 // 45 segundos entre lotes
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Actualizar progreso final
+                    document.getElementById('bulkStatusText').textContent = 'Completado';
+                    document.getElementById('bulkProgress').textContent = '100%';
+                    document.getElementById('bulkProgressBar').style.width = '100%';
+                    
+                    // Esperar un momento para mostrar el progreso completo
+                    setTimeout(() => {
+                        // Remover toast de progreso
+                        progressToast.remove();
+                        
+                        // Mostrar resultado detallado
+                        const successMsg = `✅ Envío Masivo Completado
+
+📊 Resumen:
+• Total solicitados: ${result.summary.total_requested}
+• Usuarios procesados: ${result.summary.users_processed}
+• Enviados exitosamente: ${result.summary.sent}
+• Errores: ${result.summary.errors}
+• Omitidos: ${result.summary.skipped}
+
+📱 Template usado: ${result.template_used}
+⚙️ Configuración aplicada: ${batchSize} por lote`;
+
+                        showToast(successMsg, result.summary.errors > 0 ? 'warning' : 'success');
+                        
+                        // Recargar datos
+                        loadUsers(currentFilter);
+                    }, 2000);
+                    
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error en envío masivo');
                 }
                 
-                for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-                    const batch = batches[batchIndex];
-                    const batchNum = batchIndex + 1;
-                    
-                    // Actualizar progreso
-                    document.getElementById('batchProgress').textContent = `${batchNum}/${batches.length}`;
-                    document.getElementById('statusText').textContent = `Procesando lote ${batchNum}...`;
-                    
-                    // Enviar mensajes del lote
-                    for (let i = 0; i < batch.length; i++) {
-                        const user = batch[i];
-                        const overallIndex = batchIndex * BATCH_SIZE + i;
-                        
-                        try {
-                            // Personalizar mensaje
-                            let personalizedMessage = message.replace('{nombre}', user.first_name);
-                            const formUrl = `${window.location.origin}/`;
-                            const userLink = `${formUrl}?user=${user.id}`;
-                            personalizedMessage = personalizedMessage.replace('{link}', userLink);
-                            
-                            const response = await fetch('/api/users/send-custom-whatsapp', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    userId: user.id,
-                                    phone: user.phone,
-                                    message: personalizedMessage
-                                })
-                            });
-                            
-                            if (response.ok) {
-                                successCount++;
-                            } else {
-                                errorCount++;
-                                const errorData = await response.json();
-                                console.error(`Error enviando mensaje a ${user.first_name} ${user.last_name}:`, errorData);
-                            }
-                        } catch (error) {
-                            errorCount++;
-                            console.error('Error enviando mensaje:', error);
-                        }
-                        
-                        // Actualizar progreso
-                        document.getElementById('progress').textContent = `${overallIndex + 1}/${usersToSend.length}`;
-                        
-                        // Delay entre mensajes
-                        if (i < batch.length - 1) {
-                            document.getElementById('statusText').textContent = `Esperando ${DELAY_BETWEEN_MESSAGES/1000}s...`;
-                            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_MESSAGES));
-                        }
-                    }
-                    
-                    // Delay entre lotes
-                    if (batchIndex < batches.length - 1) {
-                        document.getElementById('statusText').textContent = `Pausa entre lotes (${DELAY_BETWEEN_BATCHES/1000}s)...`;
-                        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
-                    }
-                }
-                
+            } catch (error) {
                 // Remover toast de progreso
                 progressToast.remove();
                 
-                // Mostrar resultado
-                showToast(`Envío completado: ${successCount} exitosos, ${errorCount} errores`, 
-                         errorCount > 0 ? 'warning' : 'success');
-                
-                // Recargar datos
-                await loadUsers(currentFilter);
+                console.error('Error en envío masivo:', error);
+                showToast(`❌ Error en envío masivo: ${error.message}`, 'error');
             }
-            
-            // Ejecutar envío
-            sendInBatches();
         }
 
         // Hacer las funciones disponibles globalmente
         window.sendWhatsApp = sendWhatsApp;
-        window.sendCustomWhatsApp = sendCustomWhatsApp;
+        window.sendBulkWhatsApp = sendBulkWhatsApp;
         window.sendMassWhatsApp = sendMassWhatsApp;
         window.sendApologyWhatsApp = sendApologyWhatsApp;
         window.showUsersWithoutResponse = showUsersWithoutResponse;
