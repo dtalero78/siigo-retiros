@@ -687,6 +687,99 @@
             document.body.removeChild(link);
         }
 
+        // Función para calcular estadísticas localmente
+        function calculateLocalStats(responses) {
+            const stats = {
+                total_responses: responses.length,
+                average_experience_rating: 0,
+                would_recommend_percentage: 0,
+                would_return_percentage: 0,
+                exit_reasons: {},
+                areas_analysis: {},
+                countries_analysis: {},
+                tenure_analysis: {},
+                satisfaction_ratings_avg: {}
+            };
+
+            let totalExperienceRating = 0;
+            let experienceRatingCount = 0;
+            let recommendCount = 0;
+            let returnCount = 0;
+
+            responses.forEach(resp => {
+                // Rating de experiencia
+                if (resp.experience_rating) {
+                    totalExperienceRating += parseInt(resp.experience_rating);
+                    experienceRatingCount++;
+                }
+
+                // Recomendaciones
+                if (resp.would_recommend === true || resp.would_recommend === 'SÍ') {
+                    recommendCount++;
+                }
+
+                // Regreso
+                if (resp.would_return === true || resp.would_return === 'SÍ') {
+                    returnCount++;
+                }
+
+                // Países
+                if (resp.country) {
+                    stats.countries_analysis[resp.country] = (stats.countries_analysis[resp.country] || 0) + 1;
+                }
+
+                // Áreas
+                if (resp.area) {
+                    if (!stats.areas_analysis[resp.area]) {
+                        stats.areas_analysis[resp.area] = {
+                            count: 0,
+                            avg_experience: 0,
+                            would_recommend_percentage: 0
+                        };
+                    }
+                    stats.areas_analysis[resp.area].count++;
+                }
+
+                // Tenure
+                if (resp.tenure) {
+                    stats.tenure_analysis[resp.tenure] = (stats.tenure_analysis[resp.tenure] || 0) + 1;
+                }
+
+                // Satisfaction ratings
+                if (resp.satisfaction_ratings) {
+                    let ratings = resp.satisfaction_ratings;
+                    if (typeof ratings === 'string') {
+                        try {
+                            ratings = JSON.parse(ratings);
+                        } catch (e) {
+                            ratings = {};
+                        }
+                    }
+                    Object.entries(ratings).forEach(([category, rating]) => {
+                        if (!stats.satisfaction_ratings_avg[category]) {
+                            stats.satisfaction_ratings_avg[category] = [];
+                        }
+                        stats.satisfaction_ratings_avg[category].push(parseFloat(rating) || 0);
+                    });
+                }
+            });
+
+            // Calcular promedios
+            stats.average_experience_rating = experienceRatingCount > 0 ? 
+                (totalExperienceRating / experienceRatingCount).toFixed(1) : 0;
+            stats.would_recommend_percentage = ((recommendCount / responses.length) * 100).toFixed(1);
+            stats.would_return_percentage = ((returnCount / responses.length) * 100).toFixed(1);
+
+            // Calcular promedios de satisfaction ratings
+            Object.keys(stats.satisfaction_ratings_avg).forEach(category => {
+                const values = stats.satisfaction_ratings_avg[category];
+                stats.satisfaction_ratings_avg[category] = values.length > 0 ? 
+                    (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1) : 0;
+            });
+
+            return stats;
+        }
+
         // Función para generar análisis global
         async function generateGlobalAnalysis() {
             if (allResponses.length === 0) {
@@ -694,11 +787,14 @@
                 return;
             }
 
-            const confirmed = confirm(`¿Generar análisis global de la organización?\n\nSe analizarán ${allResponses.length} respuestas para crear:\n• Estadísticas detalladas\n• 3 estrategias de mejora\n• Plan de acción con teorías de RRHH\n• Gráficos y métricas\n\nEsto tomará aproximadamente 30-60 segundos.`);
+            const confirmed = confirm(`¿Generar análisis global de la organización?\n\nSe analizarán ${allResponses.length} respuestas para crear:\n• Estadísticas detalladas\n• 3 estrategias de mejora\n• Plan de acción con teorías de RRHH\n• Gráficos y métricas\n\nPrimero se mostrarán las estadísticas y luego el análisis de IA.`);
             
             if (!confirmed) return;
 
-            // Mostrar modal de progreso
+            // Calcular estadísticas localmente primero
+            const localStats = calculateLocalStats(allResponses);
+
+            // Mostrar modal con estadísticas inmediatamente
             const progressModal = `
                 <div class="modal fade" id="analysisModal" tabindex="-1" style="backdrop-filter: blur(5px);">
                     <div class="modal-dialog modal-xl">
@@ -711,17 +807,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body" id="analysisModalBody">
-                                <div class="text-center py-5">
-                                    <div class="spinner-border text-warning mb-3" role="status" style="width: 3rem; height: 3rem;">
-                                        <span class="visually-hidden">Generando análisis...</span>
-                                    </div>
-                                    <h4>Generando Análisis Global...</h4>
-                                    <p class="text-muted">Analizando ${allResponses.length} respuestas con IA avanzada</p>
-                                    <div class="progress mt-3" style="height: 10px;">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
-                                             role="progressbar" style="width: 100%"></div>
-                                    </div>
-                                </div>
+                                <!-- Aquí se mostrarán los gráficos inmediatamente -->
                             </div>
                         </div>
                     </div>
@@ -732,6 +818,18 @@
             const modal = new bootstrap.Modal(document.getElementById('analysisModal'));
             modal.show();
 
+            // Mostrar gráficos inmediatamente con datos locales
+            const mockData = {
+                data: {
+                    resumen_estadistico: localStats,
+                    ai_analysis: null // Se llenará después
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            displayGlobalAnalysisWithLoading(mockData);
+
+            // Ahora hacer la petición para obtener el análisis de OpenAI
             try {
                 const response = await fetch('/api/analysis/global', {
                     method: 'POST',
@@ -746,21 +844,277 @@
 
                 const analysisData = await response.json();
                 
-                // Mostrar resultados en el modal
-                displayGlobalAnalysis(analysisData);
+                // Actualizar con el análisis completo de OpenAI
+                updateAnalysisSection(analysisData.data.ai_analysis);
+                window.currentAnalysis = analysisData;
 
             } catch (error) {
                 console.error('Error generando análisis global:', error);
-                document.getElementById('analysisModalBody').innerHTML = `
-                    <div class="alert alert-danger">
-                        <h4>Error generando análisis</h4>
-                        <p>Hubo un problema al generar el análisis global: ${error.message}</p>
-                        <button class="btn btn-outline-danger" onclick="generateGlobalAnalysis()">
-                            Reintentar
+                updateAnalysisSection(`<div class="alert alert-danger">
+                    <h4>Error generando análisis de IA</h4>
+                    <p>Hubo un problema al generar el análisis con OpenAI: ${error.message}</p>
+                    <button class="btn btn-outline-danger" onclick="generateGlobalAnalysis()">
+                        Reintentar
+                    </button>
+                </div>`);
+            }
+        }
+
+        function displayGlobalAnalysisWithLoading(data) {
+            const stats = data.data.resumen_estadistico;
+            
+            // Crear gráficos inmediatamente (sin análisis de IA aún)
+            const chartsHtml = generateChartsHTML(stats);
+            
+            const content = `
+                ${chartsHtml}
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-robot me-2"></i>
+                                    Análisis de IA con OpenAI GPT-4
+                                </h6>
+                            </div>
+                            <div class="card-body" id="aiAnalysisSection">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary mb-3" role="status">
+                                        <span class="visually-hidden">Generando análisis con IA...</span>
+                                    </div>
+                                    <h5>Generando análisis inteligente...</h5>
+                                    <p class="text-muted">OpenAI está analizando los datos para generar insights y recomendaciones</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('analysisModalBody').innerHTML = content;
+            window.currentAnalysis = data;
+        }
+
+        function updateAnalysisSection(aiAnalysis) {
+            const analysisSection = document.getElementById('aiAnalysisSection');
+            if (analysisSection) {
+                if (aiAnalysis) {
+                    analysisSection.innerHTML = `
+                        <div class="analysis-content">
+                            ${marked.parse(aiAnalysis)}
+                        </div>
+                    `;
+                } else {
+                    analysisSection.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h5>Análisis no disponible</h5>
+                            <p>No se pudo generar el análisis de IA en este momento.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function generateChartsHTML(stats) {
+            return `
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <h2>${stats.total_responses}</h2>
+                                <p>Total Respuestas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h2>${stats.average_experience_rating}/10</h2>
+                                <p>Rating Promedio</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <h2>${stats.would_recommend_percentage}%</h2>
+                                <p>Recomendarían</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-warning text-dark">
+                            <div class="card-body">
+                                <h2>${stats.would_return_percentage}%</h2>
+                                <p>Regresarían</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Análisis por Área</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.areas_analysis).map(([area, data]) => `
+                                    <div class="mb-3">
+                                        <h6>${area} <span class="badge bg-primary">${data.count || 0}</span></h6>
+                                        <small class="text-muted">
+                                            Área con ${data.count || 0} respuestas
+                                        </small>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Distribución por País</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.countries_analysis).map(([country, count]) => `
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">${country === 'Colombia' ? '🇨🇴' : country === 'México' ? '🇲🇽' : country === 'Ecuador' ? '🇪🇨' : country === 'Uruguay' ? '🇺🇾' : country === 'Perú' ? '🇵🇪' : '🌍'}</span>
+                                            <span>${country}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-info me-2">${count}</span>
+                                            <span class="small text-muted">${((count / stats.total_responses) * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Niveles de Satisfacción por Categoría</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.satisfaction_ratings_avg).map(([category, rating]) => `
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">${category}</small>
+                                            <span class="badge ${parseFloat(rating) >= 4 ? 'bg-success' : parseFloat(rating) >= 3 ? 'bg-warning' : 'bg-danger'}">${rating}/5</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar ${parseFloat(rating) >= 4 ? 'bg-success' : parseFloat(rating) >= 3 ? 'bg-warning' : 'bg-danger'}" 
+                                                 style="width: ${(parseFloat(rating) / 5) * 100}%" 
+                                                 title="${category}: ${rating}/5">
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Tiempo en la Empresa</h6>
+                            </div>
+                            <div class="card-body">
+                                ${Object.entries(stats.tenure_analysis).sort((a, b) => {
+                                    const order = ['Menos de 2 meses', 'Menos de 6 meses', '6 meses a 1 año', '1-2 años', '2-5 años', 'Más de 5 años'];
+                                    return order.indexOf(a[0]) - order.indexOf(b[0]);
+                                }).map(([tenure, count]) => `
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small">${tenure}</span>
+                                            <div>
+                                                <span class="badge bg-secondary me-1">${count}</span>
+                                                <span class="small text-muted">${((count / stats.total_responses) * 100).toFixed(1)}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-gradient" 
+                                                 style="width: ${(count / stats.total_responses) * 100}%; 
+                                                        background: linear-gradient(to right, #28a745, #17a2b8);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">🎯 Métricas de Retención y Recomendación</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">¿Recomendarían Siigo?</h6>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="flex-grow-1">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" style="width: ${stats.would_recommend_percentage}%">
+                                                        SÍ (${stats.would_recommend_percentage}%)
+                                                    </div>
+                                                    <div class="progress-bar bg-danger" style="width: ${100 - parseFloat(stats.would_recommend_percentage)}%">
+                                                        NO (${(100 - parseFloat(stats.would_recommend_percentage)).toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">¿Regresarían a Siigo?</h6>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="flex-grow-1">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-info" style="width: ${stats.would_return_percentage}%">
+                                                        SÍ (${stats.would_return_percentage}%)
+                                                    </div>
+                                                    <div class="progress-bar bg-secondary" style="width: ${100 - parseFloat(stats.would_return_percentage)}%">
+                                                        NO (${(100 - parseFloat(stats.would_return_percentage)).toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="alert ${parseFloat(stats.would_recommend_percentage) >= 60 ? 'alert-success' : parseFloat(stats.would_recommend_percentage) >= 40 ? 'alert-warning' : 'alert-danger'}" role="alert">
+                                            <strong>Análisis de Retención:</strong>
+                                            ${parseFloat(stats.would_recommend_percentage) >= 60 
+                                                ? '✅ Excelente nivel de satisfacción. Los empleados recomiendan activamente trabajar en Siigo.' 
+                                                : parseFloat(stats.would_recommend_percentage) >= 40 
+                                                ? '⚠️ Nivel de satisfacción moderado. Hay oportunidades de mejora significativas.' 
+                                                : '🚨 Nivel crítico de satisfacción. Se requiere acción inmediata para mejorar la experiencia del empleado.'
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12 text-center">
+                        <button class="btn btn-success me-2" onclick="downloadAnalysis()" title="Descargar reporte en PDF">
+                            <i class="bi bi-download me-2"></i>
+                            Descargar Análisis (PDF)
                         </button>
                     </div>
-                `;
-            }
+                </div>
+            `;
         }
 
         function displayGlobalAnalysis(data) {
