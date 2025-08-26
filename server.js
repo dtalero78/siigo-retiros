@@ -677,7 +677,13 @@ app.get('/api/users/stats', async (req, res) => {
   }
 });
 
-// Enviar mensaje de WhatsApp a usuario
+// Importar servicios de WhatsApp con botones
+const { 
+  sendSurveyInvitationWithButton, 
+  sendBulkSurveyInvitations 
+} = require('./services/whatsapp-button-sender');
+
+// Enviar mensaje de WhatsApp a usuario con botón interactivo
 app.post('/api/users/send-whatsapp', async (req, res) => {
   try {
     const { userId, phone, name } = req.body;
@@ -692,85 +698,140 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Limpiar número de teléfono
-    const cleanPhone = phone.replace(/\D/g, '');
+    console.log(`📱 Enviando WhatsApp con botón a ${name} (ID: ${userId})`);
 
-    if (cleanPhone.length < 10) {
-      return res.status(400).json({ error: 'Número de teléfono inválido' });
-    }
-
-    // Formatear número para WhatsApp
-    let whatsappNumber = cleanPhone;
-    if (!whatsappNumber.startsWith('57') && cleanPhone.length === 10) {
-      whatsappNumber = '57' + cleanPhone; // Código de Colombia
-    }
-
-    // URL del formulario con ID del usuario
-    const baseUrl = process.env.FORM_URL || 'https://www.siigo.digital';
-    const formUrl = `${baseUrl}/?user=${userId}`;
-
-    // Mensaje personalizado con la URL que incluye el ID
-    const message = `¡Hola! 👋 Gracias por haber hecho parte de Siigo 💙
-
-Desde el equipo de Cultura de Siigo queremos agradecerte de corazón por todo lo que aportaste durante tu tiempo en la compañía. 🙌
-
-Nos encantaría conocer tu experiencia a través de una breve entrevista de retiro. Tu opinión es muy valiosa y nos ayudará a seguir mejorando como organización.
-
-📝 Aquí puedes responder el formulario (toma menos de 10 min):
-${formUrl}
-
-¡Gracias por tu sinceridad y por habernos acompañado en este camino! 🌟
-
-Un abrazo,
-Equipo de Cultura – Siigo`;
-
-    // Configuración de Whapi
-    const whapiToken = process.env.WHAPI_TOKEN;
-    if (!whapiToken) {
-      return res.status(500).json({ error: 'Token de Whapi no configurado' });
-    }
-
-    // Enviar mensaje usando Whapi
-    const whapiResponse = await fetch('https://gate.whapi.cloud/messages/text', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${whapiToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        to: whatsappNumber,
-        body: message
-      })
+    // Enviar usando el template con botón aprobado
+    const result = await sendSurveyInvitationWithButton({
+      id: userId,
+      phone: phone,
+      first_name: name.split(' ')[0] // Usar solo el primer nombre
     });
 
-    if (whapiResponse.ok) {
-      const result = await whapiResponse.json();
-
+    if (result.success) {
       // Actualizar el registro del usuario con la información del WhatsApp enviado
       try {
-        await usersDb.updateWhatsAppStatus(userId, result.id);
+        await usersDb.updateWhatsAppStatus(userId, result.messageId);
+        console.log(`✅ WhatsApp con botón enviado a ${name} - ID: ${result.messageId}`);
       } catch (updateError) {
         console.error('Error actualizando estado de WhatsApp en BD:', updateError);
       }
 
-      // Log del envío exitoso
-      console.log(`WhatsApp enviado a ${name} (${phone}): ${formUrl}`);
+      // URL del formulario para logging
+      const formUrl = `https://www.siigo.digital/?user=${userId}`;
 
       res.json({
         success: true,
-        message: 'Mensaje de WhatsApp enviado exitosamente',
-        whatsappId: result.id,
-        formUrl: formUrl
+        message: 'Mensaje de WhatsApp con botón enviado exitosamente',
+        whatsappId: result.messageId,
+        formUrl: formUrl,
+        status: result.status,
+        sentTo: result.to,
+        templateUsed: 'UTILITY_BUTTON_TEMPLATE'
       });
     } else {
-      const error = await whapiResponse.text();
-      console.error('Error de Whapi:', error);
-      res.status(500).json({ error: 'Error al enviar mensaje a través de Whapi' });
+      console.error(`❌ Error enviando WhatsApp a ${name}:`, result.error);
+      res.status(500).json({ 
+        error: 'Error al enviar mensaje con botón', 
+        details: result.error,
+        code: result.code 
+      });
     }
 
   } catch (error) {
-    console.error('Error enviando WhatsApp:', error);
+    console.error('Error en endpoint send-whatsapp:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ================================
+// ENDPOINT PARA ENVÍO MASIVO CON BOTONES
+// ================================
+
+app.post('/api/users/send-bulk-whatsapp', async (req, res) => {
+  try {
+    const { userIds, options = {} } = req.body;
+    
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ 
+        error: 'Se requiere un array de IDs de usuarios para envío masivo' 
+      });
+    }
+
+    console.log(`🚀 Iniciando envío masivo con botones a ${userIds.length} usuarios`);
+
+    // Obtener usuarios de la base de datos
+    const users = [];
+    for (const userId of userIds) {
+      try {
+        const user = await usersDb.getUser(userId);
+        if (user && user.phone) {
+          users.push({
+            id: user.id,
+            phone: user.phone,
+            first_name: user.first_name || user.name?.split(' ')[0] || 'Usuario'
+          });
+        } else {
+          console.warn(`Usuario ${userId} sin teléfono o no encontrado`);
+        }
+      } catch (userError) {
+        console.error(`Error obteniendo usuario ${userId}:`, userError.message);
+      }
+    }
+
+    if (users.length === 0) {
+      return res.status(400).json({
+        error: 'No se encontraron usuarios válidos con números de teléfono'
+      });
+    }
+
+    // Configuración del envío masivo
+    const bulkOptions = {
+      batch_size: options.batch_size || 15,
+      message_delay: options.message_delay || 4000,
+      batch_delay: options.batch_delay || 45000
+    };
+
+    console.log(`📊 Configuración: ${bulkOptions.batch_size} por lote, ${bulkOptions.message_delay/1000}s entre mensajes`);
+
+    // Ejecutar envío masivo
+    const results = await sendBulkSurveyInvitations(users, bulkOptions);
+
+    // Actualizar base de datos para usuarios exitosos
+    if (results.details && results.details.length > 0) {
+      for (const detail of results.details) {
+        if (detail.status === 'sent' && detail.message_id) {
+          try {
+            await usersDb.updateWhatsAppStatus(detail.user_id, detail.message_id);
+          } catch (updateError) {
+            console.error(`Error actualizando BD para usuario ${detail.user_id}:`, updateError.message);
+          }
+        }
+      }
+    }
+
+    console.log(`✅ Envío masivo completado: ${results.sent} enviados, ${results.errors} errores`);
+
+    res.json({
+      success: true,
+      message: 'Envío masivo con botones completado',
+      summary: {
+        total_requested: userIds.length,
+        users_processed: users.length,
+        sent: results.sent,
+        errors: results.errors,
+        skipped: results.skipped
+      },
+      details: results.details,
+      configuration: bulkOptions,
+      template_used: 'UTILITY_BUTTON_TEMPLATE'
+    });
+
+  } catch (error) {
+    console.error('Error en envío masivo:', error);
+    res.status(500).json({ 
+      error: 'Error interno en envío masivo', 
+      message: error.message 
+    });
   }
 });
 
