@@ -1646,10 +1646,232 @@ Genera sugerencias de mejora con justificación de teorías de recursos humanos
   }
 });
 
+// ================================
+// ANÁLISIS GLOBAL DE ORGANIZACIÓN (debe ir ANTES del :id)
+// ================================
+
+app.post('/api/analysis/global', async (req, res) => {
+  try {
+    console.log('Iniciando análisis global...');
+    
+    // 1. Obtener todas las respuestas completadas
+    const responses = await db.getAllResponses();
+    
+    if (responses.length === 0) {
+      return res.status(400).json({ 
+        error: 'No hay respuestas disponibles para análizar' 
+      });
+    }
+
+    console.log(`Analizando ${responses.length} respuestas globalmente...`);
+
+    // 2. Calcular estadísticas generales
+    const stats = {
+      total_responses: responses.length,
+      average_experience_rating: 0,
+      would_recommend_percentage: 0,
+      would_return_percentage: 0,
+      exit_reasons: {},
+      areas_analysis: {},
+      countries_analysis: {},
+      tenure_analysis: {},
+      satisfaction_ratings_avg: {}
+    };
+
+    // Calcular promedios y conteos
+    let totalExperienceRating = 0;
+    let recommendCount = 0;
+    let returnCount = 0;
+
+    responses.forEach(resp => {
+      // Rating de experiencia
+      if (resp.experience_rating) {
+        totalExperienceRating += parseInt(resp.experience_rating);
+      }
+
+      // Recomendaciones
+      if (resp.would_recommend === true || resp.would_recommend === 'SÍ') {
+        recommendCount++;
+      }
+
+      // Regreso
+      if (resp.would_return === true || resp.would_return === 'SÍ') {
+        returnCount++;
+      }
+
+      // Razones de salida
+      if (resp.exit_reason_category) {
+        stats.exit_reasons[resp.exit_reason_category] = 
+          (stats.exit_reasons[resp.exit_reason_category] || 0) + 1;
+      }
+
+      // Análisis por área
+      if (resp.area) {
+        if (!stats.areas_analysis[resp.area]) {
+          stats.areas_analysis[resp.area] = {
+            count: 0,
+            avg_experience: 0,
+            would_recommend: 0,
+            would_return: 0
+          };
+        }
+        stats.areas_analysis[resp.area].count++;
+        if (resp.experience_rating) {
+          stats.areas_analysis[resp.area].avg_experience += parseInt(resp.experience_rating);
+        }
+        if (resp.would_recommend === true || resp.would_recommend === 'SÍ') {
+          stats.areas_analysis[resp.area].would_recommend++;
+        }
+        if (resp.would_return === true || resp.would_return === 'SÍ') {
+          stats.areas_analysis[resp.area].would_return++;
+        }
+      }
+
+      // Análisis por país
+      if (resp.country) {
+        stats.countries_analysis[resp.country] = 
+          (stats.countries_analysis[resp.country] || 0) + 1;
+      }
+
+      // Análisis por tiempo en la empresa
+      if (resp.tenure) {
+        stats.tenure_analysis[resp.tenure] = 
+          (stats.tenure_analysis[resp.tenure] || 0) + 1;
+      }
+
+      // Promedios de satisfacción
+      if (resp.satisfaction_ratings) {
+        let ratings;
+        try {
+          ratings = typeof resp.satisfaction_ratings === 'string' 
+            ? JSON.parse(resp.satisfaction_ratings) 
+            : resp.satisfaction_ratings;
+        } catch {
+          ratings = {};
+        }
+
+        Object.entries(ratings).forEach(([category, rating]) => {
+          if (!stats.satisfaction_ratings_avg[category]) {
+            stats.satisfaction_ratings_avg[category] = { total: 0, count: 0 };
+          }
+          stats.satisfaction_ratings_avg[category].total += parseFloat(rating) || 0;
+          stats.satisfaction_ratings_avg[category].count++;
+        });
+      }
+    });
+
+    // Calcular promedios finales
+    stats.average_experience_rating = (totalExperienceRating / responses.length).toFixed(2);
+    stats.would_recommend_percentage = ((recommendCount / responses.length) * 100).toFixed(1);
+    stats.would_return_percentage = ((returnCount / responses.length) * 100).toFixed(1);
+
+    // Promedios por área
+    Object.keys(stats.areas_analysis).forEach(area => {
+      const areaData = stats.areas_analysis[area];
+      areaData.avg_experience = (areaData.avg_experience / areaData.count).toFixed(2);
+      areaData.would_recommend_percentage = ((areaData.would_recommend / areaData.count) * 100).toFixed(1);
+      areaData.would_return_percentage = ((areaData.would_return / areaData.count) * 100).toFixed(1);
+    });
+
+    // Promedios de satisfacción por categoría
+    Object.keys(stats.satisfaction_ratings_avg).forEach(category => {
+      const catData = stats.satisfaction_ratings_avg[category];
+      stats.satisfaction_ratings_avg[category] = (catData.total / catData.count).toFixed(2);
+    });
+
+    // 3. Preparar datos para análisis con IA
+    const analysisData = {
+      resumen_estadistico: stats,
+      comentarios_principales: {
+        lo_que_disfrutaron: responses.filter(r => r.what_enjoyed).map(r => r.what_enjoyed).slice(0, 10),
+        areas_mejora: responses.filter(r => r.what_to_improve).map(r => r.what_to_improve).slice(0, 10)
+      },
+      patrones_identificados: {
+        area_mayor_rotacion: Object.keys(stats.areas_analysis).reduce((a, b) => 
+          stats.areas_analysis[a].count > stats.areas_analysis[b].count ? a : b),
+        razon_salida_principal: Object.keys(stats.exit_reasons).reduce((a, b) => 
+          stats.exit_reasons[a] > stats.exit_reasons[b] ? a : b),
+        satisfaccion_mas_baja: Object.keys(stats.satisfaction_ratings_avg).reduce((a, b) => 
+          parseFloat(stats.satisfaction_ratings_avg[a]) < parseFloat(stats.satisfaction_ratings_avg[b]) ? a : b)
+      }
+    };
+
+    // 4. Generar análisis con OpenAI
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('OpenAI API Key no configurado - devolviendo solo estadísticas');
+      return res.json({
+        success: true,
+        data: {
+          ...analysisData,
+          ai_analysis: 'Análisis de IA no disponible - API Key no configurado',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    console.log('Generando análisis organizacional con IA...');
+
+    const prompt = `
+    Eres un experto consultor en recursos humanos y análisis organizacional para la empresa SIIGO.
+    
+    Analiza los siguientes datos de entrevistas de salida y genera un análisis estratégico:
+    
+    ${JSON.stringify(analysisData, null, 2)}
+    
+    Proporciona:
+    1. ANÁLISIS DE TENDENCIAS CRÍTICAS
+    2. RECOMENDACIONES ESTRATÉGICAS PRIORITARIAS
+    3. PLAN DE ACCIÓN INMEDIATO (próximos 90 días)
+    4. MÉTRICAS DE SEGUIMIENTO SUGERIDAS
+    
+    Usa teorías de recursos humanos y gestión organizacional respaldadas.
+    `;
+
+    const ai = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 2000,
+      temperature: 0.7
+    });
+
+    const aiAnalysis = ai.choices[0].message.content.trim();
+
+    res.json({
+      success: true,
+      data: {
+        ...analysisData,
+        ai_analysis: aiAnalysis,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en análisis global:', error);
+    res.status(500).json({ 
+      error: 'Error generando análisis global',
+      details: error.message 
+    });
+  }
+});
+
 //ANÁLISIS OPENAI PARA CADA REGISTRO
 app.post('/api/analysis/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Si el ID es "global", rechazar - debe usar /api/analysis/global
+    if (id === 'global') {
+      return res.status(400).json({ 
+        error: 'Para análisis global, use el endpoint /api/analysis/global'
+      });
+    }
+    
+    // Verificar que el ID sea un número válido
+    if (isNaN(parseInt(id))) {
+      return res.status(400).json({ 
+        error: 'ID de respuesta debe ser un número válido'
+      });
+    }
     
     // Verificar si OpenAI está configurado
     if (!process.env.OPENAI_API_KEY) {
@@ -1756,225 +1978,6 @@ Genera sugerencias de mejora con justificación de teorías de recursos humanos
 
 
 
-
-// ================================
-// ANÁLISIS GLOBAL DE ORGANIZACIÓN
-// ================================
-
-app.post('/api/analysis/global', async (req, res) => {
-  try {
-    console.log('Iniciando análisis global...');
-    
-    // 1. Obtener todas las respuestas completadas
-    const responses = await db.getAllResponses();
-    
-    if (responses.length === 0) {
-      return res.status(400).json({ 
-        error: 'No hay respuestas disponibles para análizar' 
-      });
-    }
-
-    console.log(`Analizando ${responses.length} respuestas globalmente...`);
-
-    // 2. Calcular estadísticas generales
-    const stats = {
-      total_responses: responses.length,
-      average_experience_rating: 0,
-      would_recommend_percentage: 0,
-      would_return_percentage: 0,
-      exit_reasons: {},
-      areas_analysis: {},
-      countries_analysis: {},
-      tenure_analysis: {},
-      satisfaction_ratings_avg: {}
-    };
-
-    // Calcular promedios y conteos
-    let totalExperienceRating = 0;
-    let recommendCount = 0;
-    let returnCount = 0;
-
-    responses.forEach(resp => {
-      // Rating de experiencia
-      if (resp.experience_rating) {
-        totalExperienceRating += parseInt(resp.experience_rating);
-      }
-
-      // Recomendaciones
-      if (resp.would_recommend === true || resp.would_recommend === 'SÍ') {
-        recommendCount++;
-      }
-
-      // Regreso
-      if (resp.would_return === true || resp.would_return === 'SÍ') {
-        returnCount++;
-      }
-
-      // Razones de salida
-      if (resp.exit_reason_category) {
-        stats.exit_reasons[resp.exit_reason_category] = 
-          (stats.exit_reasons[resp.exit_reason_category] || 0) + 1;
-      }
-
-      // Análisis por área
-      if (resp.area) {
-        if (!stats.areas_analysis[resp.area]) {
-          stats.areas_analysis[resp.area] = {
-            count: 0,
-            avg_experience: 0,
-            would_recommend: 0,
-            would_return: 0
-          };
-        }
-        stats.areas_analysis[resp.area].count++;
-        if (resp.experience_rating) {
-          stats.areas_analysis[resp.area].avg_experience += parseInt(resp.experience_rating);
-        }
-        if (resp.would_recommend === true || resp.would_recommend === 'SÍ') stats.areas_analysis[resp.area].would_recommend++;
-        if (resp.would_return === true || resp.would_return === 'SÍ') stats.areas_analysis[resp.area].would_return++;
-      }
-
-      // Análisis por país
-      if (resp.country) {
-        if (!stats.countries_analysis[resp.country]) {
-          stats.countries_analysis[resp.country] = { count: 0, satisfaction: 0 };
-        }
-        stats.countries_analysis[resp.country].count++;
-        if (resp.experience_rating) {
-          stats.countries_analysis[resp.country].satisfaction += parseInt(resp.experience_rating);
-        }
-      }
-
-      // Análisis por tenure
-      if (resp.tenure) {
-        stats.tenure_analysis[resp.tenure] = (stats.tenure_analysis[resp.tenure] || 0) + 1;
-      }
-
-      // Satisfacción por categorías
-      if (resp.satisfaction_ratings) {
-        const satisfactionData = typeof resp.satisfaction_ratings === 'string' 
-          ? JSON.parse(resp.satisfaction_ratings) 
-          : resp.satisfaction_ratings;
-        
-        Object.keys(satisfactionData || {}).forEach(category => {
-          if (!stats.satisfaction_ratings_avg[category]) {
-            stats.satisfaction_ratings_avg[category] = { total: 0, count: 0 };
-          }
-          stats.satisfaction_ratings_avg[category].total += satisfactionData[category];
-          stats.satisfaction_ratings_avg[category].count++;
-        });
-      }
-    });
-
-    // Calcular promedios finales
-    stats.average_experience_rating = (totalExperienceRating / responses.length).toFixed(2);
-    stats.would_recommend_percentage = ((recommendCount / responses.length) * 100).toFixed(1);
-    stats.would_return_percentage = ((returnCount / responses.length) * 100).toFixed(1);
-
-    // Promedios por área
-    Object.keys(stats.areas_analysis).forEach(area => {
-      const areaData = stats.areas_analysis[area];
-      areaData.avg_experience = (areaData.avg_experience / areaData.count).toFixed(2);
-      areaData.would_recommend_percentage = ((areaData.would_recommend / areaData.count) * 100).toFixed(1);
-      areaData.would_return_percentage = ((areaData.would_return / areaData.count) * 100).toFixed(1);
-    });
-
-    // Promedios de satisfacción por categoría
-    Object.keys(stats.satisfaction_ratings_avg).forEach(category => {
-      const catData = stats.satisfaction_ratings_avg[category];
-      stats.satisfaction_ratings_avg[category] = (catData.total / catData.count).toFixed(2);
-    });
-
-    // 3. Preparar datos para análisis con IA
-    const analysisData = {
-      resumen_estadistico: stats,
-      comentarios_principales: {
-        lo_que_disfrutaron: responses.filter(r => r.what_enjoyed).map(r => r.what_enjoyed).slice(0, 10),
-        areas_mejora: responses.filter(r => r.what_to_improve).map(r => r.what_to_improve).slice(0, 10)
-      },
-      patrones_identificados: {
-        area_mayor_rotacion: Object.keys(stats.areas_analysis).reduce((a, b) => 
-          stats.areas_analysis[a].count > stats.areas_analysis[b].count ? a : b),
-        razon_salida_principal: Object.keys(stats.exit_reasons).reduce((a, b) => 
-          stats.exit_reasons[a] > stats.exit_reasons[b] ? a : b),
-        satisfaccion_general: stats.average_experience_rating
-      }
-    };
-
-    // 4. Generar análisis con OpenAI
-    const prompt = `
-Como consultor experto en Recursos Humanos y Gestión del Talento, analiza los siguientes datos de entrevistas de salida de la empresa Siigo:
-
-DATOS ESTADÍSTICOS:
-${JSON.stringify(analysisData, null, 2)}
-
-Por favor proporciona un análisis completo que incluya:
-
-1. RESUMEN EJECUTIVO (2-3 párrafos)
-   - Estado general de la retención de talento
-   - Principales hallazgos preocupantes
-   - Fortalezas identificadas
-
-2. ANÁLISIS DETALLADO CON TEORÍAS DE RRHH:
-   - Aplica la Teoría de los Dos Factores de Herzberg
-   - Referencia el Modelo de Rotación de Mobley
-   - Usa conceptos de Employee Experience y Employee Value Proposition
-   - Menciona el impacto en el Employee Net Promoter Score (eNPS)
-
-3. TRES ESTRATEGIAS PRIORITARIAS DE MEJORA:
-   Estrategia 1: [Título y descripción detallada]
-   Estrategia 2: [Título y descripción detallada]  
-   Estrategia 3: [Título y descripción detallada]
-
-4. PLAN DE ACCIÓN DETALLADO (6-8 puntos específicos):
-   - Acciones inmediatas (0-30 días)
-   - Iniciativas a corto plazo (1-3 meses)
-   - Mejoras estructurales (3-6 meses)
-
-5. ANÁLISIS POR ÁREA:
-   - Identifica las áreas con mayor riesgo
-   - Recomienda intervenciones específicas por área
-
-6. MÉTRICAS DE SEGUIMIENTO:
-   - KPIs recomendados para monitorear mejoras
-   - Frecuencia de medición sugerida
-
-Usa un lenguaje profesional pero accesible, con datos específicos de la empresa cuando sea relevante.
-`;
-
-    const aiResponse = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 4000,
-      temperature: 0.3
-    });
-
-    const analysis = aiResponse.choices[0].message.content.trim();
-
-    // 5. Respuesta completa
-    const result = {
-      timestamp: new Date().toISOString(),
-      statistics: stats,
-      ai_analysis: analysis,
-      data_summary: {
-        total_responses: responses.length,
-        analysis_date: new Date().toISOString().split('T')[0],
-        areas_covered: Object.keys(stats.areas_analysis),
-        countries_covered: Object.keys(stats.countries_analysis)
-      }
-    };
-
-    console.log('Análisis global completado exitosamente');
-    res.json(result);
-
-  } catch (error) {
-    console.error('Error en análisis global:', error);
-    res.status(500).json({ 
-      error: 'Error generando análisis global',
-      details: error.message 
-    });
-  }
-});
 
 // ================================
 // RUTAS DE PÁGINAS
