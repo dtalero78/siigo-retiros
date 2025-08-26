@@ -388,6 +388,10 @@
                     Usuarios Registrados
                 </h5>
                 <div class="d-flex gap-2">
+                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#conversationsModal">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        Ver Conversaciones
+                    </button>
                     <button class="btn btn-primary" onclick="exportUsers()">
                         <i class="bi bi-download me-2"></i>
                         Exportar CSV
@@ -647,6 +651,70 @@
                         <i class="bi bi-send me-2"></i>
                         <span id="sendButtonText">Enviar con Botones</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver conversaciones de WhatsApp -->
+    <div class="modal fade" id="conversationsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        Conversaciones de WhatsApp
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="height: 70vh;">
+                    <div class="row h-100">
+                        <!-- Lista de conversaciones -->
+                        <div class="col-md-4 border-end">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Conversaciones</h6>
+                                <button class="btn btn-sm btn-outline-primary" onclick="loadConversations()">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                            <div id="conversationsList" style="height: calc(100% - 60px); overflow-y: auto;">
+                                <div class="text-center p-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-2">Cargando conversaciones...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat actual -->
+                        <div class="col-md-8">
+                            <div id="chatHeader" class="pb-2 mb-3 border-bottom" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="bi bi-person-circle fs-2 text-success"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0" id="chatUserName">Selecciona una conversación</h6>
+                                        <small class="text-muted" id="chatUserPhone"></small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="chatMessages" style="height: calc(100% - 80px); overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px;">
+                                <div class="text-center text-muted p-5">
+                                    <i class="bi bi-chat-text fs-1 mb-3 d-block"></i>
+                                    <p>Selecciona una conversación para ver los mensajes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="text-muted small me-auto" id="conversationsStats">
+                        Cargando estadísticas...
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -1815,6 +1883,306 @@
             }
         }
 
+        // ================================
+        // FUNCIONES PARA CONVERSACIONES DE WHATSAPP
+        // ================================
+        
+        let currentConversations = {};
+        
+        async function loadConversations() {
+            const listContainer = document.getElementById('conversationsList');
+            
+            // Mostrar spinner
+            listContainer.innerHTML = `
+                <div class="text-center p-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Obteniendo conversaciones...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/whatsapp/conversations');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentConversations = data.conversations;
+                    renderConversationsList(data.conversations, data.stats);
+                } else {
+                    throw new Error(data.error || 'Error obteniendo conversaciones');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando conversaciones:', error);
+                listContainer.innerHTML = `
+                    <div class="text-center text-danger p-3">
+                        <i class="bi bi-exclamation-triangle fs-2 mb-2"></i>
+                        <p>Error cargando conversaciones</p>
+                        <small>${error.message}</small>
+                        <br>
+                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadConversations()">
+                            Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderConversationsList(conversations, stats) {
+            const listContainer = document.getElementById('conversationsList');
+            const statsContainer = document.getElementById('conversationsStats');
+            
+            // Actualizar estadísticas
+            statsContainer.innerHTML = `
+                📊 ${stats.totalConversations} conversaciones, 
+                ${stats.totalMessages} mensajes 
+                (↑${stats.outgoingMessages} enviados, ↓${stats.incomingMessages} recibidos)
+            `;
+            
+            if (Object.keys(conversations).length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center text-muted p-4">
+                        <i class="bi bi-chat-dots fs-1 mb-3"></i>
+                        <p>No hay conversaciones disponibles</p>
+                        <small>Los mensajes de WhatsApp aparecerán aquí</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Ordenar conversaciones por último mensaje
+            const sortedConversations = Object.entries(conversations)
+                .map(([number, messages]) => ({
+                    number,
+                    messages,
+                    lastMessage: messages[messages.length - 1],
+                    hasIncoming: messages.some(m => m.isFromUser)
+                }))
+                .sort((a, b) => new Date(b.lastMessage.dateCreated) - new Date(a.lastMessage.dateCreated));
+            
+            let html = '';
+            
+            for (const conv of sortedConversations) {
+                const phone = conv.number.replace('whatsapp:', '');
+                const displayPhone = formatPhoneForDisplay(phone);
+                const lastMsg = conv.lastMessage;
+                const hasUnread = conv.hasIncoming;
+                
+                // Buscar usuario en la base de datos local
+                let userName = 'Usuario desconocido';
+                const cleanPhone = phone.replace(/\D/g, '');
+                const user = allUsers.find(u => u.phone && u.phone.replace(/\D/g, '') === cleanPhone);
+                if (user) {
+                    userName = `${user.first_name} ${user.last_name}`.trim();
+                }
+                
+                // Preview del último mensaje
+                let msgPreview = lastMsg.body || '';
+                if (msgPreview.length > 50) {
+                    msgPreview = msgPreview.substring(0, 50) + '...';
+                }
+                
+                // Formatear fecha
+                const msgDate = new Date(lastMsg.dateCreated);
+                const now = new Date();
+                let dateStr = '';
+                
+                if (msgDate.toDateString() === now.toDateString()) {
+                    dateStr = msgDate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    dateStr = msgDate.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
+                }
+                
+                html += `
+                    <div class="conversation-item p-3 border-bottom cursor-pointer ${hasUnread ? 'bg-light' : ''}" 
+                         onclick="openConversation('${conv.number}', '${userName}', '${displayPhone}')">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-person-circle fs-4 text-${hasUnread ? 'success' : 'secondary'}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-0 ${hasUnread ? 'fw-bold' : ''}">${userName}</h6>
+                                        <small class="text-muted">${displayPhone}</small>
+                                    </div>
+                                    <small class="text-muted">${dateStr}</small>
+                                </div>
+                                <p class="mb-1 small text-muted ${hasUnread ? 'fw-bold' : ''}">${msgPreview}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="badge bg-light text-dark">${conv.messages.length} msgs</small>
+                                    ${hasUnread ? '<i class="bi bi-circle-fill text-success" style="font-size: 8px;"></i>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            listContainer.innerHTML = html;
+            
+            // Agregar estilos CSS para hover
+            const style = document.createElement('style');
+            style.textContent = `
+                .conversation-item:hover {
+                    background-color: #f8f9fa !important;
+                    cursor: pointer;
+                }
+                .conversation-item.active {
+                    background-color: #e3f2fd !important;
+                    border-left: 4px solid #2196f3;
+                }
+            `;
+            if (!document.querySelector('#conversation-styles')) {
+                style.id = 'conversation-styles';
+                document.head.appendChild(style);
+            }
+        }
+        
+        async function openConversation(phoneNumber, userName, displayPhone) {
+            // Marcar conversación como activa
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Mostrar header del chat
+            document.getElementById('chatHeader').style.display = 'block';
+            document.getElementById('chatUserName').textContent = userName;
+            document.getElementById('chatUserPhone').textContent = displayPhone;
+            
+            // Mostrar spinner en chat
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = `
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando mensajes...</span>
+                    </div>
+                    <p class="mt-2">Cargando conversación...</p>
+                </div>
+            `;
+            
+            try {
+                // Obtener conversación específica (más detallada)
+                const cleanPhone = phoneNumber.replace('whatsapp:', '');
+                const response = await fetch(`/api/whatsapp/conversation/${encodeURIComponent(cleanPhone)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderChatMessages(data.messages, data.user);
+                } else {
+                    throw new Error(data.error || 'Error obteniendo conversación');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando conversación:', error);
+                chatContainer.innerHTML = `
+                    <div class="text-center text-danger p-4">
+                        <i class="bi bi-exclamation-triangle fs-2 mb-2"></i>
+                        <p>Error cargando conversación</p>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderChatMessages(messages, user) {
+            const chatContainer = document.getElementById('chatMessages');
+            
+            if (messages.length === 0) {
+                chatContainer.innerHTML = `
+                    <div class="text-center text-muted p-4">
+                        <i class="bi bi-chat fs-1 mb-3"></i>
+                        <p>No hay mensajes en esta conversación</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            let currentDate = '';
+            
+            for (const msg of messages) {
+                const msgDate = new Date(msg.dateCreated);
+                const dateStr = msgDate.toLocaleDateString('es-CO', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                // Separador de fecha
+                if (dateStr !== currentDate) {
+                    currentDate = dateStr;
+                    html += `
+                        <div class="text-center my-3">
+                            <small class="badge bg-light text-dark">${dateStr}</small>
+                        </div>
+                    `;
+                }
+                
+                // Determinar si es mensaje nuestro o del usuario
+                const isFromUser = msg.isFromUser;
+                const time = msgDate.toLocaleTimeString('es-CO', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                // Estado del mensaje (solo para mensajes enviados por nosotros)
+                let statusIcon = '';
+                if (!isFromUser) {
+                    switch(msg.status) {
+                        case 'delivered':
+                            statusIcon = '<i class="bi bi-check-all text-success ms-1" title="Entregado"></i>';
+                            break;
+                        case 'sent':
+                            statusIcon = '<i class="bi bi-check text-muted ms-1" title="Enviado"></i>';
+                            break;
+                        case 'failed':
+                            statusIcon = '<i class="bi bi-exclamation-triangle text-danger ms-1" title="Falló"></i>';
+                            break;
+                        default:
+                            statusIcon = '<i class="bi bi-clock text-muted ms-1" title="Procesando"></i>';
+                    }
+                }
+                
+                html += `
+                    <div class="mb-3 d-flex ${isFromUser ? 'justify-content-start' : 'justify-content-end'}">
+                        <div class="message-bubble ${isFromUser ? 'bg-light border' : 'bg-primary text-white'}" 
+                             style="max-width: 70%; padding: 10px 15px; border-radius: 15px;">
+                            <div class="message-content">
+                                ${msg.body ? msg.body.replace(/\n/g, '<br>') : '<em>Sin contenido</em>'}
+                            </div>
+                            <div class="message-time text-end mt-1">
+                                <small class="${isFromUser ? 'text-muted' : 'text-white-50'}">${time}</small>
+                                ${statusIcon}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatContainer.innerHTML = html;
+            
+            // Scroll al final
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function formatPhoneForDisplay(phone) {
+            // Formatear número para mostrar (ej: +57 301 234 5678)
+            let cleaned = phone.replace(/\D/g, '');
+            if (cleaned.startsWith('57') && cleaned.length === 12) {
+                return `+57 ${cleaned.substr(2, 3)} ${cleaned.substr(5, 3)} ${cleaned.substr(8, 4)}`;
+            }
+            return phone;
+        }
+        
+        // Auto-cargar conversaciones cuando se abra el modal
+        document.getElementById('conversationsModal').addEventListener('shown.bs.modal', function () {
+            loadConversations();
+        });
+
         // Hacer las funciones disponibles globalmente
         window.sendWhatsApp = sendWhatsApp;
         window.sendBulkWhatsApp = sendBulkWhatsApp;
@@ -1829,6 +2197,8 @@
         window.saveUser = saveUser;
         window.exportUsers = exportUsers;
         window.handleFileSelect = handleFileSelect;
+        window.loadConversations = loadConversations;
+        window.openConversation = openConversation;
 
         console.log('Todas las funciones están disponibles:', {
             sendWhatsApp: typeof window.sendWhatsApp,

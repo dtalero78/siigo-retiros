@@ -836,6 +836,183 @@ app.post('/api/users/send-bulk-whatsapp', async (req, res) => {
 });
 
 // ================================
+// ENDPOINT PARA VER CONVERSACIONES DE WHATSAPP
+// ================================
+
+app.get('/api/whatsapp/conversations', async (req, res) => {
+  try {
+    const twilio = require('twilio');
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    
+    // Obtener mensajes de los últimos 30 días
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+    
+    console.log('📱 Obteniendo conversaciones de WhatsApp...');
+    
+    // Obtener todos los mensajes enviados y recibidos
+    const messages = await client.messages.list({
+      dateSentAfter: since,
+      limit: 500 // Limitar para evitar timeouts
+    });
+    
+    // Filtrar solo mensajes de WhatsApp
+    const whatsappMessages = messages.filter(msg => 
+      msg.from.startsWith('whatsapp:') || msg.to.startsWith('whatsapp:')
+    );
+    
+    // Agrupar mensajes por número de teléfono
+    const conversations = {};
+    
+    for (const msg of whatsappMessages) {
+      // Determinar el número del usuario (no nuestro número de Twilio)
+      const ourNumber = process.env.TWILIO_WHATSAPP_NUMBER;
+      const userNumber = msg.from === ourNumber ? msg.to : msg.from;
+      
+      if (!conversations[userNumber]) {
+        conversations[userNumber] = [];
+      }
+      
+      conversations[userNumber].push({
+        sid: msg.sid,
+        from: msg.from,
+        to: msg.to,
+        body: msg.body,
+        dateCreated: msg.dateCreated,
+        dateSent: msg.dateSent,
+        direction: msg.direction,
+        status: msg.status,
+        errorCode: msg.errorCode,
+        errorMessage: msg.errorMessage,
+        isFromUser: msg.from !== ourNumber
+      });
+    }
+    
+    // Ordenar mensajes por fecha en cada conversación
+    Object.keys(conversations).forEach(number => {
+      conversations[number].sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated));
+    });
+    
+    // Obtener estadísticas
+    const stats = {
+      totalConversations: Object.keys(conversations).length,
+      totalMessages: whatsappMessages.length,
+      incomingMessages: whatsappMessages.filter(m => m.direction === 'inbound').length,
+      outgoingMessages: whatsappMessages.filter(m => m.direction === 'outbound-api').length
+    };
+    
+    console.log(`📊 Conversaciones encontradas: ${stats.totalConversations}, Mensajes: ${stats.totalMessages}`);
+    
+    res.json({
+      success: true,
+      conversations,
+      stats,
+      ourNumber: process.env.TWILIO_WHATSAPP_NUMBER
+    });
+    
+  } catch (error) {
+    console.error('Error obteniendo conversaciones:', error);
+    res.status(500).json({ 
+      error: 'Error obteniendo conversaciones de WhatsApp', 
+      message: error.message 
+    });
+  }
+});
+
+// Endpoint para obtener conversación específica de un usuario
+app.get('/api/whatsapp/conversation/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const twilio = require('twilio');
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    
+    // Formatear número de WhatsApp
+    let whatsappNumber = phone;
+    if (!whatsappNumber.startsWith('whatsapp:')) {
+      // Limpiar y formatear número
+      const cleaned = phone.replace(/\D/g, '');
+      let formatted = cleaned;
+      
+      if (cleaned.length === 10) {
+        formatted = '57' + cleaned; // Colombia
+      }
+      if (!formatted.startsWith('+')) {
+        formatted = '+' + formatted;
+      }
+      whatsappNumber = `whatsapp:${formatted}`;
+    }
+    
+    console.log(`📱 Obteniendo conversación con: ${whatsappNumber}`);
+    
+    // Obtener mensajes de los últimos 30 días
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+    
+    // Obtener mensajes enviados a este número
+    const sentMessages = await client.messages.list({
+      to: whatsappNumber,
+      dateSentAfter: since,
+      limit: 100
+    });
+    
+    // Obtener mensajes recibidos de este número
+    const receivedMessages = await client.messages.list({
+      from: whatsappNumber,
+      dateSentAfter: since,
+      limit: 100
+    });
+    
+    // Combinar y ordenar mensajes
+    const allMessages = [...sentMessages, ...receivedMessages]
+      .map(msg => ({
+        sid: msg.sid,
+        from: msg.from,
+        to: msg.to,
+        body: msg.body,
+        dateCreated: msg.dateCreated,
+        dateSent: msg.dateSent,
+        direction: msg.direction,
+        status: msg.status,
+        errorCode: msg.errorCode,
+        errorMessage: msg.errorMessage,
+        isFromUser: msg.from === whatsappNumber,
+        mediaUrl: msg.mediaUrl
+      }))
+      .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated));
+    
+    // Buscar usuario en la base de datos
+    let user = null;
+    try {
+      // Limpiar número para buscar en BD
+      const cleanPhone = phone.replace(/\D/g, '');
+      const users = await usersDb.getAllUsers();
+      user = users.find(u => u.phone && u.phone.replace(/\D/g, '') === cleanPhone);
+    } catch (dbError) {
+      console.warn('No se pudo buscar usuario en BD:', dbError.message);
+    }
+    
+    res.json({
+      success: true,
+      messages: allMessages,
+      userNumber: whatsappNumber,
+      user: user,
+      stats: {
+        totalMessages: allMessages.length,
+        fromUser: allMessages.filter(m => m.isFromUser).length,
+        toUser: allMessages.filter(m => !m.isFromUser).length
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error obteniendo conversación específica:', error);
+    res.status(500).json({ 
+      error: 'Error obteniendo conversación', 
+      message: error.message 
+    });
+  }
+});
+
+// ================================
 // ENDPOINT PARA ENVÍO CON MENSAJE PERSONALIZADO
 // ================================
 
