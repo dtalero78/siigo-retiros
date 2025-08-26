@@ -1054,19 +1054,21 @@
             
             const data = window.currentAnalysis;
             const timestamp = new Date().toISOString().split('T')[0];
+            const stats = data.data.resumen_estadistico;
+            const analysis = data.data.ai_analysis;
             
             // Crear contenido del reporte
             const reportContent = `ANÁLISIS GLOBAL DE ORGANIZACIÓN - SIIGO
 Fecha: ${new Date(data.timestamp).toLocaleString('es-ES')}
-Respuestas analizadas: ${data.statistics.total_responses}
+Respuestas analizadas: ${stats.total_responses}
 
 ESTADÍSTICAS GENERALES:
-- Rating promedio de experiencia: ${data.statistics.average_experience_rating}/10
-- Porcentaje que recomendaría la empresa: ${data.statistics.would_recommend_percentage}%
-- Porcentaje que regresaría: ${data.statistics.would_return_percentage}%
+- Rating promedio de experiencia: ${stats.average_experience_rating}/10
+- Porcentaje que recomendaría la empresa: ${stats.would_recommend_percentage}%
+- Porcentaje que regresaría: ${stats.would_return_percentage}%
 
 ANÁLISIS DETALLADO:
-${data.ai_analysis}
+${analysis}
 
 ---
 Generado automáticamente por el Sistema de Entrevistas de Retiro - Siigo
