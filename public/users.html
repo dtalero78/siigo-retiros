@@ -667,32 +667,34 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="height: 70vh;">
-                    <div class="row h-100">
+                <div class="modal-body p-0" style="height: 80vh; max-height: 600px;">
+                    <div class="row g-0 h-100">
                         <!-- Lista de conversaciones -->
-                        <div class="col-md-4 border-end">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0">Conversaciones</h6>
-                                <button class="btn btn-sm btn-outline-primary" onclick="loadConversations()">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </button>
+                        <div class="col-md-4 border-end d-flex flex-column">
+                            <div class="p-3 border-bottom bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Conversaciones</h6>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadConversations()">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div id="conversationsList" style="height: calc(100% - 60px); overflow-y: auto;">
+                            <div id="conversationsList" class="flex-grow-1 overflow-auto">
                                 <div class="text-center p-3">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">Cargando...</span>
                                     </div>
-                                    <p class="mt-2">Cargando conversaciones...</p>
+                                    <p class="mt-2 small">Cargando conversaciones...</p>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Chat actual -->
-                        <div class="col-md-8">
-                            <div id="chatHeader" class="pb-2 mb-3 border-bottom" style="display: none;">
+                        <div class="col-md-8 d-flex flex-column">
+                            <div id="chatHeader" class="p-3 border-bottom bg-light" style="display: none;">
                                 <div class="d-flex align-items-center">
                                     <div class="me-3">
-                                        <i class="bi bi-person-circle fs-2 text-success"></i>
+                                        <i class="bi bi-person-circle fs-3 text-success"></i>
                                     </div>
                                     <div>
                                         <h6 class="mb-0" id="chatUserName">Selecciona una conversación</h6>
@@ -701,9 +703,9 @@
                                 </div>
                             </div>
                             
-                            <div id="chatMessages" style="height: calc(100% - 80px); overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px;">
+                            <div id="chatMessages" class="flex-grow-1 overflow-auto p-3" style="background-color: #f8f9fa;">
                                 <div class="text-center text-muted p-5">
-                                    <i class="bi bi-chat-text fs-1 mb-3 d-block"></i>
+                                    <i class="bi bi-chat-text fs-1 mb-3 d-block opacity-50"></i>
                                     <p>Selecciona una conversación para ver los mensajes</p>
                                 </div>
                             </div>
@@ -1995,8 +1997,9 @@
                 }
                 
                 html += `
-                    <div class="conversation-item p-3 border-bottom cursor-pointer ${hasUnread ? 'bg-light' : ''}" 
-                         onclick="openConversation('${conv.number}', '${userName}', '${displayPhone}')">
+                    <div class="conversation-item p-3 cursor-pointer ${hasUnread ? 'bg-light' : ''}" 
+                         onclick="openConversation('${conv.number}', '${userName}', '${displayPhone}')"
+                         data-phone="${conv.number}">
                         <div class="d-flex align-items-center">
                             <div class="me-3">
                                 <i class="bi bi-person-circle fs-4 text-${hasUnread ? 'success' : 'secondary'}"></i>
@@ -2025,13 +2028,30 @@
             // Agregar estilos CSS para hover
             const style = document.createElement('style');
             style.textContent = `
+                .conversation-item {
+                    transition: all 0.2s ease;
+                    border-bottom: 1px solid #e9ecef !important;
+                }
                 .conversation-item:hover {
                     background-color: #f8f9fa !important;
                     cursor: pointer;
                 }
                 .conversation-item.active {
                     background-color: #e3f2fd !important;
-                    border-left: 4px solid #2196f3;
+                    border-left: 4px solid #2196f3 !important;
+                }
+                .conversation-item:last-child {
+                    border-bottom: none !important;
+                }
+                #conversationsList {
+                    max-height: 100%;
+                }
+                #chatMessages {
+                    min-height: 200px;
+                }
+                .message-bubble {
+                    word-wrap: break-word;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
                 }
             `;
             if (!document.querySelector('#conversation-styles')) {
@@ -2045,7 +2065,12 @@
             document.querySelectorAll('.conversation-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event.currentTarget.classList.add('active');
+            
+            // Buscar el elemento clickeado por el atributo data-phone
+            const activeItem = document.querySelector(`[data-phone="${phoneNumber}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
             
             // Mostrar header del chat
             document.getElementById('chatHeader').style.display = 'block';
