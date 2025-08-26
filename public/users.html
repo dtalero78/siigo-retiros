@@ -709,6 +709,34 @@
                                     <p>Selecciona una conversación para ver los mensajes</p>
                                 </div>
                             </div>
+                            
+                            <!-- Campo para responder -->
+                            <div id="chatInputArea" class="border-top bg-white p-3" style="display: none; flex-shrink: 0;">
+                                <div class="d-flex gap-2 align-items-end">
+                                    <div class="flex-grow-1">
+                                        <textarea 
+                                            id="replyMessage" 
+                                            class="form-control" 
+                                            placeholder="Escribe tu respuesta..." 
+                                            rows="2" 
+                                            style="resize: none;"
+                                            maxlength="1000"
+                                        ></textarea>
+                                        <div class="form-text small text-end">
+                                            <span id="charCount">0</span>/1000 caracteres
+                                        </div>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        id="sendReplyBtn" 
+                                        class="btn btn-success btn-lg" 
+                                        onclick="sendWhatsAppReply()"
+                                        disabled
+                                    >
+                                        <i class="bi bi-send"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2111,6 +2139,19 @@
                 
                 if (data.success) {
                     renderChatMessages(data.messages, data.user);
+                    
+                    // Configurar conversación actual y mostrar campo de respuesta
+                    currentConversationPhone = cleanPhone;
+                    document.getElementById('chatInputArea').style.display = 'block';
+                    
+                    // Configurar event listeners para el campo de respuesta
+                    const replyInput = document.getElementById('replyMessage');
+                    if (replyInput) {
+                        replyInput.oninput = updateCharCount;
+                        replyInput.onkeypress = handleReplyKeyPress;
+                        updateCharCount(); // Actualizar contador inicial
+                    }
+                    
                 } else {
                     throw new Error(data.error || 'Error obteniendo conversación');
                 }
@@ -2124,6 +2165,9 @@
                         <small>${error.message}</small>
                     </div>
                 `;
+                // Ocultar campo de respuesta si hay error
+                document.getElementById('chatInputArea').style.display = 'none';
+                currentConversationPhone = null;
             }
         }
         
@@ -2216,6 +2260,104 @@
                 return `+57 ${cleaned.substr(2, 3)} ${cleaned.substr(5, 3)} ${cleaned.substr(8, 4)}`;
             }
             return phone;
+        }
+
+        // Variables globales para la conversación actual
+        let currentConversationPhone = null;
+
+        // ========================================
+        // FUNCIONES PARA ENVIAR RESPUESTAS
+        // ========================================
+
+        // Función para enviar respuesta de WhatsApp
+        async function sendWhatsAppReply() {
+            const messageInput = document.getElementById('replyMessage');
+            const sendBtn = document.getElementById('sendReplyBtn');
+            const message = messageInput.value.trim();
+
+            if (!message || !currentConversationPhone) {
+                return;
+            }
+
+            // Deshabilitar botón y mostrar loading
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+
+            try {
+                const response = await fetch('/api/whatsapp/reply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: currentConversationPhone,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Limpiar el campo de texto
+                    messageInput.value = '';
+                    updateCharCount();
+
+                    // Mostrar toast de éxito
+                    showToast('Respuesta enviada exitosamente', 'success');
+
+                    // Recargar la conversación para mostrar el mensaje enviado
+                    await refreshCurrentConversation();
+                } else {
+                    showToast(result.error || 'Error enviando respuesta', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error enviando respuesta:', error);
+                showToast('Error de conexión al enviar respuesta', 'error');
+            } finally {
+                // Restaurar botón
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="bi bi-send"></i>';
+            }
+        }
+
+        // Función para actualizar contador de caracteres y estado del botón
+        function updateCharCount() {
+            const messageInput = document.getElementById('replyMessage');
+            const charCount = document.getElementById('charCount');
+            const sendBtn = document.getElementById('sendReplyBtn');
+
+            if (messageInput && charCount && sendBtn) {
+                const count = messageInput.value.length;
+                charCount.textContent = count;
+                
+                // Habilitar/deshabilitar botón según si hay texto
+                sendBtn.disabled = count === 0 || !currentConversationPhone;
+            }
+        }
+
+        // Función para refrescar la conversación actual
+        async function refreshCurrentConversation() {
+            if (currentConversationPhone) {
+                // Obtener el header para obtener el nombre de usuario
+                const chatHeader = document.getElementById('chatHeader');
+                const userNameElement = document.getElementById('chatUserName');
+                const userPhoneElement = document.getElementById('chatUserPhone');
+                
+                if (userNameElement && userPhoneElement) {
+                    const userName = userNameElement.textContent;
+                    const displayPhone = userPhoneElement.textContent;
+                    
+                    // Recargar la conversación
+                    await openConversation(currentConversationPhone, userName, displayPhone);
+                }
+            }
+        }
+
+        // Función para manejar tecla Enter en el textarea
+        function handleReplyKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendWhatsAppReply();
+            }
         }
         
         // Auto-cargar conversaciones cuando se abra el modal

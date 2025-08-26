@@ -1013,6 +1013,71 @@ app.get('/api/whatsapp/conversation/:phone', async (req, res) => {
 });
 
 // ================================
+// ENDPOINT PARA ENVIAR RESPUESTA EN CONVERSACIÓN
+// ================================
+
+app.post('/api/whatsapp/reply', async (req, res) => {
+  try {
+    const { phone, message } = req.body;
+
+    if (!phone || !message) {
+      return res.status(400).json({ error: 'Número de teléfono y mensaje son requeridos' });
+    }
+
+    const twilio = require('twilio');
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    
+    // Formatear número de WhatsApp
+    let whatsappTo = phone;
+    if (!whatsappTo.startsWith('whatsapp:')) {
+      const cleaned = phone.replace(/\D/g, '');
+      let formattedNumber = cleaned;
+      
+      // Agregar código de país si no lo tiene
+      if (cleaned.length === 10) {
+        formattedNumber = '57' + cleaned;
+      }
+      
+      whatsappTo = `whatsapp:+${formattedNumber}`;
+    }
+
+    console.log(`📤 Enviando respuesta a ${whatsappTo}: ${message.substring(0, 50)}...`);
+
+    // Enviar mensaje de respuesta
+    const messageParams = {
+      to: whatsappTo,
+      body: message
+    };
+
+    // Usar Messaging Service si está disponible, sino usar número directo
+    if (process.env.TWILIO_MESSAGING_SERVICE_SID) {
+      messageParams.messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+    } else {
+      messageParams.from = process.env.TWILIO_WHATSAPP_NUMBER;
+    }
+
+    const sentMessage = await client.messages.create(messageParams);
+
+    console.log(`✅ Respuesta enviada. SID: ${sentMessage.sid}`);
+
+    res.json({
+      success: true,
+      messageId: sentMessage.sid,
+      status: sentMessage.status,
+      message: 'Respuesta enviada exitosamente'
+    });
+
+  } catch (error) {
+    console.error('❌ Error enviando respuesta WhatsApp:', error);
+    res.status(500).json({ 
+      error: 'Error enviando respuesta', 
+      message: error.message,
+      code: error.code 
+    });
+  }
+});
+
+// ================================
 // ENDPOINT PARA ENVÍO CON MENSAJE PERSONALIZADO
 // ================================
 
