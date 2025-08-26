@@ -764,8 +764,8 @@
         }
 
         function displayGlobalAnalysis(data) {
-            const stats = data.statistics;
-            const analysis = data.ai_analysis;
+            const stats = data.data.resumen_estadistico;
+            const analysis = data.data.ai_analysis;
 
             // Crear gráficos y estadísticas
             const chartsHtml = `
