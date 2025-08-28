@@ -13,6 +13,9 @@ RUN npm install --only=production
 # Copiar el código de la aplicación
 COPY . .
 
+# Forzar rebuild - cambiar este número para invalidar caché
+ENV CACHE_BUST=1
+
 # Crear directorios necesarios antes de cambiar de usuario
 RUN mkdir -p data
 RUN mkdir -p temp
