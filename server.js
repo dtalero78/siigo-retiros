@@ -147,8 +147,29 @@ const questions = [
   {
     number: 10,
     question: "¿Por favor confirma cuál fue el motivo principal que te llevó a tomar la decisión de retirarte de Siigo?",
-    type: "textarea",
-    required: true
+    type: "radio",
+    required: true,
+    options: [
+      "Ambiente laboral negativo",
+      "Anticipar terminación de contrato",
+      "Cambio en condiciones acordadas",
+      "Cambio de proyecto, estudios u objetivos personales",
+      "Carga laboral o estrés alto",
+      "Choque con estilo de liderazgo",
+      "Deficiente onboarding/inducción",
+      "Desalineación con valores de la empresa",
+      "Dificultad para conciliar trabajo y vida personal",
+      "Falta de capacitación continua",
+      "Falta de oportunidades de crecimiento",
+      "Inconformidad con comisiones",
+      "Insatisfacción con beneficios",
+      "Mejor oferta laboral",
+      "Motivos personales",
+      "Problemas de conectividad",
+      "Problemas de salud personal",
+      "Presión por metas",
+      "Rol no acorde a perfil (\"no es lo mío\")"
+    ]
   },
   {
     number: 11,
