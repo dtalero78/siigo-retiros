@@ -254,6 +254,40 @@ const questions = [
 // RUTAS API PARA RESPUESTAS
 // ================================ 
 
+// Endpoint de diagnóstico para verificar versión del código
+app.get('/api/health', (req, res) => {
+  const fs = require('fs');
+  const dbPath = './database/db.js';
+  const dbPostgresPath = './database/db-postgres.js';
+  
+  let dbContent = '';
+  let dbPostgresContent = '';
+  
+  try {
+    if (fs.existsSync(dbPath)) {
+      dbContent = fs.readFileSync(dbPath, 'utf8');
+      const line94 = dbContent.split('\n')[93] || '';
+      dbContent = line94.includes('q10') ? 'CONTIENE q10' : 'NO contiene q10';
+    }
+    if (fs.existsSync(dbPostgresPath)) {
+      dbPostgresContent = fs.readFileSync(dbPostgresPath, 'utf8');
+      const line111 = dbPostgresContent.split('\n')[110] || '';
+      dbPostgresContent = line111.includes('q10') ? 'CONTIENE q10' : 'NO contiene q10';
+    }
+  } catch (e) {
+    console.error('Error leyendo archivos:', e);
+  }
+  
+  res.json({
+    status: 'ok',
+    database: process.env.DATABASE_TYPE || 'sqlite',
+    dbFile: dbContent,
+    dbPostgresFile: dbPostgresContent,
+    lastCommit: process.env.COMMIT_SHA || 'unknown',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.get('/api/questions', (req, res) => {
   res.json(questions);
 });
@@ -318,7 +352,13 @@ app.post('/api/responses', async (req, res) => {
     });
   } catch (error) {
     console.error('Error guardando respuestas:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Stack trace:', error.stack);
+    console.error('Datos recibidos:', JSON.stringify(req.body, null, 2));
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
