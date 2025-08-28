@@ -103,7 +103,7 @@ class DatabasePostgres {
         user_id: responses.userId || null,
         full_name: responses['q3'] || responses.full_name || '',
         identification: responses['q4'] || responses.identification || '',
-        exit_date: responses['q5'] || responses.exit_date || '',
+        exit_date: responses['q5'] || responses.exit_date || null,
         tenure: responses['q6'] || '',
         area: responses['q7'] || responses.area || '',
         country: responses['q8'] || responses.country || '',
@@ -169,7 +169,7 @@ class DatabasePostgres {
     const values = [
       data.full_name,
       data.identification,
-      data.exit_date,
+      data.exit_date || null,
       data.tenure,
       data.area,
       data.country,
