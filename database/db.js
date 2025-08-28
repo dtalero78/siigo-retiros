@@ -91,7 +91,7 @@ class Database {
         country: responses['q8'] || responses.country || '',
         last_leader: responses['q9'] || '',
         lider_entrenamiento: responses['liderEntrenamiento'] || '',
-        exit_reason_detail: responses['q10'] || '',
+        exit_reason_detail: '', // Campo q10 eliminado
         exit_reason_category: responses['q11'] || '',
         experience_rating: parseInt(responses['q12']) || null,
         would_recommend: responses['q13'] || '',
