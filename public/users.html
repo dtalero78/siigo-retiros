@@ -1782,8 +1782,15 @@
 
         // ===== FUNCIONES DE MENSAJE PERSONALIZADO =====
         function updateMessagePreview() {
-            const message = document.getElementById('whatsappMessage').value;
+            const messageElement = document.getElementById('whatsappMessage');
             const preview = document.getElementById('messagePreview');
+            
+            // Si no existe el elemento de mensaje personalizado, no hacer nada
+            if (!messageElement || !preview) {
+                return;
+            }
+            
+            const message = messageElement.value;
             
             // Reemplazar variables con ejemplos
             let previewText = message.replace('{nombre}', 'Juan');
