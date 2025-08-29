@@ -1922,9 +1922,33 @@
             `;
             document.body.appendChild(progressToast);
             
+            let progressSimulator; // Declarar fuera del try para acceso en catch
+            
             try {
                 // Actualizar estado
                 document.getElementById('bulkStatusText').textContent = 'Enviando mensajes...';
+                
+                // Simular progreso durante el envío
+                let simulatedProgress = 0;
+                const expectedDuration = (usersToSend.length * messageDelay + 
+                                        Math.ceil(usersToSend.length / batchSize) * 45000); // Tiempo estimado
+                const progressInterval = Math.max(1000, expectedDuration / 100); // Actualizar cada 1% o mínimo cada segundo
+                
+                progressSimulator = setInterval(() => {
+                    simulatedProgress += Math.random() * 5; // Incremento aleatorio para parecer más natural
+                    if (simulatedProgress > 95) simulatedProgress = 95; // No pasar de 95% hasta que termine
+                    
+                    document.getElementById('bulkProgress').textContent = Math.round(simulatedProgress) + '%';
+                    document.getElementById('bulkProgressBar').style.width = simulatedProgress + '%';
+                    
+                    if (simulatedProgress < 30) {
+                        document.getElementById('bulkStatusText').textContent = 'Iniciando envío...';
+                    } else if (simulatedProgress < 70) {
+                        document.getElementById('bulkStatusText').textContent = 'Enviando mensajes...';
+                    } else {
+                        document.getElementById('bulkStatusText').textContent = 'Finalizando envío...';
+                    }
+                }, progressInterval);
                 
                 // Llamar al endpoint de envío masivo
                 const response = await fetch('/api/users/send-bulk-whatsapp', {
@@ -1939,6 +1963,9 @@
                         }
                     })
                 });
+                
+                // Detener simulador de progreso
+                clearInterval(progressSimulator);
                 
                 if (response.ok) {
                     const result = await response.json();
@@ -1973,11 +2000,18 @@
                     }, 2000);
                     
                 } else {
+                    // Detener simulador si hay error
+                    clearInterval(progressSimulator);
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Error en envío masivo');
                 }
                 
             } catch (error) {
+                // Detener simulador si existe
+                if (progressSimulator) {
+                    clearInterval(progressSimulator);
+                }
+                
                 // Remover toast de progreso
                 progressToast.remove();
                 
