@@ -584,6 +584,15 @@
                         <small class="text-muted">Se enviarán a <span id="recipientCount">0</span> usuarios según el filtro seleccionado</small>
                     </div>
                     
+                    <div class="mb-4">
+                        <label for="templateSelector" class="form-label">Seleccionar plantilla de mensaje:</label>
+                        <select class="form-control" id="templateSelector">
+                            <option value="HXd85118b65ad3e326a4b6a4531b578bf2">Mensaje inicial (Primera invitación)</option>
+                            <option value="HX221248573e750c16de8699170feae6c8">Mensaje de seguimiento (Recordatorio)</option>
+                        </select>
+                        <small class="text-muted">Elige qué plantilla usar para el envío masivo</small>
+                    </div>
+                    
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle me-2"></i>
                         <strong>Template Aprobado Configurado</strong>
@@ -1842,6 +1851,7 @@
             const filter = document.getElementById('whatsappFilter').value;
             const batchSize = parseInt(document.getElementById('batchSize').value);
             const messageDelay = parseInt(document.getElementById('messageDelay').value);
+            const templateId = document.getElementById('templateSelector').value;
             
             // Filtrar usuarios según la selección
             let usersToSend = [];
@@ -1956,6 +1966,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userIds: userIds,
+                        templateId: templateId,
                         options: {
                             batch_size: batchSize,
                             message_delay: messageDelay,

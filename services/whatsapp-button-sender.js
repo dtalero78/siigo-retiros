@@ -11,9 +11,10 @@ const SURVEY_TEMPLATE_SID = process.env.TWILIO_TEMPLATE_BUTTON_SID || 'HXd85118b
 /**
  * Enviar invitación de encuesta con botón usando la plantilla aprobada
  * @param {Object} user - Debe contener: id, phone, first_name
+ * @param {String} templateId - ID de la plantilla a usar (opcional)
  * @returns {Promise<Object>} Resultado del envío
  */
-async function sendSurveyInvitationWithButton(user) {
+async function sendSurveyInvitationWithButton(user, templateId = null) {
   try {
     // Validaciones
     if (!user.id) {
@@ -39,13 +40,17 @@ async function sendSurveyInvitationWithButton(user) {
     // Se agregará a: https://www.siigo.digital/?user=
     const buttonUrlVariable = user.id.toString();
 
+    // Usar la plantilla especificada o la por defecto
+    const templateToUse = templateId || SURVEY_TEMPLATE_SID;
+
     console.log(`📱 Enviando invitación con botón a ${user.first_name} (${user.phone})`);
     console.log(`🔗 URL del botón: https://www.siigo.digital/?user=${buttonUrlVariable}`);
+    console.log(`📋 Plantilla: ${templateToUse}`);
 
     // Enviar usando la plantilla con botón
     const result = await sendTemplateWithUrlButton(
       user.phone,
-      SURVEY_TEMPLATE_SID,
+      templateToUse,
       templateVariables,
       buttonUrlVariable
     );
@@ -78,6 +83,7 @@ async function sendBulkSurveyInvitations(users, options = {}) {
   const BATCH_SIZE = options.batch_size || 20;
   const DELAY_BETWEEN_MESSAGES = options.message_delay || 3000; // 3 segundos
   const DELAY_BETWEEN_BATCHES = options.batch_delay || 30000; // 30 segundos
+  const TEMPLATE_ID = options.templateId || SURVEY_TEMPLATE_SID; // Usar template seleccionado o el default
 
   const results = {
     total: users.length,
@@ -102,7 +108,8 @@ async function sendBulkSurveyInvitations(users, options = {}) {
   console.log(`📊 Total a enviar: ${usersWithPhone.length}`);
   console.log(`📦 Tamaño de lote: ${BATCH_SIZE}`);
   console.log(`⏱️ Delay entre mensajes: ${DELAY_BETWEEN_MESSAGES/1000}s`);
-  console.log(`⏱️ Delay entre lotes: ${DELAY_BETWEEN_BATCHES/1000}s\n`);
+  console.log(`⏱️ Delay entre lotes: ${DELAY_BETWEEN_BATCHES/1000}s`);
+  console.log(`📋 Plantilla a usar: ${TEMPLATE_ID}\n`);
 
   // Dividir en lotes
   const batches = [];
@@ -119,7 +126,7 @@ async function sendBulkSurveyInvitations(users, options = {}) {
       const user = batch[userIndex];
       
       try {
-        const result = await sendSurveyInvitationWithButton(user);
+        const result = await sendSurveyInvitationWithButton(user, TEMPLATE_ID);
         
         if (result.success) {
           results.sent++;

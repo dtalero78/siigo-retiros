@@ -843,7 +843,7 @@ app.post('/api/users/send-whatsapp', async (req, res) => {
 
 app.post('/api/users/send-bulk-whatsapp', async (req, res) => {
   try {
-    const { userIds, options = {} } = req.body;
+    const { userIds, templateId, options = {} } = req.body;
     
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
       return res.status(400).json({ 
@@ -887,8 +887,8 @@ app.post('/api/users/send-bulk-whatsapp', async (req, res) => {
 
     console.log(`📊 Configuración: ${bulkOptions.batch_size} por lote, ${bulkOptions.message_delay/1000}s entre mensajes`);
 
-    // Ejecutar envío masivo
-    const results = await sendBulkSurveyInvitations(users, bulkOptions);
+    // Ejecutar envío masivo con la plantilla seleccionada
+    const results = await sendBulkSurveyInvitations(users, { ...bulkOptions, templateId });
 
     // Actualizar base de datos para usuarios exitosos
     if (results.details && results.details.length > 0) {
