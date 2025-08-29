@@ -381,6 +381,10 @@
                     Usuarios Registrados
                 </h5>
                 <div class="d-flex gap-2">
+                    <button id="sendToFilteredBtn" class="btn btn-warning" onclick="sendWhatsAppToFilteredUsers()" style="display: none;">
+                        <i class="bi bi-whatsapp me-2"></i>
+                        Enviar a Lista Filtrada
+                    </button>
                     <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#conversationsModal">
                         <i class="bi bi-chat-dots me-2"></i>
                         Ver Conversaciones
@@ -2420,7 +2424,7 @@
         window.showUsersWithoutResponse = showUsersWithoutResponse;
         window.sendWhatsAppToFilteredUsers = sendWhatsAppToFilteredUsers;
         window.applyFilters = applyFilters;
-        window.clearFilter = clearFilter;
+        window.clearFilters = clearFilters;
         window.editUser = editUser;
         window.deleteUser = deleteUser;
         window.saveUser = saveUser;
@@ -2434,7 +2438,7 @@
             sendMassWhatsApp: typeof window.sendMassWhatsApp,
             sendWhatsAppToNoResponse: typeof window.sendWhatsAppToNoResponse,
             applyFilters: typeof window.applyFilters,
-            clearFilter: typeof window.clearFilter,
+            clearFilters: typeof window.clearFilters,
             editUser: typeof window.editUser,
             deleteUser: typeof window.deleteUser
         });
