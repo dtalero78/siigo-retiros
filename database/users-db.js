@@ -352,6 +352,7 @@ class UsersDatabase {
         UPDATE users SET 
           whatsapp_sent_at = CURRENT_TIMESTAMP,
           whatsapp_message_id = ?,
+          whatsapp_sent_count = COALESCE(whatsapp_sent_count, 0) + 1,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `;

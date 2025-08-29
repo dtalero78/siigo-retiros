@@ -217,7 +217,8 @@ class UsersDbPostgres {
         `UPDATE users 
          SET whatsapp_sent = true, 
              whatsapp_sent_at = CURRENT_TIMESTAMP, 
-             whatsapp_message_id = $1
+             whatsapp_message_id = $1,
+             whatsapp_sent_count = COALESCE(whatsapp_sent_count, 0) + 1
          WHERE id = $2`,
         [messageId, userId]
       );
