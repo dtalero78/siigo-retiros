@@ -613,17 +613,8 @@
                             </h6>
                         </div>
                         <div class="card-body">
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #25D366;">
-                                <strong>Hola [Nombre del Usuario],</strong><br><br>
-                                Como parte de nuestro compromiso con la mejora continua en Siigo, te invitamos a completar tu formulario de retiro.<br><br>
-                                Tu opinión es muy valiosa para nosotros. La encuesta toma aproximadamente 5-10 minutos y tus respuestas serán tratadas de forma confidencial.<br><br>
-                                ¡Gracias por tu tiempo y por haber sido parte del equipo Siigo!<br><br>
-                                Atentamente,<br>
-                                Equipo de Talento Humano<br>
-                                Siigo<br><br>
-                                <div style="display: inline-block; background: #0084ff; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
-                                    🔗 Iniciar Encuesta
-                                </div>
+                            <div id="templatePreview" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #25D366;">
+                                <!-- Contenido dinámico se carga aquí -->
                             </div>
                         </div>
                     </div>
@@ -1024,12 +1015,20 @@
                 filterSelect.addEventListener('change', updateRecipientCount);
             }
             
+            // Event listener para el selector de plantillas
+            const templateSelect = document.getElementById('templateSelector');
+            if (templateSelect) {
+                templateSelect.addEventListener('change', updateTemplatePreview);
+                updateTemplatePreview(); // Actualizar preview inicial
+            }
+            
             // Actualizar conteo cuando se abre el modal
             const whatsappModal = document.getElementById('whatsappMessageModal');
             if (whatsappModal) {
                 whatsappModal.addEventListener('shown.bs.modal', function() {
                     updateRecipientCount();
                     updateMessagePreview();
+                    updateTemplatePreview();
                 });
             }
         });
@@ -1806,6 +1805,65 @@
             previewText = previewText.replace('{link}', `${window.location.origin}/?user=64`);
             
             preview.textContent = previewText;
+        }
+
+        // ===== FUNCIÓN PARA VISTA PREVIA DE PLANTILLAS =====
+        function updateTemplatePreview() {
+            const templateSelect = document.getElementById('templateSelector');
+            const previewElement = document.getElementById('templatePreview');
+            
+            if (!templateSelect || !previewElement) {
+                return;
+            }
+            
+            const selectedTemplate = templateSelect.value;
+            
+            // Contenido de las plantillas
+            const templates = {
+                'HXd85118b65ad3e326a4b6a4531b578bf2': {
+                    title: 'Mensaje Inicial - Primera Invitación',
+                    content: `
+                        <strong>Hola [Nombre del Usuario],</strong><br><br>
+                        Como parte de nuestro compromiso con la mejora continua en Siigo, te invitamos a completar tu formulario de retiro.<br><br>
+                        Tu opinión es muy valiosa para nosotros. La encuesta toma aproximadamente 5-10 minutos y tus respuestas serán tratadas de forma confidencial.<br><br>
+                        ¡Gracias por tu tiempo y por haber sido parte del equipo Siigo!<br><br>
+                        Atentamente,<br>
+                        Equipo de Talento Humano<br>
+                        Siigo<br><br>
+                        <div style="display: inline-block; background: #0084ff; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                            🔗 Iniciar Encuesta
+                        </div>
+                    `
+                },
+                'HX221248573e750c16de8699170feae6c8': {
+                    title: 'Mensaje de Seguimiento - Recordatorio',
+                    content: `
+                        <strong>Hola [Nombre del Usuario],</strong><br><br>
+                        Te recordamos que aún no has completado tu formulario de retiro de Siigo.<br><br>
+                        Tu experiencia y comentarios son muy importantes para nosotros y nos ayudan a mejorar como organización.<br><br>
+                        El formulario solo toma unos minutos y toda la información será tratada de manera confidencial.<br><br>
+                        Te agradecemos completar la encuesta cuando tengas un momento disponible.<br><br>
+                        Saludos cordiales,<br>
+                        Equipo de Talento Humano<br>
+                        Siigo<br><br>
+                        <div style="display: inline-block; background: #0084ff; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                            🔗 Completar Encuesta
+                        </div>
+                    `
+                }
+            };
+            
+            // Actualizar contenido del preview
+            const template = templates[selectedTemplate];
+            if (template) {
+                previewElement.innerHTML = template.content;
+                
+                // Actualizar el título del card header si existe
+                const cardTitle = previewElement.closest('.card').querySelector('.card-header h6');
+                if (cardTitle) {
+                    cardTitle.innerHTML = `<i class="bi bi-eye me-2"></i>Vista Previa - ${template.title}`;
+                }
+            }
         }
 
         async function updateRecipientCount() {
