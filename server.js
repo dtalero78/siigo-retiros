@@ -424,37 +424,70 @@ app.delete('/api/responses/:id', async (req, res) => {
 // Obtener todos los usuarios
 app.get('/api/users', async (req, res) => {
   try {
-    const { filter } = req.query;
+    const { dateFrom, dateTo, messageCount } = req.query;
     
-    let users;
-    if (filter && ['whatsapp_sent', 'whatsapp_not_sent'].includes(filter)) {
-      users = await usersDb.getFilteredUsers(filter);
-    } else {
-      users = await usersDb.getUsersWithWhatsAppStatus();
+    // Get all users with WhatsApp status
+    let users = await usersDb.getUsersWithWhatsAppStatus();
+    
+    // Apply date filters
+    if (dateFrom || dateTo) {
+      users = users.filter(user => {
+        const userDate = new Date(user.created_at);
+        if (dateFrom) {
+          const fromDate = new Date(dateFrom);
+          fromDate.setHours(0, 0, 0, 0);
+          if (userDate < fromDate) return false;
+        }
+        if (dateTo) {
+          const toDate = new Date(dateTo);
+          toDate.setHours(23, 59, 59, 999);
+          if (userDate > toDate) return false;
+        }
+        return true;
+      });
     }
     
     // Get all responses to check which users have responded
     const responses = await db.getAllResponses();
-    // Create set of identification numbers from responses (since user_id might be null)
     const responseIdentifications = new Set(
       responses
         .map(r => r.identification)
         .filter(id => id)
     );
     
-    // Update has_response field for each user based on identification match
+    // Update has_response field for each user
     const usersWithResponses = users.map(user => ({
       ...user,
       has_response: responseIdentifications.has(user.identification) ? 1 : 0
     }));
     
-    // Apply response-based filters
+    // Apply message count filters
     let filteredUsers = usersWithResponses;
-    if (filter === 'no_response') {
-      // Todos los usuarios que NO han respondido la encuesta (independiente del WhatsApp)
-      filteredUsers = usersWithResponses.filter(u => !u.has_response);
-    } else if (filter === 'has_response') {
-      filteredUsers = usersWithResponses.filter(u => u.has_response);
+    if (messageCount) {
+      switch(messageCount) {
+        case 'no_messages':
+          // Users with no WhatsApp messages sent
+          filteredUsers = usersWithResponses.filter(u => u.whatsapp_sent_count === 0);
+          break;
+        case 'one_message':
+          // Users with exactly 1 message sent and no response
+          filteredUsers = usersWithResponses.filter(u => 
+            u.whatsapp_sent_count === 1 && !u.has_response
+          );
+          break;
+        case 'two_messages':
+          // Users with exactly 2 messages sent and no response
+          filteredUsers = usersWithResponses.filter(u => 
+            u.whatsapp_sent_count === 2 && !u.has_response
+          );
+          break;
+        case 'three_messages':
+          // Users with exactly 3 messages sent and no response
+          filteredUsers = usersWithResponses.filter(u => 
+            u.whatsapp_sent_count === 3 && !u.has_response
+          );
+          break;
+      }
     }
     
     res.json(filteredUsers);

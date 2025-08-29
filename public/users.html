@@ -327,23 +327,6 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-whatsapp me-2"></i>
-                            Mensaje Personalizado
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">Envía mensajes personalizados por WhatsApp a usuarios filtrados.</p>
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#whatsappMessageModal">
-                            <i class="bi bi-send me-2"></i>
-                            Configurar Mensaje
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
 
 
@@ -357,23 +340,33 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="dateFromFilter" class="form-label">Fecha desde:</label>
+                        <input type="date" class="form-control" id="dateFromFilter" onchange="applyFilters()">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="dateToFilter" class="form-label">Fecha hasta:</label>
+                        <input type="date" class="form-control" id="dateToFilter" onchange="applyFilters()">
+                    </div>
                     <div class="col-md-4 mb-3">
-                        <label for="filterSelect" class="form-label">Filtrar por estado:</label>
-                        <select class="form-control" id="filterSelect" onchange="applyFilter(this.value)">
+                        <label for="filterSelect" class="form-label">Filtrar por mensajes enviados:</label>
+                        <select class="form-control" id="filterSelect" onchange="applyFilters()">
                             <option value="">Todos los usuarios</option>
-                            <option value="whatsapp_sent">WhatsApp enviado</option>
-                            <option value="whatsapp_not_sent">WhatsApp no enviado</option>
-                            <option value="no_response">Sin respuesta</option>
-                            <option value="has_response">Con respuesta</option>
+                            <option value="no_messages">Mensajes sin enviar</option>
+                            <option value="one_message">Un solo mensaje enviado (sin respuesta)</option>
+                            <option value="two_messages">Dos mensajes enviados (sin respuesta)</option>
+                            <option value="three_messages">Tres mensajes enviados (sin respuesta)</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3 d-flex align-items-end">
-                        <button class="btn btn-secondary" onclick="clearFilter()">
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button class="btn btn-secondary" onclick="clearFilters()">
                             <i class="bi bi-x-circle me-1"></i>
-                            Limpiar Filtro
+                            Limpiar
                         </button>
                     </div>
-                    <div class="col-md-4 mb-3 d-flex align-items-end justify-content-end">
+                </div>
+                <div class="row">
+                    <div class="col-12">
                         <div id="filterStats" class="text-muted small"></div>
                     </div>
                 </div>
@@ -1028,10 +1021,20 @@
             }
         });
 
-        async function loadUsers(filter = null) {
+        async function loadUsers(filters = {}) {
             try {
-                currentFilter = filter;
-                const url = filter ? `/api/users?filter=${encodeURIComponent(filter)}` : '/api/users';
+                currentFilter = filters;
+                let url = '/api/users';
+                const params = new URLSearchParams();
+                
+                if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+                if (filters.dateTo) params.append('dateTo', filters.dateTo);
+                if (filters.messageCount) params.append('messageCount', filters.messageCount);
+                
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
+                
                 const response = await fetch(url);
                 allUsers = await response.json();
                 
@@ -1039,7 +1042,9 @@
                 
                 if (allUsers.length === 0) {
                     document.getElementById('emptyState').style.display = 'block';
+                    document.getElementById('usersTable').style.display = 'none';
                 } else {
+                    document.getElementById('emptyState').style.display = 'none';
                     document.getElementById('usersTable').style.display = 'block';
                     renderUsersTable();
                     calculateStats();
@@ -1419,30 +1424,64 @@
         });
 
         // ===== FUNCIONES DE FILTRADO =====
-        async function applyFilter(filter) {
-            console.log('Applying filter:', filter);
+        async function applyFilters() {
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+            const messageFilter = document.getElementById('filterSelect').value;
+            
+            const filters = {};
+            if (dateFrom) filters.dateFrom = dateFrom;
+            if (dateTo) filters.dateTo = dateTo;
+            if (messageFilter) filters.messageCount = messageFilter;
+            
             document.getElementById('loadingSpinner').style.display = 'block';
             document.getElementById('usersTable').style.display = 'none';
-            await loadUsers(filter);
-            // Mostrar/ocultar botón de envío según el filtro
+            document.getElementById('emptyState').style.display = 'none';
+            
+            await loadUsers(filters);
             showSendToFilteredButton();
         }
 
-        async function clearFilter() {
-            console.log('Clearing filter');
+        async function clearFilters() {
+            console.log('Clearing filters');
             currentFilter = null;
             document.getElementById('filterSelect').value = '';
+            document.getElementById('dateFromFilter').value = '';
+            document.getElementById('dateToFilter').value = '';
             document.getElementById('loadingSpinner').style.display = 'block';
             document.getElementById('usersTable').style.display = 'none';
             await loadUsers();
-            // Ocultar botón de envío cuando no hay filtro
             hideSendToFilteredButton();
         }
 
         function updateFilterStats() {
-            if (currentFilter) {
-                // Show filter status if there's an active filter
-                console.log(`Filter active: ${currentFilter}, showing ${allUsers.length} users`);
+            const statsDiv = document.getElementById('filterStats');
+            if (currentFilter && Object.keys(currentFilter).length > 0) {
+                let filterText = 'Filtros activos: ';
+                const parts = [];
+                
+                if (currentFilter.dateFrom || currentFilter.dateTo) {
+                    let datePart = 'Fecha: ';
+                    if (currentFilter.dateFrom) datePart += `desde ${currentFilter.dateFrom}`;
+                    if (currentFilter.dateTo) datePart += ` hasta ${currentFilter.dateTo}`;
+                    parts.push(datePart);
+                }
+                
+                if (currentFilter.messageCount) {
+                    const messageTexts = {
+                        'no_messages': 'Sin mensajes enviados',
+                        'one_message': 'Un mensaje enviado',
+                        'two_messages': 'Dos mensajes enviados',
+                        'three_messages': 'Tres mensajes enviados'
+                    };
+                    parts.push(messageTexts[currentFilter.messageCount] || currentFilter.messageCount);
+                }
+                
+                filterText += parts.join(' | ');
+                filterText += ` - Mostrando ${allUsers.length} usuarios`;
+                statsDiv.innerHTML = `<i class="bi bi-info-circle me-1"></i> ${filterText}`;
+            } else {
+                statsDiv.innerHTML = `<i class="bi bi-list me-1"></i> Mostrando todos los usuarios (${allUsers.length})`;
             }
         }
 
