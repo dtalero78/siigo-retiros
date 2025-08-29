@@ -1489,7 +1489,7 @@
             console.log('showUsersWithoutResponse called');
             // Cambiar al filtro de "sin respuesta"
             document.getElementById('filterSelect').value = 'no_response';
-            await applyFilter('no_response');
+            await applyFilters();
             
             // Mostrar el botón de envío para la lista filtrada
             showSendToFilteredButton();
@@ -1497,6 +1497,11 @@
 
         function showSendToFilteredButton() {
             const sendBtn = document.getElementById('sendToFilteredBtn');
+            if (!sendBtn) {
+                console.warn('sendToFilteredBtn element not found');
+                return;
+            }
+            
             if (currentFilter === 'no_response') {
                 sendBtn.style.display = 'inline-block';
                 sendBtn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Enviar a Sin Respuesta';
@@ -1509,7 +1514,10 @@
         }
 
         function hideSendToFilteredButton() {
-            document.getElementById('sendToFilteredBtn').style.display = 'none';
+            const sendBtn = document.getElementById('sendToFilteredBtn');
+            if (sendBtn) {
+                sendBtn.style.display = 'none';
+            }
         }
 
         async function sendWhatsAppToFilteredUsers() {
@@ -2411,7 +2419,7 @@
         window.sendApologyWhatsApp = sendApologyWhatsApp;
         window.showUsersWithoutResponse = showUsersWithoutResponse;
         window.sendWhatsAppToFilteredUsers = sendWhatsAppToFilteredUsers;
-        window.applyFilter = applyFilter;
+        window.applyFilters = applyFilters;
         window.clearFilter = clearFilter;
         window.editUser = editUser;
         window.deleteUser = deleteUser;
@@ -2425,7 +2433,7 @@
             sendWhatsApp: typeof window.sendWhatsApp,
             sendMassWhatsApp: typeof window.sendMassWhatsApp,
             sendWhatsAppToNoResponse: typeof window.sendWhatsAppToNoResponse,
-            applyFilter: typeof window.applyFilter,
+            applyFilters: typeof window.applyFilters,
             clearFilter: typeof window.clearFilter,
             editUser: typeof window.editUser,
             deleteUser: typeof window.deleteUser
