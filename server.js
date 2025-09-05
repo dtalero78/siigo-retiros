@@ -951,9 +951,12 @@ app.get('/api/whatsapp/conversations', async (req, res) => {
       limit: 500 // Limitar para evitar timeouts
     });
     
-    // Filtrar solo mensajes de WhatsApp
+    // Filtrar solo mensajes de WhatsApp válidos
     const whatsappMessages = messages.filter(msg => 
-      msg.from.startsWith('whatsapp:') || msg.to.startsWith('whatsapp:')
+      (msg.from.startsWith('whatsapp:') || msg.to.startsWith('whatsapp:')) &&
+      // Filtrar mensajes con números válidos (no vacíos o malformados)
+      msg.from !== '' && msg.to !== '' &&
+      !msg.to.includes('+096369910') // Filtrar este número específico inválido
     );
     
     // Agrupar mensajes por número de teléfono
@@ -963,6 +966,17 @@ app.get('/api/whatsapp/conversations', async (req, res) => {
       // Determinar el número del usuario (no nuestro número de Twilio)
       const ourNumber = process.env.TWILIO_WHATSAPP_NUMBER;
       const userNumber = msg.from === ourNumber ? msg.to : msg.from;
+      
+      // Validar que userNumber no esté vacío
+      if (!userNumber || userNumber === '' || userNumber === 'whatsapp:') {
+        console.warn('Mensaje con número de usuario inválido:', {
+          sid: msg.sid,
+          from: msg.from,
+          to: msg.to,
+          status: msg.status
+        });
+        continue; // Saltar este mensaje
+      }
       
       if (!conversations[userNumber]) {
         conversations[userNumber] = [];
