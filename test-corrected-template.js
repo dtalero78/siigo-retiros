@@ -11,7 +11,7 @@ async function testCorrectedTemplate() {
 
   console.log('🧪 PRUEBA CON CONTENTID CORREGIDO');
   console.log('='.repeat(50));
-  console.log('📋 ContentSid actualizado: HXabd9517719a844afc93a367ef4e23927');
+  console.log('📋 ContentSid actualizado: HX4c5c8ed40f20fa12d9b2c04df318ac70 (siigo_twilio_primer)');
   console.log('👤 Usuario de prueba:', testUser);
   console.log('📱 Número destino:', `+57${testUser.phone}`);
   console.log('');
