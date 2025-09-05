@@ -2191,6 +2191,12 @@
             let html = '';
             
             for (const conv of sortedConversations) {
+                // Validar que conv.number existe
+                if (!conv.number) {
+                    console.error('Conversación sin número:', conv);
+                    continue;
+                }
+                
                 const phone = conv.number.replace('whatsapp:', '');
                 const displayPhone = formatPhoneForDisplay(phone);
                 const lastMsg = conv.lastMessage;
@@ -2224,6 +2230,7 @@
                 // Escapar nombres para evitar problemas con comillas
                 const escapedUserName = userName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                 const escapedDisplayPhone = displayPhone.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                const escapedNumber = conv.number.replace(/'/g, "\\'");
                 
                 html += `
                     <div class="conversation-item p-3 cursor-pointer ${hasUnread ? 'bg-light' : ''}" 
@@ -2290,6 +2297,21 @@
         }
         
         async function openConversation(phoneNumber, userName, displayPhone) {
+            console.log('openConversation llamada con:', { phoneNumber, userName, displayPhone });
+            
+            // Validar que phoneNumber no esté vacío
+            if (!phoneNumber) {
+                console.error('Error: phoneNumber está vacío o undefined');
+                const chatContainer = document.getElementById('chatMessages');
+                chatContainer.innerHTML = `
+                    <div class="text-center text-danger p-4">
+                        <i class="bi bi-exclamation-triangle fs-2 mb-2"></i>
+                        <p>Error: Número de teléfono no disponible</p>
+                    </div>
+                `;
+                return;
+            }
+            
             // Marcar conversación como activa
             document.querySelectorAll('.conversation-item').forEach(item => {
                 item.classList.remove('active');
@@ -2320,6 +2342,7 @@
             try {
                 // Obtener conversación específica (más detallada)
                 const cleanPhone = phoneNumber.replace('whatsapp:', '');
+                console.log('Llamando a API con cleanPhone:', cleanPhone);
                 const response = await fetch(`/api/whatsapp/conversation/${encodeURIComponent(cleanPhone)}`);
                 const data = await response.json();
                 
