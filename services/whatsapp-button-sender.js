@@ -1,12 +1,12 @@
 /**
  * Servicio unificado para envío de WhatsApp con botones
- * Usa la plantilla aprobada HXd85118b65ad3e326a4b6a4531b578bf2
+ * Usa la plantilla aprobada HXabd9517719a844afc93a367ef4e23927 (siigo_twilio_primer_completo)
  */
 
 const { sendTemplateWithUrlButton } = require('./twilio-template-button');
 
-// Content SID de la plantilla aprobada con botón
-const SURVEY_TEMPLATE_SID = process.env.TWILIO_TEMPLATE_BUTTON_SID || 'HXd85118b65ad3e326a4b6a4531b578bf2';
+// Content SID de la plantilla aprobada con botón - ACTUALIZADO con ContentSid válido
+const SURVEY_TEMPLATE_SID = process.env.TWILIO_TEMPLATE_BUTTON_SID || 'HXabd9517719a844afc93a367ef4e23927';
 
 /**
  * Enviar invitación de encuesta con botón usando la plantilla aprobada
