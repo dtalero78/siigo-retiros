@@ -1119,6 +1119,10 @@
                             <button class="btn btn-whatsapp btn-sm" onclick="sendWhatsApp(${user.id})" title="Enviar WhatsApp" ${!user.phone ? 'disabled' : ''}>
                                 <i class="bi bi-whatsapp"></i>
                             </button>
+                            ${user.phone ? `
+                            <button class="btn btn-info btn-sm" onclick="viewUserConversation('${user.phone.replace(/'/g, "\\'")}', '${(user.first_name + ' ' + user.last_name).replace(/'/g, "\\'")}')" title="Ver Conversación">
+                                <i class="bi bi-chat-dots"></i>
+                            </button>` : ''}
                             <button class="btn btn-delete btn-sm" onclick="deleteUser(${user.id})" title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -2217,9 +2221,13 @@
                     dateStr = msgDate.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
                 }
                 
+                // Escapar nombres para evitar problemas con comillas
+                const escapedUserName = userName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                const escapedDisplayPhone = displayPhone.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                
                 html += `
                     <div class="conversation-item p-3 cursor-pointer ${hasUnread ? 'bg-light' : ''}" 
-                         onclick="openConversation('${conv.number}', '${userName}', '${displayPhone}')"
+                         onclick="openConversation('${conv.number}', '${escapedUserName}', '${escapedDisplayPhone}')"
                          data-phone="${conv.number}">
                         <div class="d-flex align-items-center">
                             <div class="me-3">
@@ -2538,6 +2546,28 @@
             }
         }
         
+        // Función para ver conversación de un usuario específico
+        async function viewUserConversation(phone, userName) {
+            // Abrir el modal de conversaciones
+            const conversationsModal = new bootstrap.Modal(document.getElementById('conversationsModal'));
+            conversationsModal.show();
+            
+            // Esperar a que el modal esté completamente visible
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Cargar todas las conversaciones primero
+            await loadConversations();
+            
+            // Luego abrir la conversación específica
+            const whatsappNumber = `whatsapp:+${phone.replace(/\D/g, '')}`;
+            const displayPhone = formatPhoneForDisplay(phone);
+            
+            // Intentar abrir la conversación
+            setTimeout(() => {
+                openConversation(whatsappNumber, userName, displayPhone);
+            }, 500);
+        }
+        
         // Auto-cargar conversaciones cuando se abra el modal
         document.getElementById('conversationsModal').addEventListener('shown.bs.modal', function () {
             loadConversations();
@@ -2559,6 +2589,7 @@
         window.handleFileSelect = handleFileSelect;
         window.loadConversations = loadConversations;
         window.openConversation = openConversation;
+        window.viewUserConversation = viewUserConversation;
 
         console.log('Todas las funciones están disponibles:', {
             sendWhatsApp: typeof window.sendWhatsApp,
