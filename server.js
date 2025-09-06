@@ -466,6 +466,10 @@ app.get('/api/users', async (req, res) => {
     let filteredUsers = usersWithResponses;
     if (messageCount) {
       switch(messageCount) {
+        case 'no_survey':
+          // Users without survey responses
+          filteredUsers = usersWithResponses.filter(u => !u.has_response);
+          break;
         case 'no_messages':
           // Users with no WhatsApp messages sent
           filteredUsers = usersWithResponses.filter(u => u.whatsapp_sent_count === 0);
