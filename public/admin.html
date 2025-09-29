@@ -627,13 +627,33 @@
 
 
 
-        function exportData() {
+        async function exportData() {
             if (allResponses.length === 0) {
                 alert('No hay datos para exportar.');
                 return;
             }
 
-            // Crear CSV
+            try {
+                // Usar endpoint nuevo para exportación dinámica
+                const response = await fetch('/api/export/csv');
+                const blob = await response.blob();
+
+                // Descargar archivo
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `entrevistas_retiro_dinamicas_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                return;
+            } catch (error) {
+                console.warn('Error con exportación dinámica, usando método legacy:', error);
+            }
+
+            // Método legacy (fallback)
             const headers = [
                 'ID',
                 'Nombre Completo',

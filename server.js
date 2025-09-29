@@ -1942,6 +1942,88 @@ app.get('/users', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
+// ================================
+// ENDPOINT PARA EXPORTACIÓN CSV DINÁMICA
+// ================================
+
+app.get('/api/export/csv', async (req, res) => {
+  try {
+    const ResponseMapper = require('./response-mapper');
+
+    // Obtener todas las respuestas
+    const responses = await db.getAllResponses();
+
+    if (responses.length === 0) {
+      return res.status(404).json({ error: 'No hay datos para exportar' });
+    }
+
+    // Agrupar respuestas por área para optimizar la exportación
+    const responsesByArea = {};
+    responses.forEach(response => {
+      const area = response.area || 'General';
+      if (!responsesByArea[area]) {
+        responsesByArea[area] = [];
+      }
+      responsesByArea[area].push(response);
+    });
+
+    // Generar CSV completo
+    let csvContent = '';
+    let isFirstArea = true;
+
+    // Procesar cada área
+    Object.keys(responsesByArea).forEach(area => {
+      const areaResponses = responsesByArea[area];
+      const headers = ResponseMapper.getCsvMapping(area);
+
+      // Agregar headers solo para la primera área o si es necesario
+      if (isFirstArea) {
+        // Agregar columna de área al inicio para identificación
+        headers.splice(3, 0, 'Tipo de Formulario');
+        csvContent += headers.join(',') + '\n';
+        isFirstArea = false;
+      }
+
+      // Agregar filas de datos
+      areaResponses.forEach(response => {
+        const row = ResponseMapper.toCsvRow(response, area);
+        // Insertar tipo de formulario
+        row.splice(3, 0, `${area} (${area === 'Sales' ? '29' : '17'} preguntas)`);
+
+        // Escapar comillas en los valores
+        const escapedRow = row.map(value => {
+          const strValue = String(value || '');
+          return strValue.includes(',') || strValue.includes('\n') || strValue.includes('"')
+            ? `"${strValue.replace(/"/g, '""')}"`
+            : strValue;
+        });
+
+        csvContent += escapedRow.join(',') + '\n';
+      });
+    });
+
+    // Configurar headers de respuesta
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `entrevistas_retiro_dinamicas_${timestamp}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    // Agregar BOM para Excel UTF-8
+    const bom = '\uFEFF';
+    res.send(bom + csvContent);
+
+    console.log(`📊 CSV dinámico exportado: ${responses.length} respuestas en ${Object.keys(responsesByArea).length} tipos de formulario`);
+
+  } catch (error) {
+    console.error('Error exportando CSV dinámico:', error);
+    res.status(500).json({
+      error: 'Error generando exportación CSV',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Manejo de errores 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

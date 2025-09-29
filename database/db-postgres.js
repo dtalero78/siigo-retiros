@@ -73,8 +73,15 @@ class DatabasePostgres {
           subArea VARCHAR(255),
           lider VARCHAR(255),
           liderEntrenamiento VARCHAR(255),
-          paisContratacion VARCHAR(50)
+          paisContratacion VARCHAR(50),
+          all_responses JSONB
         )
+      `);
+
+      // Agregar columna all_responses si no existe (para migración)
+      await this.pool.query(`
+        ALTER TABLE responses
+        ADD COLUMN IF NOT EXISTS all_responses JSONB
       `);
 
       // Crear índices para búsquedas eficientes
@@ -95,35 +102,30 @@ class DatabasePostgres {
     }
   }
 
-  // Guardar respuesta del formulario (compatibilidad con el frontend)
+  // Guardar respuesta del formulario con mapeo dinámico
   async saveResponse(responses) {
     try {
-      // Procesar datos del formulario para convertirlos al formato esperado
-      const data = {
-        user_id: responses.userId || null,
-        full_name: responses['q3'] || responses.full_name || '',
-        identification: responses['q4'] || responses.identification || '',
-        exit_date: responses['q5'] || responses.exit_date || null,
-        tenure: responses['q6'] || '',
-        area: responses['q7'] || responses.area || '',
-        country: responses['q8'] || responses.country || '',
-        last_leader: responses['q9'] || '',
-        exit_reason_detail: responses['q10'] || '', // Campo q10 para detalles del motivo de retiro
-        exit_reason_category: responses['q11'] || '',
-        experience_rating: parseInt(responses['q12']) || null,
-        would_recommend: responses['q13'] || '',
-        what_enjoyed: responses['q14'] || '',
-        what_to_improve: responses['q15'] || '',
-        satisfaction_ratings: responses['q16'] || {},
-        new_company_info: responses['q17'] || '',
-        would_return: responses['q18'] || '',
-        fechaInicio: responses.fechaInicio || null,
-        cargo: responses.cargo || null,
-        subArea: responses.subArea || null,
-        lider: responses.lider || null,
-        liderEntrenamiento: responses['liderEntrenamiento'] || responses.lider_entrenamiento || null,
-        paisContratacion: responses.paisContratacion || null
-      };
+      const ResponseMapper = require('../response-mapper');
+
+      // Determinar el área del usuario para el mapeo correcto
+      let area = responses.area;
+
+      // Si hay userId, obtener área del usuario
+      if (responses.userId && !area) {
+        try {
+          const userQuery = await this.pool.query('SELECT area FROM users WHERE id = $1', [responses.userId]);
+          if (userQuery.rows.length > 0) {
+            area = userQuery.rows[0].area;
+          }
+        } catch (userError) {
+          console.warn('No se pudo obtener área del usuario:', userError);
+        }
+      }
+
+      // Usar mapeo dinámico para procesar las respuestas
+      const data = ResponseMapper.mapResponses(responses, area);
+
+      console.log('Datos mapeados dinámicamente:', JSON.stringify(data, null, 2));
 
       // Usar el método addResponse existente
       const responseId = await this.addResponse(data);
@@ -161,8 +163,8 @@ class DatabasePostgres {
         experience_rating, would_recommend, would_return,
         what_enjoyed, what_to_improve, satisfaction_ratings,
         new_company_info, fechaInicio, cargo, subArea, lider,
-        liderEntrenamiento, paisContratacion
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+        liderEntrenamiento, paisContratacion, all_responses
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       RETURNING id
     `;
 
@@ -188,7 +190,8 @@ class DatabasePostgres {
       data.subArea || null,
       data.lider || null,
       data.liderEntrenamiento || null,
-      data.paisContratacion || null
+      data.paisContratacion || null,
+      JSON.stringify(data.all_responses || {})
     ];
 
     try {
