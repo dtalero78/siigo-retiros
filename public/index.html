@@ -1230,8 +1230,11 @@
                 document.body.appendChild(successAlert);
             }
 
-            const successMessage = document.getElementById('successMessage');
-            successMessage.textContent = message;
+            // Buscar el elemento successMessage dentro del successAlert
+            const successMessage = successAlert.querySelector('#successMessage');
+            if (successMessage) {
+                successMessage.textContent = message;
+            }
             successAlert.classList.remove('hidden');
             successAlert.scrollIntoView({ behavior: 'smooth' });
 
