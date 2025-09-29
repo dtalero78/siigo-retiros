@@ -1209,6 +1209,38 @@
             errorAlert.scrollIntoView({ behavior: 'smooth' });
         }
 
+        function showSuccess(message) {
+            // Crear o mostrar un alert de éxito
+            let successAlert = document.getElementById('successAlert');
+            if (!successAlert) {
+                successAlert = document.createElement('div');
+                successAlert.id = 'successAlert';
+                successAlert.className = 'mt-8 max-w-3xl mx-auto bg-green-50 border border-green-200 rounded-lg p-4';
+                successAlert.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-lg font-semibold text-green-800">¡Éxito!</h3>
+                            <p id="successMessage" class="text-green-700 mt-1"></p>
+                        </div>
+                    </div>
+                `;
+                document.querySelector('.container').appendChild(successAlert);
+            }
+
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successAlert.classList.remove('hidden');
+            successAlert.scrollIntoView({ behavior: 'smooth' });
+
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                successAlert.classList.add('hidden');
+            }, 3000);
+        }
+
         nextBtn.addEventListener("click", async () => {
             console.log('=== BOTÓN SIGUIENTE/ENVIAR CLICKEADO ===');
             console.log('Paso actual:', currentStep);
@@ -1368,25 +1400,35 @@
             }
         }
 
-        // Modificar la función collectFormData para incluir las respuestas dinámicas
-        const originalCollectFormData = collectFormData;
-        collectFormData = function() {
-            const baseData = originalCollectFormData();
+        // Función para recolectar datos del formulario
+        function collectFormData() {
+            const formData = {};
 
-            // Si se cargaron preguntas dinámicas, recolectar esas respuestas
+            // Recolectar datos de campos básicos
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.name && input.value) {
+                    if (input.type === 'radio') {
+                        if (input.checked) {
+                            formData[input.name] = input.value;
+                        }
+                    } else {
+                        formData[input.name] = input.value;
+                    }
+                }
+            });
+
+            // Si se cargaron preguntas dinámicas, recolectar esas respuestas también
             if (questionsLoaded && window.dynamicFormUtils) {
                 const dynamicResponses = window.dynamicFormUtils.collectDynamicResponses();
-
-                // Combinar las respuestas base con las dinámicas
-                return {
-                    ...baseData,
-                    ...dynamicResponses,
-                    questionsType: currentUser?.area === 'Sales' ? 'sales' : 'general'
-                };
+                Object.assign(formData, dynamicResponses);
+                formData.questionsType = currentUser?.area === 'Sales' ? 'sales' : 'general';
             }
 
-            return baseData;
-        };
+            return formData;
+        }
+
+        // La función collectFormData ya incluye la lógica para recolectar respuestas dinámicas
 
         // Modificar la validación para incluir preguntas dinámicas
         const originalValidateCurrentStep = validateCurrentStep;
