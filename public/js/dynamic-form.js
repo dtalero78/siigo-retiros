@@ -325,33 +325,43 @@ function collectDynamicResponses() {
     const responses = {};
 
     dynamicQuestions.forEach(question => {
-        const fieldName = `dq${question.number}`;
+        const dynamicFieldName = `dq${question.number}`;  // ID real en el DOM
+        const backendFieldName = `q${question.number}`;    // Formato esperado por backend
 
         if (question.type === 'matrix') {
             // Para matrices, recolectar todas las sub-respuestas
             const matrixResponses = {};
             question.items.forEach((item, index) => {
-                const radioName = `${fieldName}_${index}`;
+                const radioName = `${dynamicFieldName}_${index}`;
                 const checked = document.querySelector(`input[name="${radioName}"]:checked`);
                 if (checked) {
                     matrixResponses[item] = checked.value;
                 }
             });
             if (Object.keys(matrixResponses).length > 0) {
-                responses[fieldName] = matrixResponses;
+                responses[backendFieldName] = matrixResponses;
             }
         } else if (question.type === 'radio' || question.type === 'scale') {
             // Para radio buttons y escalas
-            const checked = document.querySelector(`input[name="${fieldName}"]:checked`);
+            const checked = document.querySelector(`input[name="${dynamicFieldName}"]:checked`);
             if (checked) {
-                responses[fieldName] = checked.value;
+                responses[backendFieldName] = checked.value;
             }
         } else {
-            // Para otros tipos de campos
-            const field = document.getElementById(fieldName);
+            // Para otros tipos de campos (text, textarea, dropdown, date)
+            const field = document.getElementById(dynamicFieldName);
             if (field && field.value) {
-                responses[fieldName] = field.value;
+                responses[backendFieldName] = field.value;
             }
+        }
+    });
+
+    // Agregar campos estáticos que pueden no estar en el formulario dinámico
+    const staticFields = ['liderEntrenamiento'];
+    staticFields.forEach(fieldName => {
+        const field = document.getElementById(fieldName);
+        if (field && field.value) {
+            responses[fieldName] = field.value;
         }
     });
 

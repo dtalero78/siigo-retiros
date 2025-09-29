@@ -1080,46 +1080,34 @@
                     if (q8 && q8.value) responses.q8 = q8.value;
                 }
 
-                // Preguntas simples
-                ['q9', 'q10', 'q14', 'q15', 'q17', 'liderEntrenamiento'].forEach(id => {
-                    const input = document.getElementById(id);
-                    console.log(`Pregunta ${id}:`, input ? input.value : 'ELEMENTO NO ENCONTRADO');
-                    if (input && input.value) {
-                        responses[id] = input.value;
-                    }
-                });
-                console.log('Preguntas simples recopiladas');
+                // Recopilar respuestas dinámicas usando la función del sistema dinámico
+                if (typeof collectDynamicResponses === 'function') {
+                    const dynamicResponses = collectDynamicResponses();
+                    console.log('Respuestas dinámicas recopiladas:', dynamicResponses);
 
-                // Preguntas de radio
-                ['q6', 'q11', 'q12', 'q13', 'q18'].forEach(name => {
-                    const input = document.querySelector(`input[name="${name}"]:checked`);
-                    console.log(`Radio ${name}:`, input ? input.value : 'NO SELECCIONADO');
-                    if (input) {
-                        responses[name] = input.value;
-                    }
-                });
-                console.log('Preguntas de radio recopiladas');
+                    // Fusionar las respuestas dinámicas con las respuestas del usuario
+                    Object.assign(responses, dynamicResponses);
+                } else {
+                    console.warn('collectDynamicResponses() no disponible, usando método legacy');
+                    // Método legacy como fallback
+                    ['q9', 'q10', 'q14', 'q15', 'q17', 'liderEntrenamiento'].forEach(id => {
+                        const input = document.getElementById(id);
+                        console.log(`Pregunta ${id}:`, input ? input.value : 'ELEMENTO NO ENCONTRADO');
+                        if (input && input.value) {
+                            responses[id] = input.value;
+                        }
+                    });
 
-                // Matriz de satisfacción (q16)
-                const matrixResponses = {};
-                const matrixItems = [
-                    "Liderazgo de tu líder directo",
-                    "Ambiente laboral en tu equipo",
-                    "Cultura organizacional y valores",
-                    "Beneficios emocionales o no económicos",
-                    "Modalidad de trabajo remoto",
-                    "Proceso de formación y entrenamiento"
-                ];
+                    ['q6', 'q11', 'q12', 'q13', 'q18'].forEach(name => {
+                        const input = document.querySelector(`input[name="${name}"]:checked`);
+                        console.log(`Radio ${name}:`, input ? input.value : 'NO SELECCIONADO');
+                        if (input) {
+                            responses[name] = input.value;
+                        }
+                    });
+                }
 
-                matrixItems.forEach((item, i) => {
-                    const input = document.querySelector(`input[name="q16_${i}"]:checked`);
-                    if (input) {
-                        matrixResponses[item] = input.value;
-                    }
-                });
-
-                responses['q16'] = matrixResponses;
-                console.log('Respuestas matriz recopiladas');
+                console.log('Todas las respuestas recopiladas (incluyendo dinámicas)');
                 console.log('TODAS LAS RESPUESTAS:', responses);
 
                 // Enviar al servidor
