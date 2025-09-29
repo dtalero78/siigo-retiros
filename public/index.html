@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/fonts.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/dynamic-form.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -371,11 +372,17 @@
                     <!-- Step 2: Motivos de Retiro -->
                     <div id="step-2" class="step hidden">
                         <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Motivos de Retiro</h2>
-                            <p class="text-gray-600">Ayúdanos a entender tu decisión</p>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Experiencia y Cultura</h2>
+                            <p class="text-gray-600">Comparte tu experiencia en Siigo</p>
                         </div>
 
-                        <div class="space-y-6 max-w-3xl mx-auto">
+                        <!-- Contenedor para preguntas dinámicas del paso 2 -->
+                        <div id="dynamic-questions-step2" class="space-y-6 max-w-3xl mx-auto">
+                            <!-- Las preguntas se cargarán dinámicamente aquí -->
+                        </div>
+
+                        <!-- Mantener el contenido original como fallback -->
+                        <div id="original-step2" class="space-y-6 max-w-3xl mx-auto" style="display:none;">
 
                             <div>
                                 <label for="q11" class="block text-sm font-semibold text-gray-700 mb-3">Selecciona la
@@ -493,11 +500,17 @@
                     <!-- Step 3: Evaluación y Feedback -->
                     <div id="step-3" class="step hidden">
                         <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Evaluación y Feedback</h2>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Razones y Feedback</h2>
                             <p class="text-gray-600">Tu opinión es muy valiosa para nosotros</p>
                         </div>
 
-                        <div class="space-y-8 max-w-4xl mx-auto">
+                        <!-- Contenedor para preguntas dinámicas del paso 3 -->
+                        <div id="dynamic-questions-step3" class="space-y-8 max-w-4xl mx-auto">
+                            <!-- Las preguntas se cargarán dinámicamente aquí -->
+                        </div>
+
+                        <!-- Mantener el contenido original como fallback -->
+                        <div id="original-step3" class="space-y-8 max-w-4xl mx-auto" style="display:none;">
                             <div>
                                 <label for="q12" class="block text-sm font-semibold text-gray-700 mb-4">En una escala
                                     del 1 al 10,
@@ -782,6 +795,18 @@
             } else {
                 // Si no hay usuario pre-registrado, mostrar campos de información personal
                 document.getElementById('personalInfoFields').style.display = 'block';
+
+                // Agregar listener al campo de área para cargar preguntas dinámicamente
+                const areaField = document.getElementById('q7');
+                if (areaField) {
+                    areaField.addEventListener('change', async function() {
+                        const selectedArea = this.value;
+                        if (selectedArea) {
+                            console.log('Área seleccionada:', selectedArea);
+                            await loadQuestionsForArea(selectedArea);
+                        }
+                    });
+                }
             }
 
             showStep(currentStep);
@@ -795,6 +820,12 @@
                     displayUserInfo(currentUser);
                     // Ocultar campos de información personal si hay usuario pre-registrado
                     document.getElementById('personalInfoFields').style.display = 'none';
+
+                    // Cargar preguntas según el área del usuario
+                    if (currentUser.area) {
+                        console.log('Cargando preguntas para área del usuario:', currentUser.area);
+                        await loadQuestionsForArea(currentUser.area);
+                    }
                 } else {
                     console.error('Usuario no encontrado');
                     showError('No se pudo cargar la información del usuario. Verifica el enlace.');
@@ -1266,6 +1297,143 @@
                     console.log('Error loading draft:', e);
                 }
             }
+        });
+
+        // ========== SISTEMA DE PREGUNTAS DINÁMICAS ==========
+        let currentQuestionsSet = null;
+        let questionsLoaded = false;
+
+        // Función para cargar preguntas según el área
+        async function loadQuestionsForArea(area) {
+            try {
+                console.log(`Cargando preguntas dinámicas para área: ${area}`);
+
+                // Usar la utilidad del módulo dynamic-form.js
+                const questions = await window.dynamicFormUtils.loadDynamicQuestions(area);
+                currentQuestionsSet = questions;
+                questionsLoaded = true;
+
+                // Dividir las preguntas entre los pasos 2 y 3
+                const step2Questions = questions.filter(q =>
+                    q.section && (
+                        q.section.includes('Experiencia') ||
+                        q.section.includes('Clima') ||
+                        q.section.includes('Proceso') ||
+                        q.section.includes('Entrenamiento') ||
+                        q.section.includes('Siigo')
+                    )
+                );
+
+                const step3Questions = questions.filter(q =>
+                    q.section && (
+                        q.section.includes('Razones') ||
+                        q.section.includes('Satisfacción')
+                    )
+                );
+
+                // Renderizar preguntas en los contenedores correspondientes
+                if (step2Questions.length > 0) {
+                    window.dynamicFormUtils.renderDynamicQuestions(step2Questions, 'dynamic-questions-step2');
+                    document.getElementById('original-step2').style.display = 'none';
+                } else {
+                    // Si no hay preguntas dinámicas, mostrar el contenido original
+                    document.getElementById('original-step2').style.display = 'block';
+                    document.getElementById('dynamic-questions-step2').innerHTML = '';
+                }
+
+                if (step3Questions.length > 0) {
+                    window.dynamicFormUtils.renderDynamicQuestions(step3Questions, 'dynamic-questions-step3');
+                    document.getElementById('original-step3').style.display = 'none';
+                } else {
+                    // Si no hay preguntas dinámicas, mostrar el contenido original
+                    document.getElementById('original-step3').style.display = 'block';
+                    document.getElementById('dynamic-questions-step3').innerHTML = '';
+                }
+
+                console.log(`Preguntas cargadas exitosamente: ${step2Questions.length} en paso 2, ${step3Questions.length} en paso 3`);
+
+                // Notificar al usuario que las preguntas se han personalizado
+                if (area.toLowerCase() === 'sales') {
+                    showSuccess('Formulario personalizado para el área de Sales cargado exitosamente');
+                }
+
+            } catch (error) {
+                console.error('Error cargando preguntas dinámicas:', error);
+                // En caso de error, mostrar el formulario original
+                document.getElementById('original-step2').style.display = 'block';
+                document.getElementById('original-step3').style.display = 'block';
+                document.getElementById('dynamic-questions-step2').innerHTML = '';
+                document.getElementById('dynamic-questions-step3').innerHTML = '';
+                questionsLoaded = false;
+            }
+        }
+
+        // Modificar la función collectFormData para incluir las respuestas dinámicas
+        const originalCollectFormData = collectFormData;
+        collectFormData = function() {
+            const baseData = originalCollectFormData();
+
+            // Si se cargaron preguntas dinámicas, recolectar esas respuestas
+            if (questionsLoaded && window.dynamicFormUtils) {
+                const dynamicResponses = window.dynamicFormUtils.collectDynamicResponses();
+
+                // Combinar las respuestas base con las dinámicas
+                return {
+                    ...baseData,
+                    ...dynamicResponses,
+                    questionsType: currentUser?.area === 'Sales' ? 'sales' : 'general'
+                };
+            }
+
+            return baseData;
+        };
+
+        // Modificar la validación para incluir preguntas dinámicas
+        const originalValidateCurrentStep = validateCurrentStep;
+        validateCurrentStep = function() {
+            // Si hay preguntas dinámicas cargadas y estamos en step 2 o 3
+            if (questionsLoaded && currentQuestionsSet && (currentStep === 1 || currentStep === 2)) {
+                const currentStepElement = steps[currentStep];
+                const dynamicContainer = currentStepElement.querySelector(`#dynamic-questions-step${currentStep + 1}`);
+
+                if (dynamicContainer && dynamicContainer.children.length > 0) {
+                    // Obtener las preguntas del paso actual
+                    let stepQuestions = [];
+                    if (currentStep === 1) {
+                        stepQuestions = currentQuestionsSet.filter(q =>
+                            q.section && (
+                                q.section.includes('Experiencia') ||
+                                q.section.includes('Clima') ||
+                                q.section.includes('Proceso') ||
+                                q.section.includes('Entrenamiento') ||
+                                q.section.includes('Siigo')
+                            )
+                        );
+                    } else if (currentStep === 2) {
+                        stepQuestions = currentQuestionsSet.filter(q =>
+                            q.section && (
+                                q.section.includes('Razones') ||
+                                q.section.includes('Satisfacción')
+                            )
+                        );
+                    }
+
+                    // Validar las preguntas dinámicas
+                    const errors = window.dynamicFormUtils.validateDynamicQuestions(stepQuestions);
+                    if (errors.length > 0) {
+                        showValidationSummary(errors);
+                        if (errors[0].element) {
+                            errors[0].element.focus();
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            }
+
+            // Usar la validación original para el paso 1 o si no hay preguntas dinámicas
+            return originalValidateCurrentStep();
+        };
         });
     </script>
 </body>

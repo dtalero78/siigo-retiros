@@ -8,6 +8,8 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 // Usar configuración flexible de base de datos
 const { getDatabase, getUsersDatabase } = require('./database/config');
+// Importar configuración de preguntas por área
+const { getQuestionsByArea } = require('./questions-config');
 
 const app = express();
 app.set('trust proxy', true);
@@ -74,182 +76,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const db = getDatabase();
 const usersDb = getUsersDatabase();
 
-// Datos de las preguntas (extraídos del Excel)
-const questions = [
-  {
-    number: 3,
-    question: "¿Cuál es tu nombre completo?",
-    type: "text",
-    required: true
-  },
-  {
-    number: 4,
-    question: "¿Cuál es tu número de Identificación?",
-    type: "text",
-    required: true
-  },
-  {
-    number: 5,
-    question: "Confirma tu fecha de retiro",
-    type: "date",
-    required: true
-  },
-  {
-    number: 6,
-    question: "¿Cuál fue el tiempo total que duraste en Siigo?",
-    type: "radio",
-    required: true,
-    options: [
-      "Menos de 2 meses",
-      "Menos de 6 meses",
-      "6 meses a 1 año",
-      "1-2 años",
-      "2-5 años",
-      "Más de 5 años"
-    ]
-  },
-  {
-    number: 7,
-    question: "¿En cuál área estabas?",
-    type: "radio",
-    required: true,
-    options: [
-      "Cultura",
-      "Customer Success",
-      "Finance & Administration",
-      "Fundación Siigo",
-      "Marketing",
-      "People Ops",
-      "Product",
-      "Sales",
-      "Strategy",
-      "Tech"
-    ]
-  },
-  {
-    number: 8,
-    question: "¿En cuál país estabas trabajando?",
-    type: "radio",
-    required: true,
-    options: [
-      "Colombia",
-      "Ecuador",
-      "Uruguay",
-      "México",
-      "Perú"
-    ]
-  },
-  {
-    number: 9,
-    question: "¿Cuál el es nombre del último líder que tuviste en Siigo?",
-    type: "text",
-    required: true
-  },
-  {
-    number: 10,
-    question: "¿Por favor confirma cuál fue el motivo principal que te llevó a tomar la decisión de retirarte de Siigo?",
-    type: "radio",
-    required: true,
-    options: [
-      "Ambiente laboral negativo",
-      "Anticipar terminación de contrato",
-      "Cambio en condiciones acordadas",
-      "Cambio de proyecto, estudios u objetivos personales",
-      "Carga laboral o estrés alto",
-      "Choque con estilo de liderazgo",
-      "Deficiente onboarding/inducción",
-      "Desalineación con valores de la empresa",
-      "Dificultad para conciliar trabajo y vida personal",
-      "Falta de capacitación continua",
-      "Falta de oportunidades de crecimiento",
-      "Inconformidad con comisiones",
-      "Insatisfacción con beneficios",
-      "Mejor oferta laboral",
-      "Motivos personales",
-      "Problemas de conectividad",
-      "Problemas de salud personal",
-      "Presión por metas",
-      "Rol no acorde a perfil (\"no es lo mío\")"
-    ]
-  },
-  {
-    number: 11,
-    question: "Selecciona la categoría que mejor representa el motivo principal de tu decisión de retirarte:",
-    type: "radio",
-    required: true,
-    options: [
-      "Cultura organizacional (falta de alineación con el proposito y los valores de Siigo)",
-      "Decisión relacionada con un nuevo proyecto, emprendimiento, estudios u objetivos personales",
-      "Dificultad para equilibrar las responsabilidades laborales con la vida personal o familiar",
-      "Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral.",
-      "Dificultades en la relación o alineación con el estilo de liderazgo",
-      "Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo",
-      "Falta de oportunidades de desarrollo, promoción o nuevos desafíos profesionales",
-      "Insatisfacción con los Beneficios emocionales o no económicos",
-      "Mejor oferta económica",
-      "Modificación de condiciones laborales inicialmente acordadas",
-      "Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal",
-      "Percepción de inequidad o descontento con metas, comisiones (si aplica)"
-    ]
-  },
-  {
-    number: 12,
-    question: "En una escala del 1 al 10, ¿Qué tan buena fue tu experiencia laboral en Siigo?",
-    type: "scale",
-    required: true,
-    min: 1,
-    max: 10,
-    labels: ["Nada satisfecho", "Muy satisfecho"]
-  },
-  {
-    number: 13,
-    question: "¿Recomendarías trabajar en Siigo a un amigo o familiar?",
-    type: "radio",
-    required: true,
-    options: ["SÍ", "NO"]
-  },
-  {
-    number: 14,
-    question: "¿Qué fue lo que más disfrutaste de trabajar en Siigo?",
-    type: "textarea",
-    required: true
-  },
-  {
-    number: 15,
-    question: "¿Qué crees que podríamos mejorar como organización?",
-    type: "textarea",
-    required: true
-  },
-  {
-    number: 16,
-    question: "Durante tu experiencia en Siigo, ¿cómo calificarías tu nivel de satisfacción con los siguientes aspectos?",
-    type: "matrix",
-    required: true,
-    items: [
-      "Liderazgo de tu líder directo",
-      "Ambiente laboral en tu equipo",
-      "Cultura organizacional y valores",
-      "Beneficios emocionales o no económicos",
-      "Modalidad de trabajo remoto",
-      "Proceso de formación y entrenamiento"
-    ],
-    scale: [1, 2, 3, 4, 5],
-    scaleLabels: ["Muy insatisfecho", "Insatisfecho", "Neutral", "Satisfecho", "Muy satisfecho"]
-  },
-  {
-    number: 17,
-    question: "¿Puedes contarme a qué empresa te cambiaste y qué te gustó de su propuesta?",
-    type: "textarea",
-    required: false
-  },
-  {
-    number: 18,
-    question: "¿Estarías abierto(a) a regresar a Siigo en el futuro si se presenta una oportunidad que se alinee con tus intereses?",
-    type: "radio",
-    required: true,
-    options: ["SÍ", "NO"]
-  }
-];
+// Las preguntas ahora se obtienen dinámicamente según el área del usuario
+// usando la función getQuestionsByArea del módulo questions-config
 
 // ================================
 // RUTAS API PARA RESPUESTAS
@@ -289,7 +117,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Endpoint actualizado para servir preguntas según el área
 app.get('/api/questions', (req, res) => {
+  const { area } = req.query;
+  const questions = getQuestionsByArea(area);
   res.json(questions);
 });
 
