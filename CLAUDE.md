@@ -46,7 +46,7 @@ Multiple service layers for WhatsApp Business API integration via Twilio:
 
 ### API Structure
 All API endpoints are in **server.js** with the following patterns:
-- `/api/questions` - Survey question management
+- `/api/questions` - Dynamic survey question management (supports area-based filtering: `?area=Sales`)
 - `/api/responses/*` - Survey response CRUD operations
 - `/api/users/*` - User management, CSV uploads, filtering
 - `/api/analysis/*` - OpenAI GPT-4 analysis (individual and global)
@@ -55,10 +55,11 @@ All API endpoints are in **server.js** with the following patterns:
 
 ### Frontend Architecture
 Static HTML/JS without framework, served from `/public`:
-- **public/index.html** - Main survey form with dynamic question rendering
+- **public/index.html** - Main survey form with dynamic question rendering based on user area
 - **public/admin.html** - Admin dashboard with analytics, PDF export, and OpenAI analysis
 - **public/users.html** - User management with WhatsApp sending and conversation viewing
-- Uses Bootstrap 5.3.2 for UI components
+- **public/js/dynamic-form.js** - Dynamic form rendering system for area-specific questions
+- Uses Bootstrap 5.3.2 for UI components and Tailwind CSS
 - jsPDF and html2canvas for PDF generation (loaded from cdn.jsdelivr.net for CSP compliance)
 
 ## Environment Configuration
@@ -107,14 +108,20 @@ TWILIO_WHATSAPP_FROM=whatsapp:+15558192172
 
 ### Manual Testing URLs
 - Survey form: `http://localhost:3000/`
+- Survey form with user: `http://localhost:3000/?user=559` (Sales area user for testing dynamic questions)
 - Admin panel: `http://localhost:3000/admin`
 - User management: `http://localhost:3000/users`
+- API endpoints:
+  - `http://localhost:3000/api/questions` (17 general questions)
+  - `http://localhost:3000/api/questions?area=Sales` (29 Sales questions)
 
 ### Common Issues & Solutions
 - **PostgreSQL SSL errors**: Use `NODE_TLS_REJECT_UNAUTHORIZED=0` prefix when starting server
 - **CSP violations**: Ensure all external scripts are loaded from cdn.jsdelivr.net
 - **WhatsApp template errors**: Verify template is UTILITY category, not MARKETING
 - **PDF generation fails**: Check that html2canvas and jsPDF are loaded correctly
+- **Dynamic form errors**: Check browser console for JavaScript errors in dynamic-form.js
+- **Question loading issues**: Verify user has 'area' field set and API endpoints are accessible
 
 ### Database Queries
 - PostgreSQL connection test: `node test-postgres-connection.js`
@@ -134,3 +141,14 @@ TWILIO_WHATSAPP_FROM=whatsapp:+15558192172
 - Reply functionality through Twilio API
 - Message status tracking (sent, delivered, read, failed)
 - Auto-refresh every 5 seconds when conversation modal is open
+
+### Dynamic Forms System
+- **questions-config.js** - Configuration module with area-specific question sets extracted from PDF documents
+- **Area-based Question Loading**: Sales area users receive 29 specialized questions, other areas receive 17 general questions
+- **Dynamic Rendering**: Client-side form generation supporting multiple question types (text, textarea, radio, dropdown, scale, date, matrix)
+- **Automatic Detection**: System automatically loads appropriate questions based on user's area field
+- **Question Sources**:
+  - SALES.pdf: 29 questions across 7 sections (includes Selection Process and Training/Induction)
+  - GENERAL.pdf: 17 questions across 4 sections (Experience, Climate/Culture, Siigo, Reasons)
+- **Validation System**: Built-in validation for required fields and proper response collection
+- **API Integration**: `/api/questions?area=Sales` for Sales users, `/api/questions` for general users
