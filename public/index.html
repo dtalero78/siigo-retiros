@@ -67,8 +67,6 @@
             opacity: 0;
             animation: fadeIn 0.4s forwards;
             min-height: calc(100vh - 80px);
-            overflow-y: auto;
-            overflow-x: hidden;
         }
 
         @keyframes fadeIn {
@@ -221,29 +219,37 @@
         /* Scale - Botones rectangulares solo para móviles */
         @media (max-width: 768px) {
             .scale-container {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 10px;
-                margin-bottom: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .scale-items-row {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin-bottom: 12px;
             }
 
             .scale-item {
                 flex: none;
+                width: 100%;
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                padding: 16px 12px;
+                justify-content: flex-start;
+                padding: 8px 16px;
                 border: 2px solid #e0e0e0;
                 border-radius: 8px;
                 background: white;
                 cursor: pointer;
                 transition: all 0.2s ease;
-                min-height: 52px;
+                min-height: 36px;
             }
 
-            .scale-item:hover {
+            .scale-item:active {
                 border-color: #08acfc;
-                background: #f7fafc;
+                background: #e6f7ff;
+                transform: scale(0.98);
             }
 
             .scale-item.selected {
@@ -256,16 +262,32 @@
             }
 
             .scale-item-label {
-                font-size: 18px;
+                font-size: 12px;
                 font-weight: 600;
                 color: #1a202c;
                 margin-top: 0;
+                text-align: left;
             }
 
             .scale-labels {
-                grid-column: 1 / -1;
-                font-size: 13px;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .scale-labels .label-top {
+                order: -1;
+                font-size: 11px;
+                color: #718096;
+                margin-bottom: 4px;
+                text-align: left;
+            }
+
+            .scale-labels .label-bottom {
+                font-size: 11px;
+                color: #718096;
                 margin-top: 4px;
+                text-align: left;
             }
         }
 
@@ -279,8 +301,8 @@
 
         .btn {
             padding: 12px 32px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 100;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -379,28 +401,39 @@
             }
 
             .question-container {
-                padding: 80px 24px 100px 24px;
+                padding: 130px 20px 80px 20px;
                 min-height: auto;
                 height: auto;
-                max-height: calc(100vh - 80px);
-                max-height: calc(100dvh - 80px);
                 justify-content: flex-start;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
             }
 
             .question-text {
-                font-size: 20px;
-                margin-bottom: 24px;
+                font-size: 14px;
+                margin-bottom: 18px;
+                line-height: 1.4;
             }
 
             .question-number {
-                font-size: 13px;
-                margin-bottom: 12px;
+                font-size: 12px;
+                margin-bottom: 6px;
             }
 
             .input-field {
-                font-size: 16px;
+                font-size: 18px;
+            }
+
+            select.input-field {
+                margin-top: 24px;
+                font-size: 18px;
+                padding: 18px;
+                height: 56px;
+            }
+
+            select.input-field option {
+                font-size: 18px !important;
+                padding: 18px !important;
+                min-height: 52px !important;
+                line-height: 1.6 !important;
             }
 
             textarea.input-field {
