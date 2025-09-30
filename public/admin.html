@@ -524,7 +524,54 @@
                 const resUser = await fetch(`/api/responses/${id}`);
                 const data = await resUser.json();
 
-                // 2. Inyectar el HTML inicial, con loader en Análisis AI
+                // 2. Determinar si hay respuestas dinámicas completas
+                let allResponses = {};
+                if (data.all_responses) {
+                    try {
+                        allResponses = typeof data.all_responses === 'string'
+                            ? JSON.parse(data.all_responses)
+                            : data.all_responses;
+                    } catch (e) {
+                        console.error('Error parsing all_responses:', e);
+                    }
+                }
+
+                // 3. Obtener las preguntas correspondientes al área del usuario
+                const area = data.area || 'General';
+                const questionsRes = await fetch(`/api/questions${area === 'Sales' ? '?area=Sales' : ''}`);
+                const questions = await questionsRes.json();
+
+                // 4. Construir HTML dinámico con todas las respuestas
+                let dynamicResponsesHtml = '';
+                if (Object.keys(allResponses).length > 0 && questions.length > 0) {
+                    // Crear un mapa de preguntas por número
+                    const questionsMap = {};
+                    questions.forEach(q => {
+                        questionsMap[`q${q.number}`] = q.question;
+                    });
+
+                    // Agrupar por sección
+                    const sections = {};
+                    questions.forEach(q => {
+                        if (!sections[q.section]) {
+                            sections[q.section] = [];
+                        }
+                        sections[q.section].push(q);
+                    });
+
+                    // Generar HTML por sección
+                    Object.keys(sections).forEach(sectionName => {
+                        dynamicResponsesHtml += `<div class="response-detail"><strong>${sectionName}</strong>`;
+                        sections[sectionName].forEach(q => {
+                            const qKey = `q${q.number}`;
+                            const answer = allResponses[qKey] || '-';
+                            dynamicResponsesHtml += `<p><strong>${q.question}</strong> ${answer}</p>`;
+                        });
+                        dynamicResponsesHtml += `</div>`;
+                    });
+                }
+
+                // 5. Inyectar el HTML inicial, con loader en Análisis AI
                 const modalBody = document.getElementById('responseModalBody');
                 modalBody.innerHTML = `
       <div class="response-detail">
@@ -542,6 +589,7 @@
         <p><strong>Último líder:</strong> ${data.last_leader || '-'}</p>
       </div>
 
+      ${dynamicResponsesHtml || `
       <div class="response-detail">
         <strong>Motivo de Retiro</strong>
         <p><strong>Categoría:</strong> ${data.exit_reason_category || '-'}</p>
@@ -571,6 +619,7 @@
              </div>`
                         : ''
                     }
+      `}
 
       <div class="response-detail">
         <strong>Análisis AI</strong>

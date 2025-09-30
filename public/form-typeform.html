@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrevista de Retiro - Siigo</title>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Muli', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            min-height: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #08acfc, #0694d3);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Question container */
+        .question-container {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeIn 0.4s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: #08acfc;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 32px;
+            line-height: 1.3;
+        }
+
+        .question-required {
+            color: #e53e3e;
+        }
+
+        /* Input styles */
+        .input-field {
+            width: 100%;
+            font-size: 20px;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 3px solid #e0e0e0;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+            background: transparent;
+        }
+
+        .input-field:focus {
+            border-bottom-color: #08acfc;
+        }
+
+        .input-field::placeholder {
+            color: #cbd5e0;
+        }
+
+        textarea.input-field {
+            resize: vertical;
+            min-height: 100px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        textarea.input-field:focus {
+            border-color: #08acfc;
+        }
+
+        select.input-field {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+
+        .radio-option:hover {
+            border-color: #08acfc;
+            background: #f7fafc;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: #08acfc;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            border-color: #08acfc;
+            background: #e6f7ff;
+        }
+
+        /* Scale */
+        .scale-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .scale-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .scale-item input[type="radio"] {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            accent-color: #08acfc;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #718096;
+            margin-top: 8px;
+        }
+
+        /* Navigation buttons */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 24px 40px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background: #f7fafc;
+            color: #4a5568;
+        }
+
+        .btn-back:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #08acfc, #0694d3);
+            color: white;
+            margin-left: auto;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(8, 172, 252, 0.4);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Success message */
+        .success-container {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-icon {
+            font-size: 72px;
+            color: #48bb78;
+            margin-bottom: 24px;
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+        }
+
+        .success-text {
+            font-size: 18px;
+            color: #718096;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #08acfc;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .question-container {
+                padding: 40px 24px;
+            }
+
+            .question-text {
+                font-size: 22px;
+            }
+
+            .input-field {
+                font-size: 18px;
+            }
+
+            .navigation {
+                padding: 20px 24px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+
+            .scale-item input[type="radio"] {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <!-- Question container -->
+        <div class="question-container" id="questionContainer">
+            <!-- Questions will be dynamically rendered here -->
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation" id="navigationBar">
+            <button type="button" class="btn btn-back" id="btnBack">
+                <i class="bi bi-arrow-left"></i>
+                Anterior
+            </button>
+            <button type="button" class="btn btn-next" id="btnNext">
+                Siguiente
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Success message -->
+        <div class="success-container" id="successContainer">
+            <div class="success-icon">✓</div>
+            <h2 class="success-title">¡Gracias por tu tiempo!</h2>
+            <p class="success-text">Tu respuesta ha sido enviada exitosamente.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        let questions = [];
+        let responses = {};
+        let userData = null;
+
+        // Get user ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user');
+
+        // Initialize
+        async function init() {
+            try {
+                // Load user data if userId exists
+                if (userId) {
+                    const userResponse = await fetch(`/api/user-form/${userId}`);
+                    if (userResponse.ok) {
+                        userData = await userResponse.json();
+                    }
+                }
+
+                // Determine area
+                const area = userData?.area || 'General';
+
+                // Load questions
+                const questionsResponse = await fetch(`/api/questions${area === 'Sales' ? '?area=Sales' : ''}`);
+                questions = await questionsResponse.json();
+
+                // Pre-fill responses with user data
+                if (userData) {
+                    responses = {
+                        full_name: userData.nombre,
+                        identification: userData.cedula,
+                        area: userData.area,
+                        country: userData.paisContratacion,
+                        exit_date: userData.fechaRetiro,
+                        tenure: userData.tiempoEnSiigo,
+                        last_leader: userData.lider
+                    };
+                }
+
+                // Render first question
+                renderQuestion();
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                alert('Error cargando el formulario. Por favor recarga la página.');
+            }
+        }
+
+        // Render question
+        function renderQuestion() {
+            if (currentQuestion >= questions.length) {
+                submitForm();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            const container = document.getElementById('questionContainer');
+            const qKey = `q${question.number}`;
+
+            // Update progress
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            // Build question HTML
+            let inputHTML = '';
+
+            switch (question.type) {
+                case 'text':
+                    inputHTML = `
+                        <input type="text"
+                               class="input-field"
+                               id="${qKey}"
+                               placeholder="Escribe tu respuesta aquí..."
+                               value="${responses[qKey] || ''}"
+                               ${question.required ? 'required' : ''}>
+                    `;
+                    break;
+
+                case 'textarea':
+                    inputHTML = `
+                        <textarea class="input-field"
+                                  id="${qKey}"
+                                  placeholder="${question.placeholder || 'Escribe tu respuesta aquí...'}"
+                                  ${question.required ? 'required' : ''}>${responses[qKey] || ''}</textarea>
+                    `;
+                    break;
+
+                case 'dropdown':
+                    inputHTML = `
+                        <select class="input-field" id="${qKey}" ${question.required ? 'required' : ''}>
+                            <option value="">Selecciona una opción</option>
+                            ${question.options.map(opt => `
+                                <option value="${opt}" ${responses[qKey] === opt ? 'selected' : ''}>${opt}</option>
+                            `).join('')}
+                        </select>
+                    `;
+                    break;
+
+                case 'radio':
+                    inputHTML = `
+                        <div class="radio-group">
+                            ${question.options.map(opt => `
+                                <label class="radio-option ${responses[qKey] === opt ? 'selected' : ''}">
+                                    <input type="radio"
+                                           name="${qKey}"
+                                           value="${opt}"
+                                           ${responses[qKey] === opt ? 'checked' : ''}
+                                           ${question.required ? 'required' : ''}>
+                                    ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                    break;
+
+                case 'scale':
+                    const scaleValues = [];
+                    for (let i = question.min; i <= question.max; i++) {
+                        scaleValues.push(i);
+                    }
+                    inputHTML = `
+                        <div class="scale-container">
+                            ${scaleValues.map(val => `
+                                <div class="scale-item">
+                                    <input type="radio"
+                                           name="${qKey}"
+                                           value="${val}"
+                                           ${responses[qKey] == val ? 'checked' : ''}
+                                           ${question.required ? 'required' : ''}>
+                                    <div style="margin-top: 8px; font-size: 14px; color: #4a5568;">${val}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="scale-labels">
+                            <span>${question.labels[0]}</span>
+                            <span>${question.labels[1]}</span>
+                        </div>
+                    `;
+                    break;
+
+                case 'date':
+                    inputHTML = `
+                        <input type="date"
+                               class="input-field"
+                               id="${qKey}"
+                               value="${responses[qKey] || ''}"
+                               ${question.required ? 'required' : ''}>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = `
+                <div class="question-number">${currentQuestion + 1} → ${question.section}</div>
+                <div class="question-text">
+                    ${question.question}${question.required ? '<span class="question-required"> *</span>' : ''}
+                </div>
+                ${inputHTML}
+            `;
+
+            // Add event listeners
+            addInputListeners();
+
+            // Update buttons
+            updateButtons();
+
+            // Re-trigger fade animation
+            container.style.animation = 'none';
+            setTimeout(() => {
+                container.style.animation = 'fadeIn 0.4s forwards';
+            }, 10);
+        }
+
+        // Add input event listeners
+        function addInputListeners() {
+            const question = questions[currentQuestion];
+            const qKey = `q${question.number}`;
+
+            if (question.type === 'radio') {
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+                        this.classList.add('selected');
+                        const input = this.querySelector('input[type="radio"]');
+                        input.checked = true;
+                        responses[qKey] = input.value;
+                        updateButtons();
+                    });
+                });
+            } else {
+                const input = document.getElementById(qKey);
+                if (input) {
+                    input.addEventListener('input', function() {
+                        responses[qKey] = this.value;
+                        updateButtons();
+                    });
+                }
+            }
+        }
+
+        // Update navigation buttons
+        function updateButtons() {
+            const btnBack = document.getElementById('btnBack');
+            const btnNext = document.getElementById('btnNext');
+            const question = questions[currentQuestion];
+            const qKey = `q${question.number}`;
+
+            // Show/hide back button
+            btnBack.style.display = currentQuestion === 0 ? 'none' : 'flex';
+
+            // Check if current question is answered
+            const isAnswered = responses[qKey] && responses[qKey].toString().trim() !== '';
+            btnNext.disabled = question.required && !isAnswered;
+
+            // Update next button text
+            if (currentQuestion === questions.length - 1) {
+                btnNext.innerHTML = 'Enviar <i class="bi bi-check-lg"></i>';
+            } else {
+                btnNext.innerHTML = 'Siguiente <i class="bi bi-arrow-right"></i>';
+            }
+        }
+
+        // Navigation handlers
+        document.getElementById('btnBack').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            const question = questions[currentQuestion];
+            const qKey = `q${question.number}`;
+
+            // Save current answer
+            if (question.type === 'radio' || question.type === 'scale') {
+                const selected = document.querySelector(`input[name="${qKey}"]:checked`);
+                if (selected) {
+                    responses[qKey] = selected.value;
+                }
+            } else {
+                const input = document.getElementById(qKey);
+                if (input) {
+                    responses[qKey] = input.value;
+                }
+            }
+
+            // Validate
+            if (question.required && (!responses[qKey] || responses[qKey].toString().trim() === '')) {
+                alert('Por favor responde esta pregunta antes de continuar.');
+                return;
+            }
+
+            // Move to next question
+            currentQuestion++;
+            renderQuestion();
+        });
+
+        // Submit form
+        async function submitForm() {
+            const container = document.getElementById('questionContainer');
+            const navigation = document.getElementById('navigationBar');
+            const loading = document.getElementById('loadingSpinner');
+            const success = document.getElementById('successContainer');
+
+            // Hide question and navigation
+            container.classList.add('hidden');
+            navigation.classList.add('hidden');
+
+            // Show loading
+            loading.style.display = 'flex';
+
+            try {
+                // Prepare submission data
+                const formData = { ...responses };
+
+                // Add user data if exists
+                if (userData) {
+                    formData.user_id = userId;
+                    formData.full_name = userData.nombre;
+                    formData.identification = userData.cedula;
+                    formData.area = userData.area;
+                    formData.country = userData.paisContratacion;
+                }
+
+                // Submit
+                const response = await fetch('/api/responses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    success.style.display = 'block';
+                } else {
+                    throw new Error('Error al enviar el formulario');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                loading.style.display = 'none';
+                container.classList.remove('hidden');
+                navigation.classList.remove('hidden');
+                alert('Hubo un error al enviar tu respuesta. Por favor intenta nuevamente.');
+                currentQuestion = questions.length - 1;
+                renderQuestion();
+            }
+        }
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    document.getElementById('btnNext').click();
+                }
+            }
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

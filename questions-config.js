@@ -420,26 +420,10 @@ const questionsSales = [
     max: 10,
     labels: ["Para nada", "Absolutamente"]
   },
-  {
-    number: 23,
-    section: "05| Siigo Satisfacción",
-    question: "¿Qué fue lo que más disfrutaste de trabajar en Siigo?",
-    type: "textarea",
-    required: true,
-    placeholder: "Comparte lo que más valoraste de tu experiencia"
-  },
-  {
-    number: 24,
-    section: "05| Siigo Satisfacción",
-    question: "¿Qué crees que podríamos mejorar como organización?",
-    type: "textarea",
-    required: true,
-    placeholder: "Tus sugerencias son muy importantes para nosotros"
-  },
 
   // SECCIÓN 07: Razones (nota: el PDF salta de 05 a 07)
   {
-    number: 25,
+    number: 23,
     section: "07| Razones",
     question: "Selecciona la categoría que mejor representa el motivo principal de tu decisión de retirarte:",
     type: "dropdown",
@@ -467,7 +451,7 @@ const questionsSales = [
     ]
   },
   {
-    number: 26,
+    number: 25,
     section: "07| Razones",
     question: "¿Por qué?",
     type: "textarea",
@@ -475,7 +459,7 @@ const questionsSales = [
     placeholder: "Explica con más detalle tu motivo principal"
   },
   {
-    number: 27,
+    number: 26,
     section: "07| Razones",
     question: "¿Qué crees que Siigo podría haber hecho para que decidieras quedarte?",
     type: "textarea",
@@ -483,7 +467,7 @@ const questionsSales = [
     placeholder: "Tu respuesta nos ayuda a mejorar"
   },
   {
-    number: 28,
+    number: 27,
     section: "07| Razones",
     question: "¿Qué fue lo que más influyó en tu decisión de salir de Siigo?",
     type: "textarea",
@@ -491,7 +475,7 @@ const questionsSales = [
     placeholder: "Comparte los factores más importantes"
   },
   {
-    number: 29,
+    number: 28,
     section: "07| Razones",
     question: "¿Tu decisión de salir fue algo que venías pensando desde hace tiempo o surgió recientemente?",
     type: "radio",

@@ -48,15 +48,17 @@ Multiple service layers for WhatsApp Business API integration via Twilio:
 All API endpoints are in **server.js** with the following patterns:
 - `/api/questions` - Dynamic survey question management (supports area-based filtering: `?area=Sales`)
 - `/api/responses/*` - Survey response CRUD operations
+- `/api/responses/:id/reprocess` - Re-process existing responses with improved dynamic mapping
 - `/api/users/*` - User management, CSV uploads, filtering
 - `/api/analysis/*` - OpenAI GPT-4 analysis (individual and global)
 - `/api/whatsapp/*` - Conversation viewing and reply functionality
-- `/api/export/*` - Data export endpoints
+- `/api/export/*` - Data export endpoints (includes dynamic CSV generation)
 
 ### Frontend Architecture
 Static HTML/JS without framework, served from `/public`:
-- **public/index.html** - Main survey form with dynamic question rendering based on user area
-- **public/admin.html** - Admin dashboard with analytics, PDF export, and OpenAI analysis
+- **public/index.html** - Main survey form with dynamic question rendering based on user area (multi-step wizard)
+- **public/form-typeform.html** - Alternative Typeform-style form with one question per screen (clean, minimalist design)
+- **public/admin.html** - Admin dashboard with analytics, PDF export, and OpenAI analysis (includes dynamic response viewing)
 - **public/users.html** - User management with WhatsApp sending and conversation viewing
 - **public/js/dynamic-form.js** - Dynamic form rendering system for area-specific questions
 - Uses Bootstrap 5.3.2 for UI components and Tailwind CSS
@@ -107,13 +109,15 @@ TWILIO_WHATSAPP_FROM=whatsapp:+15558192172
 ## Testing & Debugging
 
 ### Manual Testing URLs
-- Survey form: `http://localhost:3000/`
+- Survey form (multi-step): `http://localhost:3000/`
+- Survey form (Typeform-style): `http://localhost:3000/form-typeform.html`
 - Survey form with user: `http://localhost:3000/?user=559` (Sales area user for testing dynamic questions)
+- Typeform with user: `http://localhost:3000/form-typeform.html?user=559`
 - Admin panel: `http://localhost:3000/admin`
 - User management: `http://localhost:3000/users`
 - API endpoints:
   - `http://localhost:3000/api/questions` (17 general questions)
-  - `http://localhost:3000/api/questions?area=Sales` (29 Sales questions)
+  - `http://localhost:3000/api/questions?area=Sales` (27 Sales questions - duplicates removed)
 
 ### Common Issues & Solutions
 - **PostgreSQL SSL errors**: Use `NODE_TLS_REJECT_UNAUTHORIZED=0` prefix when starting server
@@ -144,11 +148,24 @@ TWILIO_WHATSAPP_FROM=whatsapp:+15558192172
 
 ### Dynamic Forms System
 - **questions-config.js** - Configuration module with area-specific question sets extracted from PDF documents
-- **Area-based Question Loading**: Sales area users receive 29 specialized questions, other areas receive 17 general questions
+- **Area-based Question Loading**: Sales area users receive 27 specialized questions (duplicates removed), other areas receive 17 general questions
+- **Two Form Styles Available**:
+  - **Multi-step wizard** (index.html): Traditional grouped questions with step indicators
+  - **Typeform-style** (form-typeform.html): One question per screen with clean, minimalist design
 - **Dynamic Rendering**: Client-side form generation supporting multiple question types (text, textarea, radio, dropdown, scale, date, matrix)
 - **Automatic Detection**: System automatically loads appropriate questions based on user's area field
 - **Question Sources**:
-  - SALES.pdf: 29 questions across 7 sections (includes Selection Process and Training/Induction)
+  - SALES.pdf: 27 questions across 6 sections (Selection Process, Training/Induction, Satisfaction, Reasons) - duplicates removed
   - GENERAL.pdf: 17 questions across 4 sections (Experience, Climate/Culture, Siigo, Reasons)
 - **Validation System**: Built-in validation for required fields and proper response collection
 - **API Integration**: `/api/questions?area=Sales` for Sales users, `/api/questions` for general users
+
+### Advanced Response Processing System
+- **response-mapper.js** - Dynamic response mapping system that adapts to different form types
+- **Intelligent Field Mapping**: Automatically maps dynamic form responses (q1-q27 for Sales, q1-q17 for General) to legacy database fields
+- **Area-Specific Processing**: Different mapping logic for Sales (27 questions) vs General (17 questions) forms
+- **Complete Data Preservation**: All original responses stored in `all_responses` JSONB field for full data integrity
+- **Re-processing Capability**: Existing responses can be re-processed with improved mapping via `/api/responses/:id/reprocess`
+- **Backward Compatibility**: Legacy responses continue to work while new responses benefit from enhanced mapping
+- **Export Enhancement**: Dynamic CSV generation includes all questions based on form type with proper headers
+- **Admin Panel Enhancement**: Response detail modal now dynamically renders all answers grouped by section, showing all 27 Sales questions or 17 General questions based on area
