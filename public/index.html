@@ -398,13 +398,12 @@
                 // Pre-fill responses with user data
                 if (userData) {
                     responses = {
-                        full_name: userData.nombre,
-                        identification: userData.cedula,
+                        full_name: userData.full_name,
+                        identification: userData.identification,
                         area: userData.area,
-                        country: userData.paisContratacion,
-                        exit_date: userData.fechaRetiro,
-                        tenure: userData.tiempoEnSiigo,
-                        last_leader: userData.lider
+                        country: userData.country,
+                        exit_date: userData.exit_date,
+                        cargo: userData.cargo
                     };
                 }
 
@@ -556,10 +555,22 @@
                         updateButtons();
                     });
                 });
+            } else if (question.type === 'scale') {
+                // Add listeners to scale radio buttons
+                document.querySelectorAll(`input[name="${qKey}"]`).forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        responses[qKey] = this.value;
+                        updateButtons();
+                    });
+                });
             } else {
                 const input = document.getElementById(qKey);
                 if (input) {
                     input.addEventListener('input', function() {
+                        responses[qKey] = this.value;
+                        updateButtons();
+                    });
+                    input.addEventListener('change', function() {
                         responses[qKey] = this.value;
                         updateButtons();
                     });
