@@ -57,7 +57,7 @@
         /* Question container */
         .question-container {
             flex: 1;
-            padding: 80px 40px 40px 40px;
+            padding: 120px 40px 40px 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -301,7 +301,7 @@
             }
 
             .question-container {
-                padding: 60px 24px 24px 24px;
+                padding: 100px 24px 24px 24px;
                 min-height: calc(100vh - 80px);
             }
 
@@ -331,25 +331,30 @@
         /* Logo */
         .logo-container {
             position: fixed;
-            top: 20px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%);
+            max-width: 800px;
+            width: 100%;
+            padding: 0 40px;
             z-index: 1001;
         }
 
         .logo-container img {
-            height: 32px;
+            height: 48px;
             width: auto;
-            opacity: 0.8;
+            opacity: 0.9;
+            display: block;
         }
 
         @media (max-width: 768px) {
             .logo-container {
-                top: 16px;
+                top: 20px;
+                padding: 0 24px;
             }
 
             .logo-container img {
-                height: 28px;
+                height: 40px;
             }
         }
 
