@@ -451,7 +451,7 @@ const questionsSales = [
     ]
   },
   {
-    number: 25,
+    number: 24,
     section: "07| Razones",
     question: "¿Por qué?",
     type: "textarea",
@@ -459,7 +459,7 @@ const questionsSales = [
     placeholder: "Explica con más detalle tu motivo principal"
   },
   {
-    number: 26,
+    number: 25,
     section: "07| Razones",
     question: "¿Qué crees que Siigo podría haber hecho para que decidieras quedarte?",
     type: "textarea",
@@ -467,7 +467,7 @@ const questionsSales = [
     placeholder: "Tu respuesta nos ayuda a mejorar"
   },
   {
-    number: 27,
+    number: 26,
     section: "07| Razones",
     question: "¿Qué fue lo que más influyó en tu decisión de salir de Siigo?",
     type: "textarea",
@@ -475,7 +475,7 @@ const questionsSales = [
     placeholder: "Comparte los factores más importantes"
   },
   {
-    number: 28,
+    number: 27,
     section: "07| Razones",
     question: "¿Tu decisión de salir fue algo que venías pensando desde hace tiempo o surgió recientemente?",
     type: "radio",

@@ -1,1473 +1,696 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrevista de Retiro - Siigo</title>
     <link rel="stylesheet" href="/css/fonts.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/js/dynamic-form.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'siigo': '#08acfc',
-                        'siigo-dark': '#0694d3',
-                        'siigo-light': '#e6f7ff'
-                    },
-                    fontFamily: {
-                        'muli': ['Muli', 'sans-serif'],
-                    }
-                }
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Muli', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            min-height: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #08acfc, #0694d3);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Question container */
+        .question-container {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeIn 0.4s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
             }
         }
-    </script>
-    <style>
-        :root {
-            --siigo: #08acfc;
-            --siigo-dark: #0694d3;
-            --siigo-light: #e6f7ff;
+
+        .question-number {
+            font-size: 14px;
+            color: #08acfc;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
         }
 
-        .step-transition {
-            transition: all 0.3s ease-in-out;
+        .question-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 32px;
+            line-height: 1.3;
         }
 
+        .question-required {
+            color: #e53e3e;
+        }
+
+        /* Input styles */
+        .input-field {
+            width: 100%;
+            font-size: 20px;
+            padding: 16px 0;
+            border: none;
+            border-bottom: 3px solid #e0e0e0;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+            background: transparent;
+        }
+
+        .input-field:focus {
+            border-bottom-color: #08acfc;
+        }
+
+        .input-field::placeholder {
+            color: #cbd5e0;
+        }
+
+        textarea.input-field {
+            resize: vertical;
+            min-height: 100px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        textarea.input-field:focus {
+            border-color: #08acfc;
+        }
+
+        select.input-field {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        /* Radio buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+
+        .radio-option:hover {
+            border-color: #08acfc;
+            background: #f7fafc;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: #08acfc;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            border-color: #08acfc;
+            background: #e6f7ff;
+        }
+
+        /* Scale */
         .scale-container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
         .scale-item {
-            text-align: center;
             flex: 1;
+            text-align: center;
         }
 
         .scale-item input[type="radio"] {
-            width: 1.5em;
-            height: 1.5em;
-            margin: 0 auto;
-            display: block;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
             accent-color: #08acfc;
         }
 
         .scale-labels {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #64748b;
+            font-size: 14px;
+            color: #718096;
+            margin-top: 8px;
         }
 
-        .matrix-table {
-            width: 100%;
-            margin-top: 15px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        /* Navigation buttons */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 24px 40px;
+            border-top: 1px solid #e0e0e0;
         }
 
-        .matrix-table th,
-        .matrix-table td {
-            text-align: center;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .matrix-table th {
-            background-color: #f1f5f9;
+        .btn {
+            padding: 12px 32px;
+            font-size: 16px;
             font-weight: 600;
-            color: #374151;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .matrix-table td:first-child {
-            text-align: left;
-            font-weight: 500;
-            background-color: #f8fafc;
-            min-width: 200px;
+        .btn-back {
+            background: #f7fafc;
+            color: #4a5568;
         }
 
-        .matrix-table input[type="radio"] {
-            accent-color: #08acfc;
+        .btn-back:hover {
+            background: #e2e8f0;
         }
 
-        input[type="radio"]:checked {
-            accent-color: #08acfc;
+        .btn-next {
+            background: linear-gradient(135deg, #08acfc, #0694d3);
+            color: white;
+            margin-left: auto;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(8, 172, 252, 0.4);
+        }
 
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Success message */
+        .success-container {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-icon {
+            font-size: 72px;
+            color: #48bb78;
+            margin-bottom: 24px;
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+        }
+
+        .success-text {
+            font-size: 18px;
+            color: #718096;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #08acfc;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
             to {
-                opacity: 1;
-                transform: translateY(0);
+                transform: rotate(360deg);
             }
         }
 
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* RESPONSIVE STYLES */
+        /* Responsive */
         @media (max-width: 768px) {
-            .scale-container {
-                flex-wrap: wrap;
-                gap: 10px;
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
             }
 
-            .scale-item {
-                flex: 0 0 calc(20% - 8px);
+            .question-container {
+                padding: 40px 24px;
             }
 
-            .matrix-table {
-                font-size: 0.875rem;
+            .question-text {
+                font-size: 22px;
             }
 
-            .matrix-table td,
-            .matrix-table th {
-                padding: 8px 4px;
+            .input-field {
+                font-size: 18px;
             }
 
-            .mobile-input,
-            input[type="date"],
-            select {
-                width: 100% !important;
-                padding: 16px !important;
-                font-size: 16px !important;
-                min-height: 64px !important;
-                height: 64px !important;
-                box-sizing: border-box !important;
-                border: 2px solid #d1d5db !important;
-                border-radius: 12px !important;
-                background-color: white !important;
-                appearance: none !important;
-                -webkit-appearance: none !important;
-                -moz-appearance: none !important;
+            .navigation {
+                padding: 20px 24px;
             }
 
-            .mobile-radio {
-                padding: 16px !important;
-                margin-bottom: 12px !important;
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+
+            .scale-item input[type="radio"] {
+                width: 32px;
+                height: 32px;
             }
         }
 
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
+<body>
+    <div class="container">
+        <!-- Progress bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
 
-<body class="bg-gray-100 md:bg-gradient-to-br md:from-blue-50 md:to-indigo-100 min-h-screen font-muli">
-    <div class="min-h-screen flex items-start md:items-center justify-center md:py-8 md:px-4">
-        <div class="w-full max-w-4xl bg-white shadow-none md:shadow-2xl rounded-none md:rounded-2xl overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-siigo to-siigo-dark text-white p-8">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <img src="/images/siigo-logo.png" alt="Siigo Logo" class="h-8 md:h-12 w-auto mr-3 md:mr-4">
-                    </div>
-                    <div class="flex-1 text-center">
-                        <h1 class="text-xl md:text-3xl font-bold mb-1 md:mb-2">Entrevista de Retiro</h1>
-                        <p class="text-blue-100 text-sm md:text-lg">¡Gracias por tu tiempo en Siigo!</p>
-                    </div>
-                    <div class="w-8 md:w-16"></div>
-                </div>
-            </div>
+        <!-- Question container -->
+        <div class="question-container" id="questionContainer">
+            <!-- Questions will be dynamically rendered here -->
+        </div>
 
-            <div class="p-4 md:p-8">
+        <!-- Navigation -->
+        <div class="navigation" id="navigationBar">
+            <button type="button" class="btn btn-back" id="btnBack">
+                <i class="bi bi-arrow-left"></i>
+                Anterior
+            </button>
+            <button type="button" class="btn btn-next" id="btnNext">
+                Siguiente
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
 
-                <!-- Intro Text -->
-                <div class="bg-siigo-light rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-l-4 border-siigo">
-                    <p class="text-gray-700 mb-2 md:mb-3 text-sm md:text-base"><strong>¡Gracias por tu tiempo en
-                            Siigo!</strong></p>
-                    <p class="text-gray-600 text-xs md:text-sm leading-relaxed">
-                        Para nosotros es muy valioso conocer tu experiencia y aprender de lo que funcionó bien.
-                        Este formulario es confidencial y nos ayudará a seguir creciendo como equipo.
-                        <strong>Completarlo te tomará menos de 5 minutos.</strong>
-                    </p>
-                </div>
+        <!-- Loading -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+        </div>
 
-                <!-- Step Indicators -->
-                <div class="flex items-center justify-between mb-6 md:mb-8">
-                    <div class="flex items-center gap-2 md:gap-4 w-full">
-                        <!-- Step 1 -->
-                        <div class="relative flex-1 flex items-center">
-                            <div id="indicator-1"
-                                class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-siigo text-white rounded-full font-semibold step-transition z-10 text-sm md:text-base">
-                                1</div>
-                            <div id="line-1"
-                                class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition">
-                            </div>
-                        </div>
-                        <!-- Step 2 -->
-                        <div class="relative flex-1 flex items-center">
-                            <div id="indicator-2"
-                                class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">
-                                2</div>
-                            <div id="line-2"
-                                class="absolute w-full h-0.5 md:h-1 bg-gray-300 left-4 md:left-6 top-1/2 transform -translate-y-1/2 step-transition">
-                            </div>
-                        </div>
-                        <!-- Step 3 -->
-                        <div>
-                            <div id="indicator-3"
-                                class="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-gray-300 text-gray-600 rounded-full font-semibold step-transition z-10 text-sm md:text-base">
-                                3</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="w-full bg-gray-200 rounded-full h-2 md:h-3 mb-6 md:mb-8">
-                    <div id="progress-bar"
-                        class="bg-gradient-to-r from-siigo to-siigo-dark h-2 md:h-3 rounded-full step-transition"
-                        style="width: 33.33%;"></div>
-                </div>
-
-                <!-- Form Content -->
-                <form id="exitInterviewForm">
-                    <!-- Step 1: Información Personal y Laboral -->
-                    <div id="step-1" class="step fade-in">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Información Personal y Laboral</h2>
-                            <p class="text-gray-600">Cuéntanos sobre ti y tu experiencia en Siigo</p>
-                        </div>
-
-                        <div class="space-y-6 max-w-2xl mx-auto">
-                            <!-- Campos de información personal (solo si no hay usuario pre-registrado) -->
-                            <div id="personalInfoFields" style="display: none;">
-
-                                <div>
-                                    <label for="q3" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        ¿Cuál es tu nombre completo? *
-                                    </label>
-                                    <input type="text" id="q3" name="q3" required
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                        placeholder="Nombre completo">
-                                </div>
-
-                                <div class="mt-4">
-                                    <label for="q4" class="block text-sm font-semibold text-gray-700 mb-2">
-                                        ¿Cuál es tu número de Identificación? *
-                                    </label>
-                                    <input type="text" id="q4" name="q4" required
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                        placeholder="Número de identificación">
-                                </div>
-
-                                <input type="hidden" id="q5" name="q5" value="">
-
-                                <div class="mt-4">
-                                    <label for="q7" class="block text-sm font-semibold text-gray-700 mb-3">
-                                        ¿En cuál área estabas? *
-                                    </label>
-                                    <select id="q7" name="q7" required
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
-                                        <option value="">Selecciona un área</option>
-                                        <option value="Cultura">Cultura</option>
-                                        <option value="Customer Success">Customer Success</option>
-                                        <option value="Finance & Administration">Finance & Administration</option>
-                                        <option value="Fundación Siigo">Fundación Siigo</option>
-                                        <option value="Marketing">Marketing</option>
-                                        <option value="People Ops">People Ops</option>
-                                        <option value="Product">Product</option>
-                                        <option value="Sales">Sales</option>
-                                        <option value="Strategy">Strategy</option>
-                                        <option value="Tech">Tech</option>
-                                    </select>
-                                </div>
-
-                                <div class="mt-4">
-                                    <label for="q8" class="block text-sm font-semibold text-gray-700 mb-3">
-                                        ¿En cuál país estabas trabajando? *
-                                    </label>
-                                    <select id="q8" name="q8" required
-                                        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input">
-                                        <option value="">Selecciona un país</option>
-                                        <option value="Colombia">Colombia</option>
-                                        <option value="Ecuador">Ecuador</option>
-                                        <option value="Uruguay">Uruguay</option>
-                                        <option value="México">México</option>
-                                        <option value="Perú">Perú</option>
-                                    </select>
-                                </div>
-
-                                <hr class="my-6 border-gray-200">
-
-                            </div>
-
-                            <!-- Resto del formulario sigue igual -->
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">¿Cuál fue el tiempo total
-                                    que duraste en Siigo? *</label>
-                                <div class="space-y-2">
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="Menos de 2 meses" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3">Menos de 2 meses</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="Menos de 6 meses" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3">Menos de 6 meses</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="6 meses a 1 año" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3">6 meses a 1 año</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="1-2 años" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3">1-2 años</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="2-5 años" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3">2-5 años</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors mobile-radio">
-                                        <input type="radio" name="q6" value="Más de 5 años" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3">Más de 5 años</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="q9" class="block text-sm font-semibold text-gray-700 mb-2">¿Cuál es el
-                                    nombre del
-                                    último líder que tuviste en Siigo? *</label>
-                                <input type="text" id="q9" name="q9" required
-                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                    placeholder="Nombre de tu último líder">
-                            </div>
-
-                            <div class="mt-4">
-                                <label for="liderEntrenamiento" class="block text-sm font-semibold text-gray-700 mb-2">
-                                    ¿Recuerdas quién fue tu líder de entrenamiento?
-                                </label>
-                                <input type="text" id="liderEntrenamiento" name="liderEntrenamiento"
-                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors mobile-input"
-                                    placeholder="Nombre de tu líder de entrenamiento (opcional)">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Motivos de Retiro -->
-                    <div id="step-2" class="step hidden">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Experiencia y Cultura</h2>
-                            <p class="text-gray-600">Comparte tu experiencia en Siigo</p>
-                        </div>
-
-                        <!-- Contenedor para preguntas dinámicas del paso 2 -->
-                        <div id="dynamic-questions-step2" class="space-y-6 max-w-3xl mx-auto">
-                            <!-- Las preguntas se cargarán dinámicamente aquí -->
-                        </div>
-
-                        <!-- Mantener el contenido original como fallback -->
-                        <div id="original-step2" class="space-y-6 max-w-3xl mx-auto" style="display:none;">
-
-                            <div>
-                                <label for="q11" class="block text-sm font-semibold text-gray-700 mb-3">Selecciona la
-                                    categoría
-                                    que mejor representa el motivo principal de tu decisión de retirarte: *</label>
-                                <div class="space-y-2 max-h-64 overflow-y-auto">
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Cultura organizacional (falta de alineación con el proposito y los valores de Siigo)"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Cultura organizacional (falta de alineación con el
-                                            propósito y los valores de Siigo)</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Decisión relacionada con un nuevo proyecto, emprendimiento, estudios u objetivos personales"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Decisión relacionada con un nuevo proyecto,
-                                            emprendimiento, estudios u objetivos personales</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Dificultad para equilibrar las responsabilidades laborales con la vida personal o familiar"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Dificultad para equilibrar las responsabilidades
-                                            laborales con la vida personal o familiar</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11" value="Mejor oferta económica" required
-                                            class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Mejor oferta económica</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Falta de oportunidades de desarrollo, promoción o nuevos desafíos profesionales"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Falta de oportunidades de desarrollo, promoción o
-                                            nuevos desafíos profesionales</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Dificultades en la relación o alineación con el estilo de liderazgo"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Dificultades en la relación o alineación con el
-                                            estilo de liderazgo</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Insatisfacción con los Beneficios emocionales o no económicos"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Insatisfacción con los Beneficios emocionales o no
-                                            económicos</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Modificación de condiciones laborales inicialmente acordadas"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Modificación de condiciones laborales inicialmente
-                                            acordadas</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Percepción de carga laboral alta o estrés que afectó el equilibrio y la motivación personal"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Percepción de carga laboral alta o estrés que afectó
-                                            el equilibrio y la motivación personal</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Decisión tomada para anticipar una posible terminación del contrato en medio de un proceso o evaluación laboral."
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Decisión tomada para anticipar una posible
-                                            terminación del contrato en medio de un proceso o evaluación laboral</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Falta de claridad, apoyo o efectividad en el proceso de formación y desarrollo"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Falta de claridad, apoyo o efectividad en el proceso
-                                            de formación y desarrollo</span>
-                                    </label>
-                                    <label
-                                        class="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors">
-                                        <input type="radio" name="q11"
-                                            value="Percepción de inequidad o descontento con metas, comisiones (si aplica)"
-                                            required class="text-siigo focus:ring-siigo mt-1">
-                                        <span class="ml-3 text-sm">Percepción de inequidad o descontento con metas,
-                                            comisiones (si aplica)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-6">
-                                <label for="q10" class="block text-sm font-semibold text-gray-700 mb-3">
-                                    Por favor, detalla o amplía el motivo de tu retiro (opcional pero muy valioso para nosotros):
-                                </label>
-                                <textarea id="q10" name="q10" rows="4" 
-                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-siigo focus:border-siigo transition-colors resize-none"
-                                    placeholder="Cuéntanos más detalles sobre tu decisión de retirarte. Tu opinión sincera nos ayudará a mejorar..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Evaluación y Feedback -->
-                    <div id="step-3" class="step hidden">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-3">Razones y Feedback</h2>
-                            <p class="text-gray-600">Tu opinión es muy valiosa para nosotros</p>
-                        </div>
-
-                        <!-- Contenedor para preguntas dinámicas del paso 3 -->
-                        <div id="dynamic-questions-step3" class="space-y-8 max-w-4xl mx-auto">
-                            <!-- Las preguntas se cargarán dinámicamente aquí -->
-                        </div>
-
-                        <!-- Mantener el contenido original como fallback -->
-                        <div id="original-step3" class="space-y-8 max-w-4xl mx-auto" style="display:none;">
-                            <div>
-                                <label for="q12" class="block text-sm font-semibold text-gray-700 mb-4">En una escala
-                                    del 1 al 10,
-                                    ¿Qué tan buena fue tu experiencia laboral en Siigo? *</label>
-                                <div class="scale-container">
-                                    <div class="scale-item"><input type="radio" name="q12" value="1"
-                                            required><label>1</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="2"
-                                            required><label>2</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="3"
-                                            required><label>3</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="4"
-                                            required><label>4</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="5"
-                                            required><label>5</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="6"
-                                            required><label>6</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="7"
-                                            required><label>7</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="8"
-                                            required><label>8</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="9"
-                                            required><label>9</label></div>
-                                    <div class="scale-item"><input type="radio" name="q12" value="10"
-                                            required><label>10</label></div>
-                                </div>
-                                <div class="scale-labels">
-                                    <span>Nada satisfecho</span>
-                                    <span>Muy satisfecho</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="q13" class="block text-sm font-semibold text-gray-700 mb-3">¿Recomendarías
-                                    trabajar en
-                                    Siigo a un amigo o familiar? *</label>
-                                <div class="flex gap-4">
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q13" value="SÍ" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3 font-semibold">SÍ</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q13" value="NO" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3 font-semibold">NO</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="q14" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué fue lo que
-                                    más
-                                    disfrutaste de trabajar en Siigo? *</label>
-                                <textarea id="q14" name="q14" required rows="3"
-                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                    placeholder="Comparte lo que más valoraste de tu experiencia..."></textarea>
-                            </div>
-
-                            <div>
-                                <label for="q15" class="block text-sm font-semibold text-gray-700 mb-2">¿Qué crees que
-                                    podríamos
-                                    mejorar como organización? *</label>
-                                <textarea id="q15" name="q15" required rows="3"
-                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                    placeholder="Tus sugerencias nos ayudan a crecer..."></textarea>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-4">Durante tu experiencia en
-                                    Siigo, ¿cómo calificarías tu nivel de satisfacción con los siguientes aspectos?
-                                    *</label>
-                                <div class="overflow-x-auto">
-                                    <table class="matrix-table">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-left">Aspecto</th>
-                                                <th>1</th>
-                                                <th>2</th>
-                                                <th>3</th>
-                                                <th>4</th>
-                                                <th>5</th>
-                                            </tr>
-                                            <tr>
-                                                <td></td>
-                                                <td class="text-xs font-normal">Muy insatisfecho</td>
-                                                <td class="text-xs font-normal">Insatisfecho</td>
-                                                <td class="text-xs font-normal">Neutral</td>
-                                                <td class="text-xs font-normal">Satisfecho</td>
-                                                <td class="text-xs font-normal">Muy satisfecho</td>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Liderazgo de tu líder directo</td>
-                                                <td><input type="radio" name="q16_0" value="1" required></td>
-                                                <td><input type="radio" name="q16_0" value="2" required></td>
-                                                <td><input type="radio" name="q16_0" value="3" required></td>
-                                                <td><input type="radio" name="q16_0" value="4" required></td>
-                                                <td><input type="radio" name="q16_0" value="5" required></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Ambiente laboral en tu equipo</td>
-                                                <td><input type="radio" name="q16_1" value="1" required></td>
-                                                <td><input type="radio" name="q16_1" value="2" required></td>
-                                                <td><input type="radio" name="q16_1" value="3" required></td>
-                                                <td><input type="radio" name="q16_1" value="4" required></td>
-                                                <td><input type="radio" name="q16_1" value="5" required></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Cultura organizacional y valores</td>
-                                                <td><input type="radio" name="q16_2" value="1" required></td>
-                                                <td><input type="radio" name="q16_2" value="2" required></td>
-                                                <td><input type="radio" name="q16_2" value="3" required></td>
-                                                <td><input type="radio" name="q16_2" value="4" required></td>
-                                                <td><input type="radio" name="q16_2" value="5" required></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Beneficios emocionales o no económicos</td>
-                                                <td><input type="radio" name="q16_3" value="1" required></td>
-                                                <td><input type="radio" name="q16_3" value="2" required></td>
-                                                <td><input type="radio" name="q16_3" value="3" required></td>
-                                                <td><input type="radio" name="q16_3" value="4" required></td>
-                                                <td><input type="radio" name="q16_3" value="5" required></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Modalidad de trabajo remoto</td>
-                                                <td><input type="radio" name="q16_4" value="1" required></td>
-                                                <td><input type="radio" name="q16_4" value="2" required></td>
-                                                <td><input type="radio" name="q16_4" value="3" required></td>
-                                                <td><input type="radio" name="q16_4" value="4" required></td>
-                                                <td><input type="radio" name="q16_4" value="5" required></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Proceso de formación y entrenamiento</td>
-                                                <td><input type="radio" name="q16_5" value="1" required></td>
-                                                <td><input type="radio" name="q16_5" value="2" required></td>
-                                                <td><input type="radio" name="q16_5" value="3" required></td>
-                                                <td><input type="radio" name="q16_5" value="4" required></td>
-                                                <td><input type="radio" name="q16_5" value="5" required></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">¿Puedes contarme a qué
-                                    empresa te cambiaste y qué te gustó de su propuesta?</label>
-                                <textarea id="q17" name="q17" rows="3"
-                                    class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-siigo focus:outline-none transition-colors"
-                                    placeholder="Opcional: Cuéntanos sobre tu nueva oportunidad..."></textarea>
-                            </div>
-
-                            <div>
-                                <label for="q18" class="block text-sm font-semibold text-gray-700 mb-3">¿Estarías
-                                    abierto(a) a
-                                    regresar a Siigo en el futuro si se presenta una oportunidad que se alinee con tus
-                                    intereses? *</label>
-                                <div class="flex gap-4">
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q18" value="SÍ" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3 font-semibold">SÍ</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-siigo cursor-pointer transition-colors flex-1">
-                                        <input type="radio" name="q18" value="NO" required
-                                            class="text-siigo focus:ring-siigo">
-                                        <span class="ml-3 font-semibold">NO</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </form>
-
-                <!-- Success Message -->
-                <div id="successAlert" class="hidden mt-8 max-w-3xl mx-auto">
-                    <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-xl">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-lg font-semibold text-green-800">¡Entrevista enviada exitosamente!</h3>
-                                <p class="text-green-700 mt-1">Gracias por completar la entrevista de retiro. Tus
-                                    respuestas han sido guardadas correctamente.</p>
-                                <p class="text-green-600 mt-2 text-sm">
-                                    <i class="bi bi-clock me-1"></i>
-                                    Un momento... <span id="countdown">3</span> segundos...
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Error Message -->
-                <div id="errorAlert" class="hidden mt-8 max-w-3xl mx-auto">
-                    <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-xl">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-lg font-semibold text-red-800">Error al enviar</h3>
-                                <p id="errorMessage" class="text-red-700 mt-1">Hubo un problema al enviar tus
-                                    respuestas. Por favor, intenta nuevamente.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="bg-gradient-to-r from-siigo to-siigo-dark py-4 px-6">
-                <div class="flex items-center justify-between">
-                    <button id="prev-btn" type="button"
-                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hidden">
-                        <i class="bi bi-arrow-left me-2"></i>
-                        Anterior
-                    </button>
-
-                    <button id="next-btn" type="button"
-                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
-                        Siguiente
-                        <i class="bi bi-arrow-right ms-2"></i>
-                    </button>
-                </div>
-            </div>
+        <!-- Success message -->
+        <div class="success-container" id="successContainer">
+            <div class="success-icon">✓</div>
+            <h2 class="success-title">¡Gracias por tu tiempo!</h2>
+            <p class="success-text">Tu respuesta ha sido enviada exitosamente.</p>
         </div>
     </div>
 
     <script>
-        console.log('=== SCRIPT CARGADO - INICIANDO FORMULARIO ===');
+        let currentQuestion = 0;
+        let questions = [];
+        let responses = {};
+        let userData = null;
 
-        const steps = document.querySelectorAll(".step");
-        const nextBtn = document.getElementById("next-btn");
-        const prevBtn = document.getElementById("prev-btn");
-        const progressBar = document.getElementById("progress-bar");
-        let currentStep = 0;
-        let currentUser = null;
+        // Get user ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user');
 
-        console.log('Elementos encontrados:', {
-            steps: steps.length,
-            nextBtn: nextBtn ? 'encontrado' : 'NO ENCONTRADO',
-            prevBtn: prevBtn ? 'encontrado' : 'NO ENCONTRADO',
-            progressBar: progressBar ? 'encontrado' : 'NO ENCONTRADO'
-        });
-
-        const indicators = [
-            document.getElementById("indicator-1"),
-            document.getElementById("indicator-2"),
-            document.getElementById("indicator-3")
-        ];
-
-        const lines = [
-            document.getElementById("line-1"),
-            document.getElementById("line-2")
-        ];
-
-        // Al cargar la página, verificar si hay un usuario en la URL
-        document.addEventListener('DOMContentLoaded', async function () {
-            console.log('DOM cargado completamente');
-            const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get('user');
-
-            if (userId) {
-                await loadUserData(userId);
-            } else {
-                // Si no hay usuario pre-registrado, mostrar campos de información personal
-                document.getElementById('personalInfoFields').style.display = 'block';
-
-                // Agregar listener al campo de área para cargar preguntas dinámicamente
-                const areaField = document.getElementById('q7');
-                if (areaField) {
-                    areaField.addEventListener('change', async function() {
-                        const selectedArea = this.value;
-                        if (selectedArea) {
-                            console.log('Área seleccionada:', selectedArea);
-                            await loadQuestionsForArea(selectedArea);
-                        }
-                    });
-                }
-            }
-
-            showStep(currentStep);
-        });
-
-        async function loadUserData(userId) {
+        // Initialize
+        async function init() {
             try {
-                const response = await fetch(`/api/user-form/${userId}`);
-                if (response.ok) {
-                    currentUser = await response.json();
-                    displayUserInfo(currentUser);
-                    // Ocultar campos de información personal si hay usuario pre-registrado
-                    document.getElementById('personalInfoFields').style.display = 'none';
-
-                    // Cargar preguntas según el área del usuario
-                    if (currentUser.area) {
-                        console.log('Cargando preguntas para área del usuario:', currentUser.area);
-                        await loadQuestionsForArea(currentUser.area);
+                // Load user data if userId exists
+                if (userId) {
+                    const userResponse = await fetch(`/api/user-form/${userId}`);
+                    if (userResponse.ok) {
+                        userData = await userResponse.json();
                     }
-                } else {
-                    console.error('Usuario no encontrado');
-                    showError('No se pudo cargar la información del usuario. Verifica el enlace.');
-                    // Mostrar campos de información personal si falla la carga
-                    document.getElementById('personalInfoFields').style.display = 'block';
                 }
+
+                // Determine area
+                const area = userData?.area || 'General';
+
+                // Load questions
+                const questionsResponse = await fetch(`/api/questions${area === 'Sales' ? '?area=Sales' : ''}`);
+                questions = await questionsResponse.json();
+
+                // Pre-fill responses with user data
+                if (userData) {
+                    responses = {
+                        full_name: userData.nombre,
+                        identification: userData.cedula,
+                        area: userData.area,
+                        country: userData.paisContratacion,
+                        exit_date: userData.fechaRetiro,
+                        tenure: userData.tiempoEnSiigo,
+                        last_leader: userData.lider
+                    };
+                }
+
+                // Render first question
+                renderQuestion();
             } catch (error) {
-                console.error('Error cargando datos del usuario:', error);
-                showError('Error de conexión al cargar los datos del usuario.');
-                // Mostrar campos de información personal si hay error
-                document.getElementById('personalInfoFields').style.display = 'block';
+                console.error('Error loading questions:', error);
+                alert('Error cargando el formulario. Por favor recarga la página.');
             }
         }
 
-        function displayUserInfo(user) {
-            // Función eliminada para mantener anonimato de la encuesta
-            // Los datos del usuario ya no se muestran en el formulario
-        }
-
-        function updateIndicators(stepIndex) {
-            indicators.forEach((indicator, index) => {
-                if (index <= stepIndex) {
-                    indicator.classList.remove("bg-gray-300", "text-gray-600");
-                    indicator.classList.add("bg-siigo", "text-white");
-                } else {
-                    indicator.classList.remove("bg-siigo", "text-white");
-                    indicator.classList.add("bg-gray-300", "text-gray-600");
-                }
-            });
-
-            lines.forEach((line, index) => {
-                if (index < stepIndex) {
-                    line.classList.remove("bg-gray-300");
-                    line.classList.add("bg-siigo");
-                } else {
-                    line.classList.remove("bg-siigo");
-                    line.classList.add("bg-gray-300");
-                }
-            });
-        }
-
-        function updateProgressBar(stepIndex) {
-            const progressPercentage = ((stepIndex + 1) / steps.length) * 100;
-            progressBar.style.width = `${progressPercentage}%`;
-        }
-        /**
-         * Busca el texto del <label> asociado al campo.
-         * — Si usas <label for="q3">…</label>, lo encontrará.
-         * — Si no, devuelve el propio ID como fallback.
-         */
-        function getFieldLabel(fieldId) {
-            // Intentamos buscar <label for="...">
-            const label = document.querySelector(`label[for="${fieldId}"]`);
-            if (label) {
-                // Quitamos el asterisco que pongas en tu texto y retornamos
-                return label.textContent.replace('*', '').trim();
+        // Render question
+        function renderQuestion() {
+            if (currentQuestion >= questions.length) {
+                submitForm();
+                return;
             }
-            // Si no hay for="", intentamos coger el <label> inmediato anterior
-            const input = document.getElementById(fieldId);
-            if (input && input.previousElementSibling?.tagName === 'LABEL') {
-                return input.previousElementSibling.textContent.replace('*', '').trim();
-            }
-            // Fallback
-            return fieldId;
-        }
 
-        function validateCurrentStep() {
-            const currentStepElement = steps[currentStep];
-            const requiredInputs = currentStepElement.querySelectorAll('[required]');
-            const errors = [];
+            const question = questions[currentQuestion];
+            const container = document.getElementById('questionContainer');
+            const qKey = `q${question.number}`;
 
-            console.log(`=== VALIDANDO PASO ${currentStep + 1} (CON REPORTE) ===`);
-            console.log(`Campos requeridos encontrados: ${requiredInputs.length}`);
+            // Update progress
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
 
-            // Si hay usuario pre-registrado, excluir campos q3-q8 de la validación
-            const fieldsToExclude = currentUser ? ['q3', 'q4', 'q5', 'q7', 'q8'] : [];
+            // Build question HTML
+            let inputHTML = '';
 
-            for (let input of requiredInputs) {
-                // Si el campo está en la lista de exclusión, saltarlo
-                if (fieldsToExclude.includes(input.id) || fieldsToExclude.includes(input.name)) {
-                    continue;
-                }
+            switch (question.type) {
+                case 'text':
+                    inputHTML = `
+                        <input type="text"
+                               class="input-field"
+                               id="${qKey}"
+                               placeholder="Escribe tu respuesta aquí..."
+                               value="${responses[qKey] || ''}"
+                               ${question.required ? 'required' : ''}>
+                    `;
+                    break;
 
-                if (input.type === 'radio') {
-                    const radioGroup = currentStepElement.querySelectorAll(`[name="${input.name}"]`);
-                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
-                    if (!isChecked) {
-                        errors.push({
-                            field: input.name,
-                            label: getFieldLabel(input.name),
-                            element: input
-                        });
+                case 'textarea':
+                    inputHTML = `
+                        <textarea class="input-field"
+                                  id="${qKey}"
+                                  placeholder="${question.placeholder || 'Escribe tu respuesta aquí...'}"
+                                  ${question.required ? 'required' : ''}>${responses[qKey] || ''}</textarea>
+                    `;
+                    break;
+
+                case 'dropdown':
+                    inputHTML = `
+                        <select class="input-field" id="${qKey}" ${question.required ? 'required' : ''}>
+                            <option value="">Selecciona una opción</option>
+                            ${question.options.map(opt => `
+                                <option value="${opt}" ${responses[qKey] === opt ? 'selected' : ''}>${opt}</option>
+                            `).join('')}
+                        </select>
+                    `;
+                    break;
+
+                case 'radio':
+                    inputHTML = `
+                        <div class="radio-group">
+                            ${question.options.map(opt => `
+                                <label class="radio-option ${responses[qKey] === opt ? 'selected' : ''}">
+                                    <input type="radio"
+                                           name="${qKey}"
+                                           value="${opt}"
+                                           ${responses[qKey] === opt ? 'checked' : ''}
+                                           ${question.required ? 'required' : ''}>
+                                    ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                    break;
+
+                case 'scale':
+                    const scaleValues = [];
+                    for (let i = question.min; i <= question.max; i++) {
+                        scaleValues.push(i);
                     }
-                } else if (input.type === 'select-one' || input.tagName === 'SELECT') {
-                    if (!input.value || input.value.trim() === '') {
-                        errors.push({
-                            field: input.id || input.name,
-                            label: getFieldLabel(input.id || input.name),
-                            element: input
-                        });
-                    }
-                } else if (!input.value.trim()) {
-                    errors.push({
-                        field: input.id || input.name,
-                        label: getFieldLabel(input.id || input.name),
-                        element: input
-                    });
-                }
+                    inputHTML = `
+                        <div class="scale-container">
+                            ${scaleValues.map(val => `
+                                <div class="scale-item">
+                                    <input type="radio"
+                                           name="${qKey}"
+                                           value="${val}"
+                                           ${responses[qKey] == val ? 'checked' : ''}
+                                           ${question.required ? 'required' : ''}>
+                                    <div style="margin-top: 8px; font-size: 14px; color: #4a5568;">${val}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="scale-labels">
+                            <span>${question.labels[0]}</span>
+                            <span>${question.labels[1]}</span>
+                        </div>
+                    `;
+                    break;
+
+                case 'date':
+                    inputHTML = `
+                        <input type="date"
+                               class="input-field"
+                               id="${qKey}"
+                               value="${responses[qKey] || ''}"
+                               ${question.required ? 'required' : ''}>
+                    `;
+                    break;
             }
 
-            if (errors.length > 0) {
-                console.error(`❌ VALIDACIÓN FALLÓ: ${errors.length} campos sin completar`);
-                errors.forEach(e => console.error(`  - ${e.field}: ${e.label}`));
-                showValidationSummary(errors);
-                errors[0].element.focus();
-                return false;
-            }
-
-            console.log('✅ TODOS LOS CAMPOS VALIDADOS CORRECTAMENTE');
-            return true;
-        }
-
-
-        function showValidationSummary(errors) {
-            // Resaltar todos los campos con error
-            errors.forEach(error => {
-                if (error.field.startsWith('q16_')) {
-                    // Para la matriz, resaltar la fila
-                    const rowIndex = parseInt(error.field.split('_')[1]);
-                    const radioGroup = document.querySelectorAll(`input[name="${error.field}"]`);
-                    if (radioGroup.length > 0) {
-                        const row = radioGroup[0].closest('tr');
-                        if (row) {
-                            row.style.backgroundColor = '#fee2e2';
-                        }
-                    }
-                } else if (error.element.type === 'radio') {
-                    // Para otros radio buttons, resaltar los labels
-                    const radioGroup = document.querySelectorAll(`input[name="${error.field}"]`);
-                    radioGroup.forEach(radio => {
-                        radio.closest('label')?.classList.add('border-red-500');
-                    });
-                } else {
-                    // Para campos de texto y select
-                    error.element.classList.add('border-red-500');
-                }
-            });
-
-            // Remover resaltados después de 5 segundos
-            setTimeout(() => {
-                document.querySelectorAll('.border-red-500').forEach(el => {
-                    el.classList.remove('border-red-500');
-                });
-                document.querySelectorAll('tr[style*="background-color"]').forEach(row => {
-                    row.style.backgroundColor = '';
-                });
-            }, 5000);
-
-            const errorList = errors.map(e => `• ${e.label}`).join('<br>');
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 transition-all duration-300 max-w-md';
-            toast.innerHTML = `
-                <div>
-                    <div class="flex items-center mb-2">
-                        <i class="bi bi-exclamation-circle me-2"></i>
-                        <strong>Por favor completa los siguientes campos:</strong>
-                    </div>
-                    <div class="text-sm ml-6">
-                        ${errorList}
-                    </div>
+            container.innerHTML = `
+                <div class="question-number">${currentQuestion + 1} → ${question.section}</div>
+                <div class="question-text">
+                    ${question.question}${question.required ? '<span class="question-required"> *</span>' : ''}
                 </div>
+                ${inputHTML}
             `;
-            document.body.appendChild(toast);
 
+            // Add event listeners
+            addInputListeners();
+
+            // Update buttons
+            updateButtons();
+
+            // Re-trigger fade animation
+            container.style.animation = 'none';
             setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 6000);
+                container.style.animation = 'fadeIn 0.4s forwards';
+            }, 10);
         }
 
+        // Add input event listeners
+        function addInputListeners() {
+            const question = questions[currentQuestion];
+            const qKey = `q${question.number}`;
 
-        function showStep(index) {
-            steps.forEach((step, i) => {
-                step.classList.toggle("hidden", i !== index);
-                if (i === index) {
-                    step.classList.add("fade-in");
-                }
-            });
-
-            prevBtn.classList.toggle("hidden", index === 0);
-
-            if (index === steps.length - 1) {
-                nextBtn.innerHTML = `
-                    Enviar Entrevista
-                    <i class="bi bi-check-circle ms-2"></i>
-                `;
-            } else {
-                nextBtn.innerHTML = `
-                    Siguiente
-                    <i class="bi bi-arrow-right ms-2"></i>
-                `;
-            }
-
-            updateIndicators(index);
-            updateProgressBar(index);
-
-            if (window.innerWidth <= 768) {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
+            if (question.type === 'radio') {
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        document.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+                        this.classList.add('selected');
+                        const input = this.querySelector('input[type="radio"]');
+                        input.checked = true;
+                        responses[qKey] = input.value;
+                        updateButtons();
+                    });
                 });
+            } else {
+                const input = document.getElementById(qKey);
+                if (input) {
+                    input.addEventListener('input', function() {
+                        responses[qKey] = this.value;
+                        updateButtons();
+                    });
+                }
             }
         }
 
+        // Update navigation buttons
+        function updateButtons() {
+            const btnBack = document.getElementById('btnBack');
+            const btnNext = document.getElementById('btnNext');
+            const question = questions[currentQuestion];
+            const qKey = `q${question.number}`;
+
+            // Show/hide back button
+            btnBack.style.display = currentQuestion === 0 ? 'none' : 'flex';
+
+            // Check if current question is answered
+            const isAnswered = responses[qKey] && responses[qKey].toString().trim() !== '';
+            btnNext.disabled = question.required && !isAnswered;
+
+            // Update next button text
+            if (currentQuestion === questions.length - 1) {
+                btnNext.innerHTML = 'Enviar <i class="bi bi-check-lg"></i>';
+            } else {
+                btnNext.innerHTML = 'Siguiente <i class="bi bi-arrow-right"></i>';
+            }
+        }
+
+        // Navigation handlers
+        document.getElementById('btnBack').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            const question = questions[currentQuestion];
+            const qKey = `q${question.number}`;
+
+            // Save current answer
+            if (question.type === 'radio' || question.type === 'scale') {
+                const selected = document.querySelector(`input[name="${qKey}"]:checked`);
+                if (selected) {
+                    responses[qKey] = selected.value;
+                }
+            } else {
+                const input = document.getElementById(qKey);
+                if (input) {
+                    responses[qKey] = input.value;
+                }
+            }
+
+            // Validate
+            if (question.required && (!responses[qKey] || responses[qKey].toString().trim() === '')) {
+                alert('Por favor responde esta pregunta antes de continuar.');
+                return;
+            }
+
+            // Move to next question
+            currentQuestion++;
+            renderQuestion();
+        });
+
+        // Submit form
         async function submitForm() {
-            console.log('=== INICIANDO submitForm() ===');
+            const container = document.getElementById('questionContainer');
+            const navigation = document.getElementById('navigationBar');
+            const loading = document.getElementById('loadingSpinner');
+            const success = document.getElementById('successContainer');
+
+            // Hide question and navigation
+            container.classList.add('hidden');
+            navigation.classList.add('hidden');
+
+            // Show loading
+            loading.style.display = 'flex';
+
             try {
-                // Recopilar todas las respuestas
-                const responses = {};
+                // Prepare submission data
+                const formData = { ...responses };
 
-                console.log('Usuario actual:', currentUser);
-
-                // Si hay usuario registrado, usar sus datos
-                if (currentUser) {
-                    responses.full_name = currentUser.full_name;
-                    responses.identification = currentUser.identification;
-                    responses.exit_date = currentUser.exit_date;
-                    responses.area = currentUser.area;
-                    responses.country = currentUser.country;
-                    console.log('Datos del usuario agregados a respuestas');
-                } else {
-                    console.log('NO HAY USUARIO PRE-REGISTRADO');
-                    // Si no hay usuario pre-registrado, debemos recopilar q3, q4, q5, q7 y q8
-                    const q3 = document.getElementById('q3');
-                    const q4 = document.getElementById('q4');
-                    const q5 = document.getElementById('q5');
-                    const q7 = document.getElementById('q7');
-                    const q8 = document.getElementById('q8');
-
-                    console.log('Verificando campos básicos del formulario:', {
-                        q3: q3 ? 'existe' : 'NO EXISTE',
-                        q4: q4 ? 'existe' : 'NO EXISTE',
-                        q5: q5 ? 'existe' : 'NO EXISTE',
-                        q7: q7 ? 'existe' : 'NO EXISTE',
-                        q8: q8 ? 'existe' : 'NO EXISTE'
-                    });
-
-                    if (q3 && q3.value) responses.q3 = q3.value;
-                    if (q4 && q4.value) responses.q4 = q4.value;
-                    if (q5 && q5.value) responses.q5 = q5.value;
-                    if (q7 && q7.value) responses.q7 = q7.value;
-                    if (q8 && q8.value) responses.q8 = q8.value;
+                // Add user data if exists
+                if (userData) {
+                    formData.user_id = userId;
+                    formData.full_name = userData.nombre;
+                    formData.identification = userData.cedula;
+                    formData.area = userData.area;
+                    formData.country = userData.paisContratacion;
                 }
 
-                // Recopilar respuestas dinámicas usando la función del sistema dinámico
-                if (typeof collectDynamicResponses === 'function') {
-                    const dynamicResponses = collectDynamicResponses();
-                    console.log('Respuestas dinámicas recopiladas:', dynamicResponses);
-
-                    // Fusionar las respuestas dinámicas con las respuestas del usuario
-                    Object.assign(responses, dynamicResponses);
-                } else {
-                    console.warn('collectDynamicResponses() no disponible, usando método legacy');
-                    // Método legacy como fallback
-                    ['q9', 'q10', 'q14', 'q15', 'q17', 'liderEntrenamiento'].forEach(id => {
-                        const input = document.getElementById(id);
-                        console.log(`Pregunta ${id}:`, input ? input.value : 'ELEMENTO NO ENCONTRADO');
-                        if (input && input.value) {
-                            responses[id] = input.value;
-                        }
-                    });
-
-                    ['q6', 'q11', 'q12', 'q13', 'q18'].forEach(name => {
-                        const input = document.querySelector(`input[name="${name}"]:checked`);
-                        console.log(`Radio ${name}:`, input ? input.value : 'NO SELECCIONADO');
-                        if (input) {
-                            responses[name] = input.value;
-                        }
-                    });
-                }
-
-                console.log('Todas las respuestas recopiladas (incluyendo dinámicas)');
-                console.log('TODAS LAS RESPUESTAS:', responses);
-
-                // Enviar al servidor
-                const requestBody = { responses };
-                if (currentUser) {
-                    requestBody.userId = currentUser.id;
-                }
-
-                console.log('Enviando POST a /api/responses...');
-                console.log('Body:', JSON.stringify(requestBody));
-
+                // Submit
                 const response = await fetch('/api/responses', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(formData)
                 });
 
-                console.log('Respuesta del servidor:', response.status, response.statusText);
-
                 if (response.ok) {
-                    console.log('Respuesta exitosa del servidor');
-                    
-                    // Mostrar mensaje de éxito brevemente antes de redirigir
-                    document.getElementById('exitInterviewForm').style.display = 'none';
-                    document.getElementById('successAlert').classList.remove('hidden');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                    // Limpiar draft guardado
-                    localStorage.removeItem('siigo-exit-interview-draft');
-                    
-                    // Contador regresivo para la redirección
-                    let countdown = 3;
-                    const countdownElement = document.getElementById('countdown');
-                    
-                    const countdownInterval = setInterval(() => {
-                        countdown--;
-                        if (countdownElement) {
-                            countdownElement.textContent = countdown;
-                        }
-                        
-                        if (countdown <= 0) {
-                            clearInterval(countdownInterval);
-                            window.location.href = 'https://www.siigo.com';
-                        }
-                    }, 1000);
+                    loading.style.display = 'none';
+                    success.style.display = 'block';
                 } else {
-                    const errorData = await response.json();
-                    console.error('Error del servidor:', errorData);
-                    
-                    // Restaurar estado del botón en caso de error del servidor
-                    const nextBtn = document.getElementById('nextBtn');
-                    if (nextBtn) {
-                        nextBtn.innerHTML = `
-                            Enviar Entrevista
-                            <i class="bi bi-check-circle ms-2"></i>
-                        `;
-                        nextBtn.disabled = false;
-                    }
-                    
-                    showError(errorData.error || 'Error desconocido al enviar las respuestas');
+                    throw new Error('Error al enviar el formulario');
                 }
             } catch (error) {
-                console.error('Error completo en submitForm:', error);
-                console.error('Stack trace:', error.stack);
-                
-                // Restaurar estado del botón en caso de error
-                const nextBtn = document.getElementById('nextBtn');
-                if (nextBtn) {
-                    nextBtn.innerHTML = `
-                        Enviar Entrevista
-                        <i class="bi bi-check-circle ms-2"></i>
-                    `;
-                    nextBtn.disabled = false;
-                }
-                
-                showError('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
+                console.error('Error submitting form:', error);
+                loading.style.display = 'none';
+                container.classList.remove('hidden');
+                navigation.classList.remove('hidden');
+                alert('Hubo un error al enviar tu respuesta. Por favor intenta nuevamente.');
+                currentQuestion = questions.length - 1;
+                renderQuestion();
             }
         }
 
-        function showError(message) {
-            const errorAlert = document.getElementById('errorAlert');
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.textContent = message;
-            errorAlert.classList.remove('hidden');
-            errorAlert.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function showSuccess(message) {
-            // Crear o mostrar un alert de éxito
-            let successAlert = document.getElementById('successAlert');
-            if (!successAlert) {
-                successAlert = document.createElement('div');
-                successAlert.id = 'successAlert';
-                successAlert.className = 'mt-8 max-w-3xl mx-auto bg-green-50 border border-green-200 rounded-lg p-4';
-                successAlert.innerHTML = `
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-check-circle text-green-600 text-xl"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-lg font-semibold text-green-800">¡Éxito!</h3>
-                            <p id="successMessage" class="text-green-700 mt-1"></p>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(successAlert);
-            }
-
-            // Buscar el elemento successMessage dentro del successAlert
-            const successMessage = successAlert.querySelector('#successMessage');
-            if (successMessage) {
-                successMessage.textContent = message;
-            }
-            successAlert.classList.remove('hidden');
-            successAlert.scrollIntoView({ behavior: 'smooth' });
-
-            // Ocultar después de 3 segundos
-            setTimeout(() => {
-                successAlert.classList.add('hidden');
-            }, 3000);
-        }
-
-        nextBtn.addEventListener("click", async () => {
-            console.log('=== BOTÓN SIGUIENTE/ENVIAR CLICKEADO ===');
-            console.log('Paso actual:', currentStep);
-            console.log('Total de pasos:', steps.length);
-
-            if (currentStep < steps.length - 1) {
-                console.log('No es el último paso, avanzando...');
-                if (validateCurrentStep()) {
-                    currentStep++;
-                    showStep(currentStep);
-                } else {
-                    console.log('Validación falló en paso', currentStep);
-                    // Mostrar mensaje de validación
-                    const toast = document.createElement('div');
-                    toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
-                    toast.textContent = 'Por favor completa todos los campos requeridos';
-                    document.body.appendChild(toast);
-                    setTimeout(() => {
-                        toast.classList.add('opacity-0');
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3000);
-                }
-            } else {
-                console.log('ES EL ÚLTIMO PASO - INTENTANDO ENVIAR FORMULARIO');
-                if (validateCurrentStep()) {
-                    console.log('Validación del último paso exitosa, enviando...');
-                    nextBtn.disabled = true;
-                    const oldInnerHTML = nextBtn.innerHTML;
-                    nextBtn.innerHTML = `
-    <span>Enviando...</span>
-    <i class="bi bi-hourglass-split ms-2"></i>
-`;
-                    try {
-                        await submitForm();
-                        console.log('Formulario enviado exitosamente');
-                        // El formulario se oculta, así que no hace falta restaurar aquí
-                    } catch (error) {
-                        console.error('Error al enviar formulario:', error);
-                        alert('Error al enviar el formulario: ' + error.message);
-                        nextBtn.innerHTML = oldInnerHTML; // Restaurar solo si hubo error
-                        nextBtn.disabled = false;         // Restaurar solo si hubo error
-                    }
-
-                } else {
-                    console.log('Validación del último paso falló');
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    document.getElementById('btnNext').click();
                 }
             }
         });
 
-        prevBtn.addEventListener("click", () => {
-            if (currentStep > 0) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        });
-
-        // Auto-save en localStorage (opcional)
-        document.addEventListener('input', () => {
-            try {
-                const formData = new FormData(document.getElementById('exitInterviewForm'));
-                const data = Object.fromEntries(formData.entries());
-                localStorage.setItem('siigo-exit-interview-draft', JSON.stringify(data));
-            } catch (e) {
-                console.log('Error saving draft:', e);
-            }
-        });
-
-        // Cargar draft si existe
-        window.addEventListener('load', () => {
-            const savedDraft = localStorage.getItem('siigo-exit-interview-draft');
-            if (savedDraft) {
-                try {
-                    const data = JSON.parse(savedDraft);
-                    Object.entries(data).forEach(([key, value]) => {
-                        const input = document.querySelector(`[name="${key}"]`);
-                        if (input) {
-                            if (input.type === 'radio') {
-                                const radioInput = document.querySelector(`[name="${key}"][value="${value}"]`);
-                                if (radioInput) radioInput.checked = true;
-                            } else {
-                                input.value = value;
-                            }
-                        }
-                    });
-                } catch (e) {
-                    console.log('Error loading draft:', e);
-                }
-            }
-        });
-
-        // ========== SISTEMA DE PREGUNTAS DINÁMICAS ==========
-        let currentQuestionsSet = null;
-        let questionsLoaded = false;
-
-        // Función para cargar preguntas según el área
-        async function loadQuestionsForArea(area) {
-            try {
-                console.log(`Cargando preguntas dinámicas para área: ${area}`);
-
-                // Usar la utilidad del módulo dynamic-form.js
-                const questions = await window.dynamicFormUtils.loadDynamicQuestions(area);
-                currentQuestionsSet = questions;
-                questionsLoaded = true;
-
-                // Dividir las preguntas entre los pasos 2 y 3
-                const step2Questions = questions.filter(q =>
-                    q.section && (
-                        q.section.includes('Experiencia') ||
-                        q.section.includes('Clima') ||
-                        q.section.includes('Proceso') ||
-                        q.section.includes('Entrenamiento') ||
-                        q.section.includes('Siigo')
-                    )
-                );
-
-                const step3Questions = questions.filter(q =>
-                    q.section && (
-                        q.section.includes('Razones') ||
-                        q.section.includes('Satisfacción')
-                    )
-                );
-
-                // Renderizar preguntas en los contenedores correspondientes
-                if (step2Questions.length > 0) {
-                    window.dynamicFormUtils.renderDynamicQuestions(step2Questions, 'dynamic-questions-step2');
-                    document.getElementById('original-step2').style.display = 'none';
-                } else {
-                    // Si no hay preguntas dinámicas, mostrar el contenido original
-                    document.getElementById('original-step2').style.display = 'block';
-                    document.getElementById('dynamic-questions-step2').innerHTML = '';
-                }
-
-                if (step3Questions.length > 0) {
-                    window.dynamicFormUtils.renderDynamicQuestions(step3Questions, 'dynamic-questions-step3');
-                    document.getElementById('original-step3').style.display = 'none';
-                } else {
-                    // Si no hay preguntas dinámicas, mostrar el contenido original
-                    document.getElementById('original-step3').style.display = 'block';
-                    document.getElementById('dynamic-questions-step3').innerHTML = '';
-                }
-
-                console.log(`Preguntas cargadas exitosamente: ${step2Questions.length} en paso 2, ${step3Questions.length} en paso 3`);
-
-                // Notificar al usuario que las preguntas se han personalizado
-                if (area.toLowerCase() === 'sales') {
-                    showSuccess('Formulario personalizado para el área de Sales cargado exitosamente');
-                }
-
-            } catch (error) {
-                console.error('Error cargando preguntas dinámicas:', error);
-                // En caso de error, mostrar el formulario original
-                document.getElementById('original-step2').style.display = 'block';
-                document.getElementById('original-step3').style.display = 'block';
-                document.getElementById('dynamic-questions-step2').innerHTML = '';
-                document.getElementById('dynamic-questions-step3').innerHTML = '';
-                questionsLoaded = false;
-            }
-        }
-
-        // Función para recolectar datos del formulario
-        function collectFormData() {
-            const formData = {};
-
-            // Recolectar datos de campos básicos
-            const inputs = document.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                if (input.name && input.value) {
-                    if (input.type === 'radio') {
-                        if (input.checked) {
-                            formData[input.name] = input.value;
-                        }
-                    } else {
-                        formData[input.name] = input.value;
-                    }
-                }
-            });
-
-            // Si se cargaron preguntas dinámicas, recolectar esas respuestas también
-            if (questionsLoaded && window.dynamicFormUtils) {
-                const dynamicResponses = window.dynamicFormUtils.collectDynamicResponses();
-                Object.assign(formData, dynamicResponses);
-                formData.questionsType = currentUser?.area === 'Sales' ? 'sales' : 'general';
-            }
-
-            return formData;
-        }
-
-        // La función collectFormData ya incluye la lógica para recolectar respuestas dinámicas
-
-        // Modificar la validación para incluir preguntas dinámicas
-        const originalValidateCurrentStep = validateCurrentStep;
-        validateCurrentStep = function() {
-            // Si hay preguntas dinámicas cargadas y estamos en step 2 o 3
-            if (questionsLoaded && currentQuestionsSet && (currentStep === 1 || currentStep === 2)) {
-                const currentStepElement = steps[currentStep];
-                const dynamicContainer = currentStepElement.querySelector(`#dynamic-questions-step${currentStep + 1}`);
-
-                if (dynamicContainer && dynamicContainer.children.length > 0) {
-                    // Obtener las preguntas del paso actual
-                    let stepQuestions = [];
-                    if (currentStep === 1) {
-                        stepQuestions = currentQuestionsSet.filter(q =>
-                            q.section && (
-                                q.section.includes('Experiencia') ||
-                                q.section.includes('Clima') ||
-                                q.section.includes('Proceso') ||
-                                q.section.includes('Entrenamiento') ||
-                                q.section.includes('Siigo')
-                            )
-                        );
-                    } else if (currentStep === 2) {
-                        stepQuestions = currentQuestionsSet.filter(q =>
-                            q.section && (
-                                q.section.includes('Razones') ||
-                                q.section.includes('Satisfacción')
-                            )
-                        );
-                    }
-
-                    // Validar las preguntas dinámicas
-                    const errors = window.dynamicFormUtils.validateDynamicQuestions(stepQuestions);
-                    if (errors.length > 0) {
-                        showValidationSummary(errors);
-                        if (errors[0].element) {
-                            errors[0].element.focus();
-                        }
-                        return false;
-                    }
-                    return true;
-                }
-            }
-
-            // Usar la validación original para el paso 1 o si no hay preguntas dinámicas
-            return originalValidateCurrentStep();
-        };
+        // Initialize on load
+        init();
     </script>
 </body>
-
 </html>
