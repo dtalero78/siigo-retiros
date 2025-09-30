@@ -56,12 +56,19 @@ All API endpoints are in **server.js** with the following patterns:
 
 ### Frontend Architecture
 Static HTML/JS without framework, served from `/public`:
-- **public/index.html** - Main survey form with dynamic question rendering based on user area (multi-step wizard)
-- **public/form-typeform.html** - Alternative Typeform-style form with one question per screen (clean, minimalist design)
+- **public/index.html** - Main survey form with Typeform-style design (one question per screen, clean and minimalist)
+  - Flat white background with no shadows or borders
+  - Fixed progress bar at the top
+  - Siigo logo (logoazul.png) aligned left, 120px height
+  - Dynamic question loading based on user area (27 for Sales, 17 for General)
+  - Keyboard navigation support (Enter to advance)
+  - Smooth animations between questions
+- **public/index-old.html** - Legacy multi-step wizard form (backup)
+- **public/form-typeform.html** - Original Typeform prototype (deprecated, kept for reference)
 - **public/admin.html** - Admin dashboard with analytics, PDF export, and OpenAI analysis (includes dynamic response viewing)
 - **public/users.html** - User management with WhatsApp sending and conversation viewing
 - **public/js/dynamic-form.js** - Dynamic form rendering system for area-specific questions
-- Uses Bootstrap 5.3.2 for UI components and Tailwind CSS
+- Uses Bootstrap 5.3.2 for UI components and Bootstrap Icons
 - jsPDF and html2canvas for PDF generation (loaded from cdn.jsdelivr.net for CSP compliance)
 
 ## Environment Configuration
@@ -109,15 +116,18 @@ TWILIO_WHATSAPP_FROM=whatsapp:+15558192172
 ## Testing & Debugging
 
 ### Manual Testing URLs
-- Survey form (multi-step): `http://localhost:3000/`
-- Survey form (Typeform-style): `http://localhost:3000/form-typeform.html`
-- Survey form with user: `http://localhost:3000/?user=559` (Sales area user for testing dynamic questions)
-- Typeform with user: `http://localhost:3000/form-typeform.html?user=559`
+- Survey form (Typeform-style): `http://localhost:3000/`
+- Survey form with user: `http://localhost:3000/?user=562` (General area user - 17 questions)
+- Survey form with Sales user: `http://localhost:3000/?user=561` (Sales area user - 27 questions)
 - Admin panel: `http://localhost:3000/admin`
 - User management: `http://localhost:3000/users`
+- Legacy forms (deprecated):
+  - `http://localhost:3000/index-old.html` (Multi-step wizard backup)
+  - `http://localhost:3000/form-typeform.html` (Original Typeform prototype)
 - API endpoints:
   - `http://localhost:3000/api/questions` (17 general questions)
   - `http://localhost:3000/api/questions?area=Sales` (27 Sales questions - duplicates removed)
+  - `http://localhost:3000/api/user-form/562` (Get user data)
 
 ### Common Issues & Solutions
 - **PostgreSQL SSL errors**: Use `NODE_TLS_REJECT_UNAUTHORIZED=0` prefix when starting server
@@ -146,19 +156,28 @@ TWILIO_WHATSAPP_FROM=whatsapp:+15558192172
 - Message status tracking (sent, delivered, read, failed)
 - Auto-refresh every 5 seconds when conversation modal is open
 
-### Dynamic Forms System
+### Dynamic Forms System (Typeform-style)
 - **questions-config.js** - Configuration module with area-specific question sets extracted from PDF documents
 - **Area-based Question Loading**: Sales area users receive 27 specialized questions (duplicates removed), other areas receive 17 general questions
-- **Two Form Styles Available**:
-  - **Multi-step wizard** (index.html): Traditional grouped questions with step indicators
-  - **Typeform-style** (form-typeform.html): One question per screen with clean, minimalist design
-- **Dynamic Rendering**: Client-side form generation supporting multiple question types (text, textarea, radio, dropdown, scale, date, matrix)
-- **Automatic Detection**: System automatically loads appropriate questions based on user's area field
+- **Typeform-style Design** (index.html):
+  - One question per screen with clean, minimalist flat design
+  - White background with no shadows or borders
+  - Fixed progress bar at top showing completion percentage
+  - Siigo logo (logoazul.png) 120px aligned left with content
+  - Real-time validation and button state management
+  - Keyboard navigation (Enter to advance, Escape handled gracefully)
+  - Smooth fade animations between questions
+  - Support for multiple question types: text, textarea, radio, dropdown, scale (0-10), date
+- **Dynamic Rendering**: Client-side form generation supporting multiple question types
+- **Automatic Detection**: System automatically loads appropriate questions based on user's area field from `/api/user-form/:id`
 - **Question Sources**:
   - SALES.pdf: 27 questions across 6 sections (Selection Process, Training/Induction, Satisfaction, Reasons) - duplicates removed
   - GENERAL.pdf: 17 questions across 4 sections (Experience, Climate/Culture, Siigo, Reasons)
-- **Validation System**: Built-in validation for required fields and proper response collection
-- **API Integration**: `/api/questions?area=Sales` for Sales users, `/api/questions` for general users
+- **Validation System**: Real-time validation for required fields, button enable/disable based on answer state
+- **API Integration**:
+  - `/api/questions?area=Sales` for Sales users (27 questions)
+  - `/api/questions` for general users (17 questions)
+  - `/api/responses` POST endpoint expects format: `{ responses: {...}, userId: 'xxx' }`
 
 ### Advanced Response Processing System
 - **response-mapper.js** - Dynamic response mapping system that adapts to different form types
