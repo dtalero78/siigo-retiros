@@ -177,24 +177,48 @@
             background: #e6f7ff;
         }
 
-        /* Scale */
+        /* Scale - Botones rectangulares */
         .scale-container {
             display: flex;
             justify-content: space-between;
             gap: 8px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
         .scale-item {
-            flex: 1;
-            text-align: center;
+            flex: 0 0 calc(10% - 7.2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 48px;
+        }
+
+        .scale-item:hover {
+            border-color: #08acfc;
+            background: #f7fafc;
+        }
+
+        .scale-item.selected {
+            border-color: #08acfc;
+            background: #e6f7ff;
         }
 
         .scale-item input[type="radio"] {
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            accent-color: #08acfc;
+            display: none;
+        }
+
+        .scale-item-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+            user-select: none;
         }
 
         .scale-labels {
@@ -203,6 +227,7 @@
             font-size: 14px;
             color: #718096;
             margin-top: 8px;
+            width: 100%;
         }
 
         /* Scale grid compacto para móviles */
@@ -210,48 +235,24 @@
             .scale-container {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
+                gap: 10px;
                 margin-bottom: 16px;
             }
 
             .scale-item {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 12px;
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: all 0.3s;
-            }
-
-            .scale-item:hover {
-                border-color: #08acfc;
-                background: #f7fafc;
-            }
-
-            .scale-item.selected {
-                border-color: #08acfc;
-                background: #e6f7ff;
-            }
-
-            .scale-item input[type="radio"] {
-                display: none;
+                flex: none;
+                padding: 16px 12px;
+                min-height: 52px;
             }
 
             .scale-item-label {
                 font-size: 18px;
-                font-weight: 600;
-                color: #1a202c;
             }
 
             .scale-labels {
                 grid-column: 1 / -1;
-                display: flex;
-                justify-content: space-between;
                 font-size: 13px;
-                color: #718096;
-                margin-top: 8px;
+                margin-top: 4px;
             }
         }
 
@@ -623,7 +624,7 @@
                                            value="${val}"
                                            ${responses[qKey] == val ? 'checked' : ''}
                                            ${question.required ? 'required' : ''}>
-                                    <div class="scale-item-label" style="margin-top: 8px; font-size: 14px; color: #4a5568;">${val}</div>
+                                    <div class="scale-item-label">${val}</div>
                                 </div>
                             `).join('')}
                             <div class="scale-labels">
