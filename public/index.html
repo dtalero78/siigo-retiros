@@ -177,48 +177,36 @@
             background: #e6f7ff;
         }
 
-        /* Scale - Botones rectangulares */
+        /* Scale - Desktop con círculos */
         .scale-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scale-items-row {
             display: flex;
             justify-content: space-between;
             gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
         }
 
         .scale-item {
-            flex: 0 0 calc(10% - 7.2px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 8px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 48px;
-        }
-
-        .scale-item:hover {
-            border-color: #08acfc;
-            background: #f7fafc;
-        }
-
-        .scale-item.selected {
-            border-color: #08acfc;
-            background: #e6f7ff;
+            flex: 1;
+            text-align: center;
         }
 
         .scale-item input[type="radio"] {
-            display: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            accent-color: #08acfc;
         }
 
         .scale-item-label {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a202c;
-            user-select: none;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            display: block;
         }
 
         .scale-labels {
@@ -226,11 +214,11 @@
             justify-content: space-between;
             font-size: 14px;
             color: #718096;
-            margin-top: 8px;
-            width: 100%;
+            margin-top: 12px;
+            padding: 0 4px;
         }
 
-        /* Scale grid compacto para móviles */
+        /* Scale - Botones rectangulares solo para móviles */
         @media (max-width: 768px) {
             .scale-container {
                 display: grid;
@@ -241,12 +229,37 @@
 
             .scale-item {
                 flex: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 padding: 16px 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                background: white;
+                cursor: pointer;
+                transition: all 0.2s ease;
                 min-height: 52px;
+            }
+
+            .scale-item:hover {
+                border-color: #08acfc;
+                background: #f7fafc;
+            }
+
+            .scale-item.selected {
+                border-color: #08acfc;
+                background: #e6f7ff;
+            }
+
+            .scale-item input[type="radio"] {
+                display: none;
             }
 
             .scale-item-label {
                 font-size: 18px;
+                font-weight: 600;
+                color: #1a202c;
+                margin-top: 0;
             }
 
             .scale-labels {
@@ -617,16 +630,18 @@
                     }
                     inputHTML = `
                         <div class="scale-container">
-                            ${scaleValues.map(val => `
-                                <div class="scale-item ${responses[qKey] == val ? 'selected' : ''}" data-value="${val}">
-                                    <input type="radio"
-                                           name="${qKey}"
-                                           value="${val}"
-                                           ${responses[qKey] == val ? 'checked' : ''}
-                                           ${question.required ? 'required' : ''}>
-                                    <div class="scale-item-label">${val}</div>
-                                </div>
-                            `).join('')}
+                            <div class="scale-items-row">
+                                ${scaleValues.map(val => `
+                                    <div class="scale-item ${responses[qKey] == val ? 'selected' : ''}" data-value="${val}">
+                                        <input type="radio"
+                                               name="${qKey}"
+                                               value="${val}"
+                                               ${responses[qKey] == val ? 'checked' : ''}
+                                               ${question.required ? 'required' : ''}>
+                                        <div class="scale-item-label">${val}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                             <div class="scale-labels">
                                 <span>${question.labels[0]}</span>
                                 <span>${question.labels[1]}</span>
@@ -688,9 +703,13 @@
                     });
                 });
             } else if (question.type === 'scale') {
-                // Add listeners to scale items (clickeable en móvil)
+                // Add listeners to scale items (clickeable en móvil y desktop)
                 document.querySelectorAll('.scale-item').forEach(item => {
-                    item.addEventListener('click', function() {
+                    item.addEventListener('click', function(e) {
+                        // Prevenir el comportamiento por defecto
+                        e.preventDefault();
+                        e.stopPropagation();
+
                         const value = this.getAttribute('data-value');
                         const radio = this.querySelector('input[type="radio"]');
                         if (radio) {
@@ -701,19 +720,21 @@
                             updateButtons();
                             // Auto-avanzar a la siguiente pregunta
                             setTimeout(() => {
-                                goToNextQuestion();
+                                currentQuestion++;
+                                renderQuestion();
                             }, 300);
                         }
                     });
                 });
-                // También mantener el listener en los radio buttons
+                // También mantener el listener en los radio buttons para desktop
                 document.querySelectorAll(`input[name="${qKey}"]`).forEach(radio => {
-                    radio.addEventListener('change', function() {
+                    radio.addEventListener('change', function(e) {
                         responses[qKey] = this.value;
                         updateButtons();
                         // Auto-avanzar a la siguiente pregunta
                         setTimeout(() => {
-                            goToNextQuestion();
+                            currentQuestion++;
+                            renderQuestion();
                         }, 300);
                     });
                 });
