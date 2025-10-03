@@ -63,6 +63,12 @@ Static HTML/JS without framework, served from `/public`:
   - Dynamic question loading based on user area (27 for Sales, 17 for General)
   - Keyboard navigation support (Enter to advance)
   - Smooth animations between questions
+  - **Mobile optimizations:**
+    - Vertical scroll enabled for scale questions (0-10) with many options
+    - 160px top padding for proper logo separation
+    - Dynamic viewport height (dvh) support
+    - Touch-friendly button sizing and spacing
+  - **Desktop:** Centered layout with 120px padding, fixed viewport
 - **public/index-old.html** - Legacy multi-step wizard form (backup)
 - **public/form-typeform.html** - Original Typeform prototype (deprecated, kept for reference)
 - **public/admin.html** - Admin dashboard with analytics, PDF export, and OpenAI analysis (includes dynamic response viewing)
