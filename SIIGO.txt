@@ -1,4 +1,0 @@
-al abrir el endpoint https://www.siigo.digital/?user=559 aparece en el console
-(índice):64 cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation
-(anónimas) @ (índice):64
-?user=559:1437 Uncaught SyntaxError: Unexpected token '}'

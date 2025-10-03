@@ -1943,6 +1943,108 @@ app.get('/users', (req, res) => {
 });
 
 // ================================
+// ENDPOINT PARA RE-PROCESAR RESPUESTAS EXISTENTES
+// ================================
+
+app.post('/api/responses/:id/reprocess', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ResponseMapper = require('./response-mapper');
+
+    // Obtener la respuesta existente
+    const response = await db.getResponse(id);
+    if (!response) {
+      return res.status(404).json({ error: 'Respuesta no encontrada' });
+    }
+
+    // Verificar que tenga respuestas completas
+    if (!response.all_responses) {
+      return res.status(400).json({ error: 'Esta respuesta no tiene datos completos para re-procesar' });
+    }
+
+    console.log(`🔄 Re-procesando respuesta ${id} para área: ${response.area}`);
+
+    // Re-mapear usando las respuestas completas
+    const remappedData = ResponseMapper.mapResponses(response.all_responses, response.area);
+
+    // Campos válidos en la base de datos (basado en la respuesta existente)
+    const validFields = [
+      'area', 'country', 'exit_date', 'exit_reason_category', 'exit_reason_detail',
+      'experience_rating', 'full_name', 'identification', 'last_leader',
+      'new_company_info', 'satisfaction_ratings', 'tenure', 'what_enjoyed',
+      'what_to_improve', 'would_recommend', 'would_return', 'all_responses'
+    ];
+
+    // Filtrar solo campos válidos del mapeo
+    const updateData = {};
+    validFields.forEach(field => {
+      if (remappedData[field] !== undefined) {
+        updateData[field] = remappedData[field];
+      }
+    });
+
+    // Mantener respuestas completas
+    updateData.all_responses = response.all_responses;
+
+    // Para debugging, vamos a actualizar campos específicos uno por uno
+    console.log('Campos a actualizar:', Object.keys(updateData));
+
+    // Actualizar campos específicos más importantes primero
+    if (remappedData.experience_rating !== undefined) {
+      await db.pool.query('UPDATE responses SET experience_rating = $1 WHERE id = $2',
+        [remappedData.experience_rating, id]);
+      console.log(`✅ experience_rating actualizado: ${remappedData.experience_rating}`);
+    }
+
+    if (remappedData.exit_reason_category !== undefined) {
+      await db.pool.query('UPDATE responses SET exit_reason_category = $1 WHERE id = $2',
+        [remappedData.exit_reason_category, id]);
+      console.log(`✅ exit_reason_category actualizado: ${remappedData.exit_reason_category}`);
+    }
+
+    if (remappedData.exit_reason_detail !== undefined) {
+      await db.pool.query('UPDATE responses SET exit_reason_detail = $1 WHERE id = $2',
+        [remappedData.exit_reason_detail, id]);
+      console.log(`✅ exit_reason_detail actualizado: ${remappedData.exit_reason_detail}`);
+    }
+
+    if (remappedData.would_recommend !== undefined) {
+      await db.pool.query('UPDATE responses SET would_recommend = $1 WHERE id = $2',
+        [remappedData.would_recommend, id]);
+      console.log(`✅ would_recommend actualizado: ${remappedData.would_recommend}`);
+    }
+
+    if (remappedData.what_enjoyed !== undefined) {
+      await db.pool.query('UPDATE responses SET what_enjoyed = $1 WHERE id = $2',
+        [remappedData.what_enjoyed, id]);
+      console.log(`✅ what_enjoyed actualizado: ${remappedData.what_enjoyed}`);
+    }
+
+    if (remappedData.what_to_improve !== undefined) {
+      await db.pool.query('UPDATE responses SET what_to_improve = $1 WHERE id = $2',
+        [remappedData.what_to_improve, id]);
+      console.log(`✅ what_to_improve actualizado: ${remappedData.what_to_improve}`);
+    }
+
+    console.log(`✅ Respuesta ${id} re-procesada exitosamente`);
+
+    res.json({
+      success: true,
+      message: `Respuesta ${id} re-procesada con mapeo mejorado`,
+      originalArea: response.area,
+      fieldsUpdated: Object.keys(remappedData).filter(key => remappedData[key] !== null).length
+    });
+
+  } catch (error) {
+    console.error(`❌ Error re-procesando respuesta ${req.params.id}:`, error);
+    res.status(500).json({
+      error: 'Error re-procesando respuesta',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ================================
 // ENDPOINT PARA EXPORTACIÓN CSV DINÁMICA
 // ================================
 

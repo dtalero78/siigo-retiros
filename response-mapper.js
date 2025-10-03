@@ -10,71 +10,47 @@ class ResponseMapper {
    * Obtiene el mapeo de campos según el área
    */
   static getFieldMapping(area) {
-    const questions = getQuestionsByArea(area);
-    const mapping = {};
-
-    // Campos comunes que se encuentran en ambos formularios
-    const commonFields = {
-      'full_name': null,
-      'identification': null,
-      'exit_date': null,
-      'tenure': null,
-      'area': null,
-      'country': null,
-      'last_leader': null,
-      'exit_reason_category': null,
-      'exit_reason_detail': null,
-      'experience_rating': null,
-      'would_recommend': null,
-      'would_return': null,
-      'what_enjoyed': null,
-      'what_to_improve': null,
-      'satisfaction_ratings': null,
-      'new_company_info': null
-    };
-
-    // Mapear preguntas según el contenido y tipo
-    questions.forEach((q, index) => {
-      const questionText = q.question.toLowerCase();
-      const questionNumber = `q${index + 1}`;
-
-      // Mapear según el contenido de la pregunta
-      if (questionText.includes('nombre completo') || questionText.includes('full name')) {
-        commonFields.full_name = questionNumber;
-      } else if (questionText.includes('identificación') || questionText.includes('cédula') || questionText.includes('id')) {
-        commonFields.identification = questionNumber;
-      } else if (questionText.includes('fecha de retiro') || questionText.includes('exit date')) {
-        commonFields.exit_date = questionNumber;
-      } else if (questionText.includes('tiempo en siigo') || questionText.includes('tenure')) {
-        commonFields.tenure = questionNumber;
-      } else if (questionText.includes('área') && !questionText.includes('líder')) {
-        commonFields.area = questionNumber;
-      } else if (questionText.includes('país') || questionText.includes('country')) {
-        commonFields.country = questionNumber;
-      } else if (questionText.includes('líder') || questionText.includes('leader')) {
-        commonFields.last_leader = questionNumber;
-      } else if (questionText.includes('experiencia general') || questionText.includes('experience')) {
-        commonFields.experience_rating = questionNumber;
-      } else if (questionText.includes('recomendarías') || questionText.includes('recommend')) {
-        commonFields.would_recommend = questionNumber;
-      } else if (questionText.includes('regresarías') || questionText.includes('would return')) {
-        commonFields.would_return = questionNumber;
-      } else if (questionText.includes('qué fue lo que más disfrutaste') || questionText.includes('what enjoyed')) {
-        commonFields.what_enjoyed = questionNumber;
-      } else if (questionText.includes('qué crees que podríamos mejorar') || questionText.includes('what to improve')) {
-        commonFields.what_to_improve = questionNumber;
-      } else if (questionText.includes('selecciona la categoría') || questionText.includes('motivo principal')) {
-        commonFields.exit_reason_category = questionNumber;
-      } else if (q.type === 'textarea' && q.section && q.section.includes('Razones') && questionText.includes('¿por qué?')) {
-        commonFields.exit_reason_detail = questionNumber;
-      } else if (q.type === 'matrix' || (q.question.includes('califica') && q.type === 'scale')) {
-        commonFields.satisfaction_ratings = questionNumber;
-      } else if (questionText.includes('nueva empresa') || questionText.includes('new company')) {
-        commonFields.new_company_info = questionNumber;
-      }
-    });
-
-    return commonFields;
+    // Mapeos específicos por área basados en la estructura real de preguntas
+    if (area === 'Sales') {
+      return {
+        'experience_rating': 'q1',        // ¿Cómo fue tu experiencia general en Siigo?
+        'exit_reason_category': 'q25',    // Selecciona la categoría que mejor representa...
+        'exit_reason_detail': 'q26',      // ¿Por qué? (después de categoría)
+        'would_recommend': 'q22',         // Recomendarías trabajar en Siigo
+        'what_enjoyed': 'q23',            // ¿Qué fue lo que más disfrutaste...
+        'what_to_improve': 'q24',         // ¿Qué crees que podríamos mejorar...
+        'last_leader': 'q6',              // Relación con líder (aunque es escala, mapeamos)
+        'full_name': null,                // Viene pre-rellenado del usuario
+        'identification': null,           // Viene pre-rellenado del usuario
+        'exit_date': null,               // Viene pre-rellenado del usuario
+        'tenure': null,                  // No hay pregunta específica para esto en Sales
+        'area': null,                    // Viene pre-rellenado del usuario
+        'country': null,                 // Viene pre-rellenado del usuario
+        'would_return': null,            // No hay pregunta específica para esto en Sales
+        'satisfaction_ratings': null,     // No hay matriz en formulario Sales
+        'new_company_info': null         // No hay pregunta específica para esto en Sales
+      };
+    } else {
+      // Mapeo para formularios General (17 preguntas)
+      return {
+        'experience_rating': 'q1',        // Primera pregunta suele ser experiencia general
+        'exit_reason_category': 'q15',    // Típicamente cerca del final
+        'exit_reason_detail': 'q16',      // Después de categoría
+        'would_recommend': 'q12',         // Pregunta de recomendación
+        'what_enjoyed': 'q13',            // Qué disfrutó
+        'what_to_improve': 'q14',         // Qué mejorar
+        'satisfaction_ratings': 'q17',    // Matriz de satisfacción (última pregunta)
+        'full_name': null,
+        'identification': null,
+        'exit_date': null,
+        'tenure': null,
+        'area': null,
+        'country': null,
+        'last_leader': null,
+        'would_return': null,
+        'new_company_info': null
+      };
+    }
   }
 
   /**
@@ -85,7 +61,7 @@ class ResponseMapper {
     const mappedData = {};
 
     // Datos básicos del usuario (pueden venir pre-rellenados)
-    mappedData.user_id = responses.userId || null;
+    // Nota: user_id no existe en el esquema de base de datos, se omite
     mappedData.area = responses.area || area;
 
     // Mapear campos usando el mapeo dinámico
