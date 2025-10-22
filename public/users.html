@@ -398,6 +398,10 @@
                         <i class="bi bi-whatsapp me-2"></i>
                         Envío Masivo
                     </button>
+                    <button id="deleteSelectedBtn" class="btn btn-danger" onclick="deleteSelectedUsers()" style="display: none;">
+                        <i class="bi bi-trash me-2"></i>
+                        Eliminar <span id="selectedCount">0</span> seleccionados
+                    </button>
                 </div>
             </div>
             <div class="card-body">
@@ -418,6 +422,7 @@
                         <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
+                                    <th><input type="checkbox" id="selectAllUsers" onchange="toggleSelectAll()" title="Seleccionar todos"></th>
                                     <th>ID</th>
                                     <th>Nombre</th>
                                     <th>Apellido</th>
@@ -1098,6 +1103,7 @@
                     </span>`;
                 
                 row.innerHTML = `
+                    <td><input type="checkbox" class="user-checkbox" data-user-id="${user.id}" onchange="updateDeleteButton()"></td>
                     <td>${user.id}</td>
                     <td>${user.first_name}</td>
                     <td>${user.last_name}</td>
@@ -1278,6 +1284,103 @@
                 console.error('Error eliminando usuario:', error);
                 showToast('Error de conexión', 'error');
             }
+        }
+
+        // Función para actualizar el botón de eliminar múltiples
+        function updateDeleteButton() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+            const selectedCount = document.getElementById('selectedCount');
+            const selectAllCheckbox = document.getElementById('selectAllUsers');
+
+            selectedCount.textContent = checkboxes.length;
+
+            if (checkboxes.length > 0) {
+                deleteBtn.style.display = 'inline-block';
+            } else {
+                deleteBtn.style.display = 'none';
+            }
+
+            // Actualizar estado del checkbox "seleccionar todos"
+            const allCheckboxes = document.querySelectorAll('.user-checkbox');
+            if (allCheckboxes.length > 0) {
+                selectAllCheckbox.checked = checkboxes.length === allCheckboxes.length;
+                selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+            }
+        }
+
+        // Función para seleccionar/deseleccionar todos
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllUsers');
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+
+            updateDeleteButton();
+        }
+
+        // Función para eliminar múltiples usuarios
+        async function deleteSelectedUsers() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            const userIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-user-id'));
+
+            if (userIds.length === 0) {
+                showToast('No hay usuarios seleccionados', 'warning');
+                return;
+            }
+
+            const confirmMessage = `¿Estás seguro de que quieres eliminar ${userIds.length} usuario(s) seleccionado(s)?`;
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            // Mostrar spinner de carga
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+            const originalHtml = deleteBtn.innerHTML;
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...';
+
+            // Eliminar usuarios uno por uno
+            for (const userId of userIds) {
+                try {
+                    const response = await fetch(`/api/users/${userId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.error('Error eliminando usuario:', userId, error);
+                    errorCount++;
+                }
+            }
+
+            // Restaurar botón
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalHtml;
+
+            // Recargar usuarios
+            await loadUsers(currentFilter);
+
+            // Mostrar resultado
+            if (successCount > 0) {
+                showToast(`${successCount} usuario(s) eliminado(s) exitosamente`, 'success');
+            }
+            if (errorCount > 0) {
+                showToast(`Error al eliminar ${errorCount} usuario(s)`, 'error');
+            }
+
+            // Resetear selección
+            document.getElementById('selectAllUsers').checked = false;
+            updateDeleteButton();
         }
 
         function handleFileSelect(event) {
