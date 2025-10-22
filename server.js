@@ -856,9 +856,19 @@ app.get('/api/whatsapp/conversations', async (req, res) => {
     
   } catch (error) {
     console.error('Error obteniendo conversaciones:', error);
-    res.status(500).json({ 
-      error: 'Error obteniendo conversaciones de WhatsApp', 
-      message: error.message 
+
+    // Manejar error de autenticación de Twilio
+    if (error.status === 401 || error.code === 20003) {
+      return res.status(401).json({
+        error: 'Credenciales de Twilio no válidas',
+        message: 'Las credenciales de TWILIO_ACCOUNT_SID y TWILIO_AUTH_TOKEN en el archivo .env no son válidas. Por favor, configura las credenciales reales de tu cuenta de Twilio.',
+        code: error.code
+      });
+    }
+
+    res.status(500).json({
+      error: 'Error obteniendo conversaciones de WhatsApp',
+      message: error.message
     });
   }
 });
