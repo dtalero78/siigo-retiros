@@ -475,70 +475,257 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
     // Limpiar archivo temporal
     fs.unlinkSync(req.file.path);
 
-    // Parsear CSV
+    // Parsear CSV - soportar tanto coma como punto y coma como separador
+    const separator = csvContent.includes(';') ? ';' : ',';
     const lines = csvContent.split('\n').filter(line => line.trim());
-    if (lines.length === 0) {
-      return res.status(400).json({ error: 'El archivo CSV está vacío' });
+    if (lines.length < 2) {
+      return res.status(400).json({ error: 'El archivo CSV está vacío o no tiene datos' });
     }
 
+    // Mapeo de nombres de columnas del CSV a campos internos
+    const columnMapping = {
+      // Identificación
+      'id': 'identification',
+      'identificacion': 'identification',
+      'identification': 'identification',
+      'cedula': 'identification',
+      'documento': 'identification',
+
+      // Código empleado
+      'codigo del empleado': 'codigoEmpleado',
+      'codigo empleado': 'codigoEmpleado',
+      'codigoempleado': 'codigoEmpleado',
+
+      // Tipo de identificación
+      'tipo de identificacion': 'tipoIdentificacion',
+      'tipo identificacion': 'tipoIdentificacion',
+      'tipoidentificacion': 'tipoIdentificacion',
+
+      // Tipo de empleado
+      'tipo de empleado': 'tipoEmpleado',
+      'tipo empleado': 'tipoEmpleado',
+      'tipoempleado': 'tipoEmpleado',
+
+      // Estado
+      'estado': 'estado',
+
+      // Nombre (se parsea para extraer nombre y apellido)
+      'nombre': 'nombreCompleto',
+      'nombre completo': 'nombreCompleto',
+      'nombrecompleto': 'nombreCompleto',
+      'first_name': 'first_name',
+      'firstname': 'first_name',
+      'primer nombre': 'first_name',
+      'last_name': 'last_name',
+      'lastname': 'last_name',
+      'apellido': 'last_name',
+      'apellidos': 'last_name',
+
+      // Género
+      'genero': 'genero',
+      'género': 'genero',
+      'sexo': 'genero',
+
+      // Fechas
+      'fecha inicio': 'fechaInicio',
+      'fechainicio': 'fechaInicio',
+      'fecha_inicio': 'fechaInicio',
+      'fecha de inicio': 'fechaInicio',
+      'fecha final contrato': 'exitDate',
+      'fechafinalcontrato': 'exitDate',
+      'fecha_final_contrato': 'exitDate',
+      'fecha retiro': 'exitDate',
+      'fecharetiro': 'exitDate',
+      'fecha_retiro': 'exitDate',
+      'exit_date': 'exitDate',
+      'exitdate': 'exitDate',
+      'fecha salida': 'exitDate',
+
+      // Motivo de retiro
+      'motivo de retiro': 'motivoRetiro',
+      'motivoretiro': 'motivoRetiro',
+      'motivo retiro': 'motivoRetiro',
+      'motivo': 'motivoRetiro',
+
+      // División
+      'division': 'division',
+      'división': 'division',
+
+      // País
+      'pais de contratacion': 'paisContratacion',
+      'paiscontratacion': 'paisContratacion',
+      'pais contratacion': 'paisContratacion',
+      'país de contratación': 'paisContratacion',
+      'pais gestion': 'country',
+      'paisgestion': 'country',
+      'pais de gestion': 'country',
+      'país gestión': 'country',
+      'país de gestión': 'country',
+      'country': 'country',
+      'pais': 'country',
+      'país': 'country',
+
+      // Centro de costos
+      'cod ceco': 'codCeco',
+      'codceco': 'codCeco',
+      'codigo ceco': 'codCeco',
+      'subceco': 'subCeco',
+      'codigo subceco': 'codigoSubCeco',
+      'codigosubceco': 'codigoSubCeco',
+      'subcentro de costo': 'subcentroCosto',
+      'subcentrodecosto': 'subcentroCosto',
+
+      // Proyecto
+      'proyecto': 'proyecto',
+
+      // Área
+      'area': 'area',
+      'área': 'area',
+      'subarea': 'subArea',
+      'sub area': 'subArea',
+      'sub-area': 'subArea',
+      'subárea': 'subArea',
+
+      // Célula
+      'celula': 'celula',
+      'célula': 'celula',
+
+      // Posición/Cargo
+      'cod posicion': 'codPosicion',
+      'codposicion': 'codPosicion',
+      'codigo posicion': 'codPosicion',
+      'posicion': 'cargo',
+      'posición': 'cargo',
+      'cargo': 'cargo',
+
+      // Líder
+      'codigo de jefe': 'codigoJefe',
+      'codigodejefe': 'codigoJefe',
+      'codigo jefe': 'codigoJefe',
+      'lider': 'lider',
+      'líder': 'lider',
+      'jefe': 'lider',
+
+      // Email
+      'e-mail corporativo 1': 'emailCorporativo1',
+      'email corporativo 1': 'emailCorporativo1',
+      'emailcorporativo1': 'emailCorporativo1',
+      'email': 'emailCorporativo1',
+      'correo': 'emailCorporativo1',
+      'e-mail corporativo 2': 'emailCorporativo2',
+      'email corporativo 2': 'emailCorporativo2',
+      'emailcorporativo2': 'emailCorporativo2',
+
+      // Teléfono
+      'telefono 2': 'phone',
+      'telefono2': 'phone',
+      'teléfono 2': 'phone',
+      'telefono': 'phone',
+      'teléfono': 'phone',
+      'celular': 'phone',
+      'phone': 'phone',
+      'movil': 'phone',
+      'móvil': 'phone'
+    };
+
+    // Parsear headers (primera línea)
+    const headers = lines[0].split(separator).map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+
+    // Crear índice de columnas basado en headers
+    const columnIndex = {};
+    headers.forEach((header, index) => {
+      const mappedField = columnMapping[header];
+      if (mappedField) {
+        columnIndex[mappedField] = index;
+      }
+    });
+
     const users = [];
-    const validAreas = [
-      "Aliados", "Cargo en Entrenamiento", "Commercial Ops", "Compensation & Benefits", 
-      "Cross Selling", "Cultura", "Customer Success", "Data Analytics", 
-      "Digital Strategy Engineering", "Engagement & Retention Core", 
-      "Engagement & Retention Empresario", "Entrenamiento y Excelencia", 
-      "Finance & Administration", "Fundación Siigo", "Ingenieria Cloud", 
-      "Ingenieria Legacy", "Marketing", "Marketing Channels", 
-      "Marketing Valor Agregado / Training", "Onboarding", "People Ops", 
-      "Product", "Quality Assurance Cloud", "Renovaciones", "Sales", 
-      "Small and Medium Business", "Soporte Legacy", "Soporte Nube", 
-      "Strategy", "Talent Acquisition", "Tech", "Transformation & Innovation"
-    ];
-    const validCountries = ["Colombia", "Ecuador", "Uruguay", "México", "Perú"];
+    const skippedRows = [];
 
-    // Procesar cada línea (omitir la primera si es header)
-    const dataLines = lines[0].toLowerCase().includes('nombre') ? lines.slice(1) : lines;
-
-    for (let i = 0; i < dataLines.length; i++) {
-      const line = dataLines[i].trim();
+    // Procesar cada línea de datos (omitir headers)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
       if (!line) continue;
 
-      const columns = line.split(',').map(col => col.trim().replace(/^["']|["']$/g, ''));
+      const columns = line.split(separator).map(col => col.trim().replace(/^["']|["']$/g, ''));
 
-      if (columns.length < 13) {
-        continue; // Saltar líneas incompletas
+      // Extraer valores usando el índice de columnas
+      const getValue = (field) => {
+        const idx = columnIndex[field];
+        return idx !== undefined ? columns[idx] || null : null;
+      };
+
+      // Manejar nombre completo vs nombre/apellido separados
+      let firstName = getValue('first_name');
+      let lastName = getValue('last_name');
+
+      if (!firstName && !lastName) {
+        const nombreCompleto = getValue('nombreCompleto');
+        if (nombreCompleto) {
+          const partes = nombreCompleto.split(' ');
+          if (partes.length >= 2) {
+            firstName = partes[0];
+            lastName = partes.slice(1).join(' ');
+          } else {
+            firstName = nombreCompleto;
+            lastName = '';
+          }
+        }
       }
 
-      const [identification, firstName, lastName, country, paisContratacion, area, subArea, cargo, lider, liderEntrenamiento, phone, fechaInicio, exitDate] = columns;
+      const identification = getValue('identification');
+      const exitDate = getValue('exitDate');
+      const area = getValue('area');
+      const country = getValue('country');
 
-      // Validar datos
-      if (!firstName || !lastName || !identification || !exitDate || !area || !country) {
-        continue;
-      }
-
-      if (!validAreas.includes(area) || !validCountries.includes(country)) {
+      // Validar campos requeridos mínimos
+      if (!identification) {
+        skippedRows.push({ row: i + 1, reason: 'Sin identificación' });
         continue;
       }
 
       users.push({
-        first_name: firstName,
-        last_name: lastName,
+        first_name: firstName || 'Sin nombre',
+        last_name: lastName || '',
         identification: identification,
-        phone: phone || null,
-        exit_date: exitDate,
-        area: area,
-        country: country,
-        fechaInicio: fechaInicio || null,
-        cargo: cargo || null,
-        subArea: subArea || null,
-        lider: lider || null,
-        liderEntrenamiento: liderEntrenamiento || null,
-        paisContratacion: paisContratacion || null
+        phone: getValue('phone'),
+        exit_date: exitDate || null,
+        area: area || 'Sin área',
+        country: country || getValue('paisContratacion') || 'Sin país',
+        fechaInicio: getValue('fechaInicio'),
+        cargo: getValue('cargo'),
+        subArea: getValue('subArea'),
+        lider: getValue('lider'),
+        paisContratacion: getValue('paisContratacion'),
+        // Nuevos campos
+        codigoEmpleado: getValue('codigoEmpleado'),
+        tipoIdentificacion: getValue('tipoIdentificacion'),
+        tipoEmpleado: getValue('tipoEmpleado'),
+        estado: getValue('estado'),
+        genero: getValue('genero'),
+        motivoRetiro: getValue('motivoRetiro'),
+        division: getValue('division'),
+        codCeco: getValue('codCeco'),
+        subCeco: getValue('subCeco'),
+        codigoSubCeco: getValue('codigoSubCeco'),
+        subcentroCosto: getValue('subcentroCosto'),
+        proyecto: getValue('proyecto'),
+        celula: getValue('celula'),
+        codPosicion: getValue('codPosicion'),
+        codigoJefe: getValue('codigoJefe'),
+        emailCorporativo1: getValue('emailCorporativo1'),
+        emailCorporativo2: getValue('emailCorporativo2')
       });
     }
 
     if (users.length === 0) {
-      return res.status(400).json({ error: 'No se encontraron usuarios válidos en el archivo CSV' });
+      return res.status(400).json({
+        error: 'No se encontraron usuarios válidos en el archivo CSV',
+        skippedRows: skippedRows.slice(0, 10),
+        detectedHeaders: headers,
+        mappedFields: Object.keys(columnIndex)
+      });
     }
 
     // Insertar en lote
@@ -549,12 +736,15 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
       message: 'Archivo CSV procesado exitosamente',
       inserted: result.inserted,
       total: result.total,
-      errors: result.errors
+      errors: result.errors,
+      skippedRows: skippedRows.length,
+      detectedHeaders: headers,
+      mappedFields: Object.keys(columnIndex)
     });
 
   } catch (error) {
     console.error('Error procesando CSV:', error);
-    res.status(500).json({ error: 'Error procesando el archivo CSV' });
+    res.status(500).json({ error: 'Error procesando el archivo CSV: ' + error.message });
   }
 });
 

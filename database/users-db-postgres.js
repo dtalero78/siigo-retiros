@@ -48,9 +48,56 @@ class UsersDbPostgres {
           subArea VARCHAR(255),
           lider VARCHAR(255),
           liderEntrenamiento VARCHAR(255),
-          paisContratacion VARCHAR(50)
+          paisContratacion VARCHAR(50),
+          -- Nuevos campos
+          codigoEmpleado VARCHAR(50),
+          tipoIdentificacion VARCHAR(50),
+          tipoEmpleado VARCHAR(100),
+          estado VARCHAR(50),
+          genero VARCHAR(20),
+          motivoRetiro VARCHAR(255),
+          division VARCHAR(100),
+          codCeco VARCHAR(50),
+          subCeco VARCHAR(100),
+          codigoSubCeco VARCHAR(50),
+          subcentroCosto VARCHAR(255),
+          proyecto VARCHAR(255),
+          celula VARCHAR(100),
+          codPosicion VARCHAR(50),
+          codigoJefe VARCHAR(50),
+          emailCorporativo1 VARCHAR(255),
+          emailCorporativo2 VARCHAR(255)
         )
       `);
+
+      // Agregar columnas nuevas si no existen (para tablas existentes)
+      const newColumns = [
+        { name: 'codigoEmpleado', type: 'VARCHAR(50)' },
+        { name: 'tipoIdentificacion', type: 'VARCHAR(50)' },
+        { name: 'tipoEmpleado', type: 'VARCHAR(100)' },
+        { name: 'estado', type: 'VARCHAR(50)' },
+        { name: 'genero', type: 'VARCHAR(20)' },
+        { name: 'motivoRetiro', type: 'VARCHAR(255)' },
+        { name: 'division', type: 'VARCHAR(100)' },
+        { name: 'codCeco', type: 'VARCHAR(50)' },
+        { name: 'subCeco', type: 'VARCHAR(100)' },
+        { name: 'codigoSubCeco', type: 'VARCHAR(50)' },
+        { name: 'subcentroCosto', type: 'VARCHAR(255)' },
+        { name: 'proyecto', type: 'VARCHAR(255)' },
+        { name: 'celula', type: 'VARCHAR(100)' },
+        { name: 'codPosicion', type: 'VARCHAR(50)' },
+        { name: 'codigoJefe', type: 'VARCHAR(50)' },
+        { name: 'emailCorporativo1', type: 'VARCHAR(255)' },
+        { name: 'emailCorporativo2', type: 'VARCHAR(255)' }
+      ];
+
+      for (const col of newColumns) {
+        try {
+          await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col.name} ${col.type}`);
+        } catch (err) {
+          // Ignorar errores si la columna ya existe
+        }
+      }
 
       // Crear índices
       await this.pool.query(`
@@ -81,8 +128,12 @@ class UsersDbPostgres {
       INSERT INTO users (
         first_name, last_name, identification, phone, exit_date,
         area, country, fechaInicio, cargo, subArea, lider,
-        liderEntrenamiento, paisContratacion
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        liderEntrenamiento, paisContratacion,
+        codigoEmpleado, tipoIdentificacion, tipoEmpleado, estado, genero,
+        motivoRetiro, division, codCeco, subCeco, codigoSubCeco,
+        subcentroCosto, proyecto, celula, codPosicion, codigoJefe,
+        emailCorporativo1, emailCorporativo2
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30)
       ON CONFLICT (identification) DO UPDATE SET
         first_name = EXCLUDED.first_name,
         last_name = EXCLUDED.last_name,
@@ -95,7 +146,24 @@ class UsersDbPostgres {
         subArea = EXCLUDED.subArea,
         lider = EXCLUDED.lider,
         liderEntrenamiento = EXCLUDED.liderEntrenamiento,
-        paisContratacion = EXCLUDED.paisContratacion
+        paisContratacion = EXCLUDED.paisContratacion,
+        codigoEmpleado = EXCLUDED.codigoEmpleado,
+        tipoIdentificacion = EXCLUDED.tipoIdentificacion,
+        tipoEmpleado = EXCLUDED.tipoEmpleado,
+        estado = EXCLUDED.estado,
+        genero = EXCLUDED.genero,
+        motivoRetiro = EXCLUDED.motivoRetiro,
+        division = EXCLUDED.division,
+        codCeco = EXCLUDED.codCeco,
+        subCeco = EXCLUDED.subCeco,
+        codigoSubCeco = EXCLUDED.codigoSubCeco,
+        subcentroCosto = EXCLUDED.subcentroCosto,
+        proyecto = EXCLUDED.proyecto,
+        celula = EXCLUDED.celula,
+        codPosicion = EXCLUDED.codPosicion,
+        codigoJefe = EXCLUDED.codigoJefe,
+        emailCorporativo1 = EXCLUDED.emailCorporativo1,
+        emailCorporativo2 = EXCLUDED.emailCorporativo2
       RETURNING id
     `;
 
@@ -112,7 +180,24 @@ class UsersDbPostgres {
       userData.subArea || null,
       userData.lider || null,
       userData.liderEntrenamiento || null,
-      userData.paisContratacion || null
+      userData.paisContratacion || null,
+      userData.codigoEmpleado || null,
+      userData.tipoIdentificacion || null,
+      userData.tipoEmpleado || null,
+      userData.estado || null,
+      userData.genero || null,
+      userData.motivoRetiro || null,
+      userData.division || null,
+      userData.codCeco || null,
+      userData.subCeco || null,
+      userData.codigoSubCeco || null,
+      userData.subcentroCosto || null,
+      userData.proyecto || null,
+      userData.celula || null,
+      userData.codPosicion || null,
+      userData.codigoJefe || null,
+      userData.emailCorporativo1 || null,
+      userData.emailCorporativo2 || null
     ];
 
     try {

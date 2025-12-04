@@ -105,6 +105,21 @@ class UsersDatabase {
             else console.log('Columna whatsapp_custom_message añadida a users');
           });
         }
+        // Nuevos campos
+        const newColumns = [
+          'codigoEmpleado', 'tipoIdentificacion', 'tipoEmpleado', 'estado', 'genero',
+          'motivoRetiro', 'division', 'codCeco', 'subCeco', 'codigoSubCeco',
+          'subcentroCosto', 'proyecto', 'celula', 'codPosicion', 'codigoJefe',
+          'emailCorporativo1', 'emailCorporativo2'
+        ];
+        newColumns.forEach(col => {
+          if (!existing.includes(col)) {
+            this.db.run(`ALTER TABLE users ADD COLUMN ${col} TEXT`, (err) => {
+              if (err) console.error(`Error agregando columna ${col}:`, err.message);
+              else console.log(`Columna ${col} añadida a users`);
+            });
+          }
+        });
       });
     });
   }
@@ -113,10 +128,14 @@ class UsersDatabase {
     return new Promise((resolve, reject) => {
       const sql = `
         INSERT INTO users (
-          first_name, last_name, identification, phone, 
+          first_name, last_name, identification, phone,
           exit_date, area, country, fechaInicio, cargo,
-          subArea, lider, liderEntrenamiento, paisContratacion
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          subArea, lider, liderEntrenamiento, paisContratacion,
+          codigoEmpleado, tipoIdentificacion, tipoEmpleado, estado, genero,
+          motivoRetiro, division, codCeco, subCeco, codigoSubCeco,
+          subcentroCosto, proyecto, celula, codPosicion, codigoJefe,
+          emailCorporativo1, emailCorporativo2
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const values = [
@@ -132,7 +151,24 @@ class UsersDatabase {
         userData.subArea || null,
         userData.lider || null,
         userData.liderEntrenamiento || null,
-        userData.paisContratacion || null
+        userData.paisContratacion || null,
+        userData.codigoEmpleado || null,
+        userData.tipoIdentificacion || null,
+        userData.tipoEmpleado || null,
+        userData.estado || null,
+        userData.genero || null,
+        userData.motivoRetiro || null,
+        userData.division || null,
+        userData.codCeco || null,
+        userData.subCeco || null,
+        userData.codigoSubCeco || null,
+        userData.subcentroCosto || null,
+        userData.proyecto || null,
+        userData.celula || null,
+        userData.codPosicion || null,
+        userData.codigoJefe || null,
+        userData.emailCorporativo1 || null,
+        userData.emailCorporativo2 || null
       ];
 
       this.db.run(sql, values, function(err) {
@@ -248,10 +284,14 @@ class UsersDatabase {
     return new Promise((resolve, reject) => {
       const sql = `
         INSERT OR IGNORE INTO users (
-          first_name, last_name, identification, phone, 
+          first_name, last_name, identification, phone,
           exit_date, area, country, fechaInicio, cargo,
-          subArea, lider, liderEntrenamiento, paisContratacion
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          subArea, lider, liderEntrenamiento, paisContratacion,
+          codigoEmpleado, tipoIdentificacion, tipoEmpleado, estado, genero,
+          motivoRetiro, division, codCeco, subCeco, codigoSubCeco,
+          subcentroCosto, proyecto, celula, codPosicion, codigoJefe,
+          emailCorporativo1, emailCorporativo2
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       let inserted = 0;
@@ -271,7 +311,24 @@ class UsersDatabase {
           userData.subArea || null,
           userData.lider || null,
           userData.liderEntrenamiento || null,
-          userData.paisContratacion || null
+          userData.paisContratacion || null,
+          userData.codigoEmpleado || null,
+          userData.tipoIdentificacion || null,
+          userData.tipoEmpleado || null,
+          userData.estado || null,
+          userData.genero || null,
+          userData.motivoRetiro || null,
+          userData.division || null,
+          userData.codCeco || null,
+          userData.subCeco || null,
+          userData.codigoSubCeco || null,
+          userData.subcentroCosto || null,
+          userData.proyecto || null,
+          userData.celula || null,
+          userData.codPosicion || null,
+          userData.codigoJefe || null,
+          userData.emailCorporativo1 || null,
+          userData.emailCorporativo2 || null
         ];
 
         this.db.run(sql, values, function(err) {
@@ -285,7 +342,7 @@ class UsersDatabase {
 
       this.db.serialize(() => {
         this.db.run('BEGIN TRANSACTION');
-        
+
         usersArray.forEach(userData => {
           insertUser(userData);
         });
