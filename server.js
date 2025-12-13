@@ -685,11 +685,13 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
         continue;
       }
 
+      const phone = getValue('phone');
+
       users.push({
         first_name: firstName || 'Sin nombre',
         last_name: lastName || '',
         identification: identification,
-        phone: getValue('phone'),
+        phone: phone,
         exit_date: exitDate || null,
         area: area || 'Sin área',
         country: country || getValue('paisContratacion') || 'Sin país',
@@ -719,12 +721,40 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
       });
     }
 
+    // Separar usuarios con y sin celular
+    const usersWithPhone = [];
+    const usersWithoutPhone = [];
+
+    users.forEach(user => {
+      if (user.phone && user.phone.trim() !== '') {
+        usersWithPhone.push(user);
+      } else {
+        usersWithoutPhone.push({
+          row: users.indexOf(user) + 2, // +2 porque: +1 por índice 0, +1 por header
+          name: `${user.first_name} ${user.last_name}`,
+          identification: user.identification,
+          area: user.area,
+          cargo: user.cargo || '-'
+        });
+      }
+    });
+
     if (users.length === 0) {
       return res.status(400).json({
         error: 'No se encontraron usuarios válidos en el archivo CSV',
         skippedRows: skippedRows.slice(0, 10),
         detectedHeaders: headers,
         mappedFields: Object.keys(columnIndex)
+      });
+    }
+
+    // Si no hay usuarios con teléfono, retornar error con lista de usuarios sin celular
+    if (usersWithPhone.length === 0) {
+      return res.status(400).json({
+        error: 'Ningún usuario del CSV tiene número de celular',
+        usersWithoutPhone: usersWithoutPhone,
+        totalWithoutPhone: usersWithoutPhone.length,
+        detectedHeaders: headers
       });
     }
 
@@ -739,10 +769,10 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
       existingUsers.map(u => u.identification)
     );
 
-    // Filtrar usuarios que ya existen por teléfono o identificación
+    // Filtrar usuarios que ya existen por teléfono o identificación (solo de usersWithPhone)
     const duplicatesByPhone = [];
     const duplicatesByIdentification = [];
-    const usersToInsert = users.filter(user => {
+    const usersToInsert = usersWithPhone.filter(user => {
       const phoneNormalized = user.phone ? user.phone.replace(/\D/g, '') : null;
 
       // Verificar duplicado por identificación
@@ -774,9 +804,11 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
 
     if (usersToInsert.length === 0) {
       return res.status(400).json({
-        error: 'Todos los usuarios del CSV ya existen en la base de datos',
+        error: 'Todos los usuarios con celular del CSV ya existen en la base de datos',
         duplicatesByPhone: duplicatesByPhone.length,
         duplicatesByIdentification: duplicatesByIdentification.length,
+        usersWithoutPhone: usersWithoutPhone,
+        totalWithoutPhone: usersWithoutPhone.length,
         detectedHeaders: headers
       });
     }
@@ -789,10 +821,13 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
       message: 'Archivo CSV procesado exitosamente',
       inserted: result.inserted,
       total: users.length,
+      totalWithPhone: usersWithPhone.length,
       errors: result.errors,
       skippedRows: skippedRows.length,
       duplicatesByPhone: duplicatesByPhone.length,
       duplicatesByIdentification: duplicatesByIdentification.length,
+      usersWithoutPhone: usersWithoutPhone,
+      totalWithoutPhone: usersWithoutPhone.length,
       detectedHeaders: headers,
       mappedFields: Object.keys(columnIndex)
     });

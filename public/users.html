@@ -815,8 +815,18 @@
                             <ul class="mb-0 mt-2">
                                 <li>Usuarios insertados: <span id="insertedCount">0</span></li>
                                 <li>Total en archivo: <span id="totalCount">0</span></li>
+                                <li>Con celular válido: <span id="withPhoneCount">0</span></li>
+                                <li>Duplicados (teléfono): <span id="duplicatePhoneCount">0</span></li>
+                                <li>Duplicados (ID): <span id="duplicateIdCount">0</span></li>
                                 <li>Errores: <span id="errorCount">0</span></li>
                             </ul>
+                        </div>
+                        <div id="withoutPhoneAlert" style="display: none;" class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong><span id="withoutPhoneCount">0</span> usuarios sin número de celular</strong> - No fueron cargados
+                            <button type="button" class="btn btn-sm btn-outline-warning ms-2" onclick="showUsersWithoutPhone()">
+                                <i class="bi bi-eye me-1"></i>Ver lista
+                            </button>
                         </div>
                         <div id="errorDetails" style="display: none;">
                             <h6>Detalles de errores:</h6>
@@ -831,10 +841,50 @@
         </div>
     </div>
 
+    <!-- Modal para usuarios sin celular -->
+    <div class="modal fade" id="usersWithoutPhoneModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="bi bi-phone-vibrate me-2"></i>
+                        Usuarios sin número de celular
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Los siguientes usuarios no fueron cargados porque no tienen número de celular registrado:</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fila</th>
+                                    <th>Nombre</th>
+                                    <th>Identificación</th>
+                                    <th>Área</th>
+                                    <th>Cargo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersWithoutPhoneList">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadUsersWithoutPhone()">
+                        <i class="bi bi-download me-1"></i>Descargar CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let allUsers = [];
         let currentFilter = null;
+        let lastUsersWithoutPhone = []; // Guardar para descargar
 
         // ===== FUNCIONES PRINCIPALES =====
         
@@ -1577,21 +1627,75 @@
         function showUploadResults(result) {
             document.getElementById('insertedCount').textContent = result.inserted;
             document.getElementById('totalCount').textContent = result.total;
-            document.getElementById('errorCount').textContent = result.errors.length;
+            document.getElementById('withPhoneCount').textContent = result.totalWithPhone || 0;
+            document.getElementById('duplicatePhoneCount').textContent = result.duplicatesByPhone || 0;
+            document.getElementById('duplicateIdCount').textContent = result.duplicatesByIdentification || 0;
+            document.getElementById('errorCount').textContent = result.errors ? result.errors.length : 0;
 
             const resultsContainer = document.getElementById('uploadResults');
             resultsContainer.style.display = 'block';
 
-            if (result.errors.length > 0) {
+            // Mostrar alerta de usuarios sin celular
+            const withoutPhoneAlert = document.getElementById('withoutPhoneAlert');
+            if (result.usersWithoutPhone && result.usersWithoutPhone.length > 0) {
+                document.getElementById('withoutPhoneCount').textContent = result.totalWithoutPhone;
+                lastUsersWithoutPhone = result.usersWithoutPhone;
+                withoutPhoneAlert.style.display = 'block';
+            } else {
+                withoutPhoneAlert.style.display = 'none';
+                lastUsersWithoutPhone = [];
+            }
+
+            if (result.errors && result.errors.length > 0) {
                 const errorDetails = document.getElementById('errorDetails');
                 const errorList = document.getElementById('errorList');
-                
-                errorList.innerHTML = result.errors.map(err => 
+
+                errorList.innerHTML = result.errors.map(err =>
                     `<div>Fila: ${JSON.stringify(err.userData)} - Error: ${err.error}</div>`
                 ).join('');
-                
+
                 errorDetails.style.display = 'block';
+            } else {
+                document.getElementById('errorDetails').style.display = 'none';
             }
+        }
+
+        function showUsersWithoutPhone() {
+            const tbody = document.getElementById('usersWithoutPhoneList');
+            tbody.innerHTML = lastUsersWithoutPhone.map(user => `
+                <tr>
+                    <td>${user.row}</td>
+                    <td>${user.name}</td>
+                    <td>${user.identification}</td>
+                    <td>${user.area}</td>
+                    <td>${user.cargo}</td>
+                </tr>
+            `).join('');
+
+            const modal = new bootstrap.Modal(document.getElementById('usersWithoutPhoneModal'));
+            modal.show();
+        }
+
+        function downloadUsersWithoutPhone() {
+            if (lastUsersWithoutPhone.length === 0) return;
+
+            const headers = ['Fila', 'Nombre', 'Identificación', 'Área', 'Cargo'];
+            const csvContent = [
+                headers.join(','),
+                ...lastUsersWithoutPhone.map(user => [
+                    user.row,
+                    `"${user.name}"`,
+                    `"${user.identification}"`,
+                    `"${user.area}"`,
+                    `"${user.cargo}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'usuarios_sin_celular.csv';
+            link.click();
         }
 
         function exportUsers() {
