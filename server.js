@@ -728,16 +728,71 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
       });
     }
 
-    // Insertar en lote
-    const result = await usersDb.bulkInsert(users);
+    // Obtener usuarios existentes para verificar duplicados por teléfono
+    const existingUsers = await usersDb.getAllUsers();
+    const existingPhones = new Set(
+      existingUsers
+        .filter(u => u.phone)
+        .map(u => u.phone.replace(/\D/g, '')) // Normalizar: solo dígitos
+    );
+    const existingIdentifications = new Set(
+      existingUsers.map(u => u.identification)
+    );
+
+    // Filtrar usuarios que ya existen por teléfono o identificación
+    const duplicatesByPhone = [];
+    const duplicatesByIdentification = [];
+    const usersToInsert = users.filter(user => {
+      const phoneNormalized = user.phone ? user.phone.replace(/\D/g, '') : null;
+
+      // Verificar duplicado por identificación
+      if (existingIdentifications.has(user.identification)) {
+        duplicatesByIdentification.push({
+          identification: user.identification,
+          name: `${user.first_name} ${user.last_name}`
+        });
+        return false;
+      }
+
+      // Verificar duplicado por teléfono (solo si tiene teléfono)
+      if (phoneNormalized && existingPhones.has(phoneNormalized)) {
+        duplicatesByPhone.push({
+          phone: user.phone,
+          name: `${user.first_name} ${user.last_name}`
+        });
+        return false;
+      }
+
+      // Agregar a los sets para evitar duplicados dentro del mismo CSV
+      if (phoneNormalized) {
+        existingPhones.add(phoneNormalized);
+      }
+      existingIdentifications.add(user.identification);
+
+      return true;
+    });
+
+    if (usersToInsert.length === 0) {
+      return res.status(400).json({
+        error: 'Todos los usuarios del CSV ya existen en la base de datos',
+        duplicatesByPhone: duplicatesByPhone.length,
+        duplicatesByIdentification: duplicatesByIdentification.length,
+        detectedHeaders: headers
+      });
+    }
+
+    // Insertar en lote solo los usuarios no duplicados
+    const result = await usersDb.bulkInsert(usersToInsert);
 
     res.json({
       success: true,
       message: 'Archivo CSV procesado exitosamente',
       inserted: result.inserted,
-      total: result.total,
+      total: users.length,
       errors: result.errors,
       skippedRows: skippedRows.length,
+      duplicatesByPhone: duplicatesByPhone.length,
+      duplicatesByIdentification: duplicatesByIdentification.length,
       detectedHeaders: headers,
       mappedFields: Object.keys(columnIndex)
     });
