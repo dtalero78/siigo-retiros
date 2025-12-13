@@ -424,17 +424,12 @@
                                 <tr>
                                     <th><input type="checkbox" id="selectAllUsers" onchange="toggleSelectAll()" title="Seleccionar todos"></th>
                                     <th>ID</th>
+                                    <th>Fecha Creación</th>
                                     <th>Nombre</th>
                                     <th>Apellido</th>
-                                    <th>Identificación</th>
                                     <th>Celular</th>
-                                    <th>Fecha Inicio</th>
-                                    <th>Fecha Retiro</th>
                                     <th>Cargo</th>
                                     <th>Área</th>
-                                    <th>SubÁrea</th>
-                                    <th>Líder</th>
-                                    <th>Líder Entrenamiento</th>
                                     <th>WhatsApp</th>
                                     <th>Respuesta</th>
                                     <th>Acciones</th>
@@ -1082,40 +1077,34 @@
 
             allUsers.forEach(user => {
                 const row = document.createElement('tr');
-                const exitDate = user.exit_date ? new Date(user.exit_date).toLocaleDateString('es-ES') : '-';
-                
-                const fechaInicio = user.fechaInicio ? new Date(user.fechaInicio).toLocaleDateString('es-ES') : '-';
-                
-                const whatsappStatus = user.whatsapp_sent_at ? 
+
+                const createdAt = user.created_at ? new Date(user.created_at).toLocaleDateString('es-ES') : '-';
+
+                const whatsappStatus = user.whatsapp_sent_at ?
                     `<span class="badge bg-success" title="Enviado: ${new Date(user.whatsapp_sent_at).toLocaleString('es-ES')}">
                         <i class="bi bi-check-circle me-1"></i>Enviado
-                    </span>` : 
+                    </span>` :
                     `<span class="badge bg-secondary">
                         <i class="bi bi-x-circle me-1"></i>No enviado
                     </span>`;
-                
-                const responseStatus = user.has_response ? 
+
+                const responseStatus = user.has_response ?
                     `<span class="badge bg-success">
                         <i class="bi bi-chat-fill me-1"></i>Respondió
-                    </span>` : 
+                    </span>` :
                     `<span class="badge bg-warning">
                         <i class="bi bi-hourglass me-1"></i>Sin respuesta
                     </span>`;
-                
+
                 row.innerHTML = `
                     <td><input type="checkbox" class="user-checkbox" data-user-id="${user.id}" onchange="updateDeleteButton()"></td>
                     <td>${user.id}</td>
+                    <td>${createdAt}</td>
                     <td>${user.first_name}</td>
                     <td>${user.last_name}</td>
-                    <td>${user.identification}</td>
                     <td>${user.phone || '-'}</td>
-                    <td>${fechaInicio}</td>
-                    <td>${exitDate}</td>
                     <td>${user.cargo || '-'}</td>
                     <td><span class="badge bg-primary">${user.area}</span></td>
-                    <td>${user.subArea || '-'}</td>
-                    <td>${user.lider || '-'}</td>
-                    <td>${user.liderEntrenamiento || '-'}</td>
                     <td>${whatsappStatus}</td>
                     <td>${responseStatus}</td>
                     <td>
