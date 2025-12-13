@@ -593,7 +593,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-4">
+                    <!-- Sección cuando hay usuarios seleccionados -->
+                    <div id="selectedUsersSection" class="mb-4" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="bi bi-check2-square me-2"></i>
+                            <strong>Usuarios seleccionados: <span id="selectedUsersCount">0</span></strong>
+                            <p class="mb-0 mt-1 small">Se enviará el mensaje a los usuarios que seleccionaste en la tabla.</p>
+                        </div>
+                    </div>
+
+                    <!-- Sección cuando NO hay usuarios seleccionados (dropdown) -->
+                    <div id="filterSection" class="mb-4">
                         <label for="whatsappFilter" class="form-label">Seleccionar destinatarios:</label>
                         <select class="form-control" id="whatsappFilter">
                             <option value="all">Todos los usuarios con teléfono</option>
@@ -1098,7 +1108,22 @@
             const whatsappModal = document.getElementById('whatsappMessageModal');
             if (whatsappModal) {
                 whatsappModal.addEventListener('shown.bs.modal', function() {
-                    updateRecipientCount();
+                    // Verificar si hay usuarios seleccionados con checkboxes
+                    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+                    const selectedCount = selectedCheckboxes.length;
+
+                    if (selectedCount > 0) {
+                        // Mostrar sección de usuarios seleccionados, ocultar dropdown
+                        document.getElementById('selectedUsersSection').style.display = 'block';
+                        document.getElementById('filterSection').style.display = 'none';
+                        document.getElementById('selectedUsersCount').textContent = selectedCount;
+                    } else {
+                        // Mostrar dropdown, ocultar sección de seleccionados
+                        document.getElementById('selectedUsersSection').style.display = 'none';
+                        document.getElementById('filterSection').style.display = 'block';
+                        updateRecipientCount();
+                    }
+
                     updateMessagePreview();
                     updateTemplatePreview();
                 });
@@ -2275,40 +2300,50 @@
         }
 
         async function sendBulkWhatsApp() {
-            const filter = document.getElementById('whatsappFilter').value;
             const batchSize = parseInt(document.getElementById('batchSize').value);
             const messageDelay = parseInt(document.getElementById('messageDelay').value);
             const templateId = document.getElementById('templateSelector').value;
-            
+
             // Filtrar usuarios según la selección
             let usersToSend = [];
-            
-            // Para filtros que requieren datos actualizados del servidor
-            if (filter === 'no_response' || filter === 'has_response') {
-                try {
-                    const response = await fetch(`/api/users?filter=${filter}`);
-                    const serverUsers = await response.json();
-                    usersToSend = serverUsers.filter(u => u.phone);
-                } catch (error) {
-                    console.error('Error obteniendo usuarios del servidor:', error);
-                    showToast('Error obteniendo datos actualizados del servidor', 'error');
-                    return;
-                }
+
+            // Primero verificar si hay usuarios seleccionados con checkboxes
+            const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+            if (selectedCheckboxes.length > 0) {
+                // Usar usuarios seleccionados
+                const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.userId));
+                usersToSend = allUsers.filter(u => selectedIds.includes(u.id) && u.phone);
             } else {
-                // Para filtros simples usar datos locales
-                switch(filter) {
-                    case 'all':
-                        usersToSend = allUsers.filter(u => u.phone);
-                        break;
-                    case 'whatsapp_not_sent':
-                        usersToSend = allUsers.filter(u => u.phone && !u.whatsapp_sent_at);
-                        break;
-                    case 'whatsapp_sent':
-                        usersToSend = allUsers.filter(u => u.phone && u.whatsapp_sent_at);
-                        break;
-                    case 'filtered':
-                        usersToSend = allUsers.filter(u => u.phone);
-                        break;
+                // Usar filtro del dropdown
+                const filter = document.getElementById('whatsappFilter').value;
+
+                // Para filtros que requieren datos actualizados del servidor
+                if (filter === 'no_response' || filter === 'has_response') {
+                    try {
+                        const response = await fetch(`/api/users?filter=${filter}`);
+                        const serverUsers = await response.json();
+                        usersToSend = serverUsers.filter(u => u.phone);
+                    } catch (error) {
+                        console.error('Error obteniendo usuarios del servidor:', error);
+                        showToast('Error obteniendo datos actualizados del servidor', 'error');
+                        return;
+                    }
+                } else {
+                    // Para filtros simples usar datos locales
+                    switch(filter) {
+                        case 'all':
+                            usersToSend = allUsers.filter(u => u.phone);
+                            break;
+                        case 'whatsapp_not_sent':
+                            usersToSend = allUsers.filter(u => u.phone && !u.whatsapp_sent_at);
+                            break;
+                        case 'whatsapp_sent':
+                            usersToSend = allUsers.filter(u => u.phone && u.whatsapp_sent_at);
+                            break;
+                        case 'filtered':
+                            usersToSend = allUsers.filter(u => u.phone);
+                            break;
+                    }
                 }
             }
             
