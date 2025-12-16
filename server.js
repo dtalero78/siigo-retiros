@@ -2416,6 +2416,180 @@ app.get('/api/export/csv', async (req, res) => {
   }
 });
 
+// ================================
+// EXPORTACIÓN A EXCEL (XLSX)
+// ================================
+
+app.get('/api/export/excel', async (req, res) => {
+  try {
+    const XLSX = require('xlsx');
+    const ResponseMapper = require('./response-mapper');
+
+    // Obtener todas las respuestas
+    const responses = await db.getAllResponses();
+
+    if (responses.length === 0) {
+      return res.status(404).json({ error: 'No hay datos para exportar' });
+    }
+
+    // Crear workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Preparar datos para la hoja principal
+    const allData = [];
+
+    // Obtener headers dinámicos basados en el área
+    const salesHeaders = ResponseMapper.getCsvMapping('Sales');
+    const generalHeaders = ResponseMapper.getCsvMapping('General');
+
+    // Usar el conjunto más completo de headers (Sales tiene más preguntas)
+    const baseHeaders = ['ID', 'Nombre Completo', 'Identificación', 'Tipo de Formulario', 'Fecha de Retiro', 'Tiempo en Siigo', 'Área', 'País', 'Último Líder'];
+
+    // Procesar cada respuesta
+    responses.forEach(response => {
+      const area = response.area || 'General';
+      const row = ResponseMapper.toCsvRow(response, area);
+
+      // Crear objeto con datos
+      const rowData = {
+        'ID': response.id,
+        'Nombre Completo': response.full_name || '',
+        'Identificación': response.identification || '',
+        'Tipo de Formulario': `${area} (${area === 'Sales' ? '27' : '17'} preguntas)`,
+        'Fecha de Retiro': response.exit_date || '',
+        'Tiempo en Siigo': response.time_at_siigo || '',
+        'Área': response.area || '',
+        'País': response.country || '',
+        'Último Líder': response.last_leader || '',
+        'Fecha de Respuesta': response.created_at ? new Date(response.created_at).toLocaleDateString('es-ES') : ''
+      };
+
+      // Agregar respuestas dinámicas desde all_responses
+      if (response.all_responses) {
+        let allResponses = response.all_responses;
+        if (typeof allResponses === 'string') {
+          try {
+            allResponses = JSON.parse(allResponses);
+          } catch (e) {
+            allResponses = {};
+          }
+        }
+
+        // Agregar cada respuesta con su número de pregunta
+        Object.keys(allResponses).forEach(key => {
+          if (key.startsWith('q')) {
+            const questionNum = key.replace('q', '');
+            rowData[`Pregunta ${questionNum}`] = allResponses[key] || '';
+          }
+        });
+      }
+
+      allData.push(rowData);
+    });
+
+    // Crear hoja principal con todos los datos
+    const worksheet = XLSX.utils.json_to_sheet(allData);
+
+    // Ajustar anchos de columna automáticamente
+    const colWidths = [];
+    if (allData.length > 0) {
+      const keys = Object.keys(allData[0]);
+      keys.forEach((key, i) => {
+        let maxWidth = key.length;
+        allData.forEach(row => {
+          const cellValue = String(row[key] || '');
+          if (cellValue.length > maxWidth) {
+            maxWidth = Math.min(cellValue.length, 50); // Máximo 50 caracteres
+          }
+        });
+        colWidths.push({ wch: maxWidth + 2 });
+      });
+      worksheet['!cols'] = colWidths;
+    }
+
+    // Agregar la hoja al workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Entrevistas de Retiro');
+
+    // Crear hojas separadas por área si hay datos
+    const salesResponses = responses.filter(r => r.area === 'Sales');
+    const generalResponses = responses.filter(r => r.area !== 'Sales');
+
+    if (salesResponses.length > 0) {
+      const salesData = salesResponses.map(response => {
+        const rowData = {
+          'ID': response.id,
+          'Nombre': response.full_name || '',
+          'Área': response.area || '',
+          'País': response.country || '',
+          'Fecha Retiro': response.exit_date || ''
+        };
+
+        if (response.all_responses) {
+          let allResponses = response.all_responses;
+          if (typeof allResponses === 'string') {
+            try { allResponses = JSON.parse(allResponses); } catch (e) { allResponses = {}; }
+          }
+          Object.keys(allResponses).forEach(key => {
+            if (key.startsWith('q')) {
+              rowData[`P${key.replace('q', '')}`] = allResponses[key] || '';
+            }
+          });
+        }
+        return rowData;
+      });
+      const salesSheet = XLSX.utils.json_to_sheet(salesData);
+      XLSX.utils.book_append_sheet(workbook, salesSheet, 'Ventas');
+    }
+
+    if (generalResponses.length > 0) {
+      const generalData = generalResponses.map(response => {
+        const rowData = {
+          'ID': response.id,
+          'Nombre': response.full_name || '',
+          'Área': response.area || '',
+          'País': response.country || '',
+          'Fecha Retiro': response.exit_date || ''
+        };
+
+        if (response.all_responses) {
+          let allResponses = response.all_responses;
+          if (typeof allResponses === 'string') {
+            try { allResponses = JSON.parse(allResponses); } catch (e) { allResponses = {}; }
+          }
+          Object.keys(allResponses).forEach(key => {
+            if (key.startsWith('q')) {
+              rowData[`P${key.replace('q', '')}`] = allResponses[key] || '';
+            }
+          });
+        }
+        return rowData;
+      });
+      const generalSheet = XLSX.utils.json_to_sheet(generalData);
+      XLSX.utils.book_append_sheet(workbook, generalSheet, 'General');
+    }
+
+    // Generar buffer del archivo Excel
+    const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Configurar headers de respuesta
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `entrevistas_retiro_${timestamp}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(excelBuffer);
+
+    console.log(`📊 Excel exportado: ${responses.length} respuestas (${salesResponses.length} ventas, ${generalResponses.length} general)`);
+
+  } catch (error) {
+    console.error('Error exportando Excel:', error);
+    res.status(500).json({
+      error: 'Error generando exportación Excel',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Manejo de errores 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

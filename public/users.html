@@ -895,6 +895,7 @@
         let allUsers = [];
         let currentFilter = null;
         let lastUsersWithoutPhone = []; // Guardar para descargar
+        let selectedUserIdsForWhatsApp = []; // IDs de usuarios seleccionados para envío masivo
 
         // ===== FUNCIONES PRINCIPALES =====
         
@@ -1113,11 +1114,18 @@
                     const selectedCount = selectedCheckboxes.length;
 
                     if (selectedCount > 0) {
+                        // GUARDAR los IDs seleccionados en la variable global
+                        selectedUserIdsForWhatsApp = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.userId));
+                        console.log('IDs guardados para envío:', selectedUserIdsForWhatsApp);
+
                         // Mostrar sección de usuarios seleccionados, ocultar dropdown
                         document.getElementById('selectedUsersSection').style.display = 'block';
                         document.getElementById('filterSection').style.display = 'none';
                         document.getElementById('selectedUsersCount').textContent = selectedCount;
                     } else {
+                        // Limpiar la lista de IDs seleccionados
+                        selectedUserIdsForWhatsApp = [];
+
                         // Mostrar dropdown, ocultar sección de seleccionados
                         document.getElementById('selectedUsersSection').style.display = 'none';
                         document.getElementById('filterSection').style.display = 'block';
@@ -1126,6 +1134,13 @@
 
                     updateMessagePreview();
                     updateTemplatePreview();
+                });
+
+                // Limpiar selección cuando se cierra el modal (cancelar, X, etc.)
+                whatsappModal.addEventListener('hidden.bs.modal', function() {
+                    // Solo limpiar si no se ha enviado (ya se limpia en sendBulkWhatsApp)
+                    // Esto maneja el caso de cancelar o cerrar con X
+                    selectedUserIdsForWhatsApp = [];
                 });
             }
         });
@@ -2307,12 +2322,12 @@
             // Filtrar usuarios según la selección
             let usersToSend = [];
 
-            // Primero verificar si hay usuarios seleccionados con checkboxes
-            const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
-            if (selectedCheckboxes.length > 0) {
-                // Usar usuarios seleccionados
-                const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.userId));
-                usersToSend = allUsers.filter(u => selectedIds.includes(u.id) && u.phone);
+            // Primero verificar si hay usuarios seleccionados (usando la variable global guardada al abrir el modal)
+            if (selectedUserIdsForWhatsApp.length > 0) {
+                // Usar usuarios seleccionados desde la variable global
+                console.log('Usando IDs guardados:', selectedUserIdsForWhatsApp);
+                usersToSend = allUsers.filter(u => selectedUserIdsForWhatsApp.includes(u.id) && u.phone);
+                console.log('Usuarios a enviar:', usersToSend.length);
             } else {
                 // Usar filtro del dropdown
                 const filter = document.getElementById('whatsappFilter').value;
@@ -2366,9 +2381,12 @@
             // Obtener IDs de usuarios
             const userIds = usersToSend.map(u => u.id);
             
-            // Cerrar modal
+            // Cerrar modal y limpiar selección
             const modal = bootstrap.Modal.getInstance(document.getElementById('whatsappMessageModal'));
             modal.hide();
+
+            // Limpiar la variable global de IDs seleccionados
+            selectedUserIdsForWhatsApp = [];
             
             // Mostrar progreso
             const progressToast = document.createElement('div');

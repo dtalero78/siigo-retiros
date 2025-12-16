@@ -287,8 +287,8 @@
                 </h5>
                 <div class="d-flex gap-2">
                     <button class="btn btn-export" onclick="exportData()">
-                        <i class="bi bi-download me-2"></i>
-                        Exportar CSV
+                        <i class="bi bi-file-earmark-excel me-2"></i>
+                        Exportar Excel
                     </button>
                     <button class="btn btn-warning" onclick="generateGlobalAnalysis()">
                         <i class="bi bi-graph-up-arrow me-2"></i>
@@ -683,79 +683,48 @@
             }
 
             try {
-                // Usar endpoint nuevo para exportación dinámica
-                const response = await fetch('/api/export/csv');
+                // Mostrar indicador de carga
+                const btn = event.target.closest('button');
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generando Excel...';
+                btn.disabled = true;
+
+                // Usar endpoint de Excel
+                const response = await fetch('/api/export/excel');
+
+                if (!response.ok) {
+                    throw new Error('Error al generar el archivo Excel');
+                }
+
                 const blob = await response.blob();
 
                 // Descargar archivo
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 link.setAttribute('href', url);
-                link.setAttribute('download', `entrevistas_retiro_dinamicas_${new Date().toISOString().split('T')[0]}.csv`);
+                link.setAttribute('download', `entrevistas_retiro_${new Date().toISOString().split('T')[0]}.xlsx`);
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Restaurar botón
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
 
                 return;
             } catch (error) {
-                console.warn('Error con exportación dinámica, usando método legacy:', error);
+                console.error('Error exportando Excel:', error);
+                alert('Error al exportar a Excel. Por favor intenta de nuevo.');
+
+                // Restaurar botón en caso de error
+                const btn = document.querySelector('.btn-export');
+                if (btn) {
+                    btn.innerHTML = '<i class="bi bi-file-earmark-excel me-2"></i>Exportar Excel';
+                    btn.disabled = false;
+                }
             }
-
-            // Método legacy (fallback)
-            const headers = [
-                'ID',
-                'Nombre Completo',
-                'Identificación',
-                'Fecha de Retiro',
-                'Tiempo en Siigo',
-                'Área',
-                'País',
-                'Último Líder',
-                'Motivo Detallado',
-                'Categoría de Motivo',
-                'Calificación Experiencia',
-                'Recomendaría',
-                'Regresaría',
-                'Lo que más disfrutó',
-                'Qué mejorar',
-                'Nueva empresa',
-                'Fecha de Respuesta'
-            ];
-
-            const csvContent = [
-                headers.join(','),
-                ...allResponses.map(response => [
-                    response.id,
-                    `"${(response.full_name || '').replace(/"/g, '""')}"`,
-                    `"${(response.identification || '').replace(/"/g, '""')}"`,
-                    response.exit_date || '',
-                    `"${(response.tenure || '').replace(/"/g, '""')}"`,
-                    `"${(response.area || '').replace(/"/g, '""')}"`,
-                    `"${(response.country || '').replace(/"/g, '""')}"`,
-                    `"${(response.last_leader || '').replace(/"/g, '""')}"`,
-                    `"${(response.exit_reason_detail || '').replace(/"/g, '""')}"`,
-                    `"${(response.exit_reason_category || '').replace(/"/g, '""')}"`,
-                    response.experience_rating || '',
-                    response.would_recommend || '',
-                    response.would_return || '',
-                    `"${(response.what_enjoyed || '').replace(/"/g, '""')}"`,
-                    `"${(response.what_to_improve || '').replace(/"/g, '""')}"`,
-                    `"${(response.new_company_info || '').replace(/"/g, '""')}"`,
-                    response.created_at || ''
-                ].join(','))
-            ].join('\n');
-
-            // Descargar archivo
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `entrevistas_retiro_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
 
         // Función para calcular estadísticas localmente
