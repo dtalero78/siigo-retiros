@@ -256,27 +256,47 @@ class UsersDbPostgres {
     const values = [];
     let valueIndex = 1;
 
+    // Campos de tipo DATE que necesitan manejo especial
+    const dateFields = ['exit_date', 'fechaInicio'];
+
     Object.keys(userData).forEach(key => {
       if (userData[key] !== undefined) {
+        // Para campos de fecha, convertir string vacío a null
+        let value = userData[key];
+        if (dateFields.includes(key) && (value === '' || value === null)) {
+          value = null;
+        }
+        // Para otros campos, string vacío se mantiene como string vacío
+
         fields.push(`${key} = $${valueIndex}`);
-        values.push(userData[key]);
+        values.push(value);
         valueIndex++;
       }
     });
 
+    if (fields.length === 0) {
+      console.log('No hay campos para actualizar');
+      return false;
+    }
+
     values.push(id);
 
     const query = `
-      UPDATE users 
+      UPDATE users
       SET ${fields.join(', ')}
       WHERE id = $${valueIndex}
     `;
+
+    console.log('Query de actualización:', query);
+    console.log('Valores:', values);
 
     try {
       const result = await this.pool.query(query, values);
       return result.rowCount > 0;
     } catch (error) {
       console.error('Error actualizando usuario:', error);
+      console.error('Query fallida:', query);
+      console.error('Valores fallidos:', values);
       throw error;
     }
   }
