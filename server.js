@@ -685,17 +685,47 @@ app.post('/api/users/upload-csv', upload.single('csvFile'), async (req, res) => 
         continue;
       }
 
-      const phone = getValue('phone');
+      let phone = getValue('phone');
+
+      // Limpiar teléfono: eliminar si es '0', vacío, o solo espacios
+      if (phone && (phone.trim() === '0' || phone.trim() === '')) {
+        phone = null;
+      }
+
+      // Convertir fechas de formato MM/DD/YYYY a YYYY-MM-DD si es necesario
+      const parseDate = (dateStr) => {
+        if (!dateStr) return null;
+
+        // Si ya está en formato YYYY-MM-DD, retornar
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+
+        // Intentar parsear MM/DD/YYYY
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          const [month, day, year] = parts;
+          // Validar que sean números
+          if (!isNaN(month) && !isNaN(day) && !isNaN(year)) {
+            const m = month.padStart(2, '0');
+            const d = day.padStart(2, '0');
+            return `${year}-${m}-${d}`;
+          }
+        }
+
+        return dateStr; // Retornar original si no se puede parsear
+      };
+
+      const parsedExitDate = parseDate(exitDate);
+      const parsedFechaInicio = parseDate(getValue('fechaInicio'));
 
       users.push({
         first_name: firstName || 'Sin nombre',
         last_name: lastName || '',
         identification: identification,
         phone: phone,
-        exit_date: exitDate || null,
+        exit_date: parsedExitDate,
         area: area || 'Sin área',
         country: country || getValue('paisContratacion') || 'Sin país',
-        fechaInicio: getValue('fechaInicio'),
+        fechaInicio: parsedFechaInicio,
         cargo: getValue('cargo'),
         subArea: getValue('subArea'),
         lider: getValue('lider'),
@@ -1066,20 +1096,27 @@ app.get('/api/whatsapp/conversations', async (req, res) => {
       limit: 500 // Limitar para evitar timeouts
     });
     
-    // Filtrar solo mensajes de WhatsApp válidos
-    const whatsappMessages = messages.filter(msg => 
+    // Número de WhatsApp configurado
+    const ourNumber = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+15558192172';
+
+    // Filtrar solo mensajes de WhatsApp válidos de nuestra línea configurada
+    const whatsappMessages = messages.filter(msg =>
       (msg.from.startsWith('whatsapp:') || msg.to.startsWith('whatsapp:')) &&
       // Filtrar mensajes con números válidos (no vacíos o malformados)
       msg.from !== '' && msg.to !== '' &&
-      !msg.to.includes('+096369910') // Filtrar este número específico inválido
+      !msg.to.includes('+096369910') && // Filtrar este número específico inválido
+      // IMPORTANTE: Solo mostrar mensajes de nuestra línea configurada
+      (msg.from === ourNumber || msg.to === ourNumber)
     );
-    
+
+    console.log(`📱 Filtrando mensajes de la línea: ${ourNumber}`);
+    console.log(`📊 Mensajes totales: ${messages.length}, Mensajes filtrados: ${whatsappMessages.length}`);
+
     // Agrupar mensajes por número de teléfono
     const conversations = {};
-    
+
     for (const msg of whatsappMessages) {
-      // Determinar el número del usuario (no nuestro número de Twilio)
-      const ourNumber = process.env.TWILIO_WHATSAPP_NUMBER;
+      // Determinar el número del usuario (no nuestro número)
       const userNumber = msg.from === ourNumber ? msg.to : msg.from;
       
       // Validar que userNumber no esté vacío
